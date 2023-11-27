@@ -12,8 +12,8 @@
     "p:migrate:dev": "npx prisma migrate dev --name",
     "p:generate": "npx prisma generate",
     "p:squash-migrations": "rm -rf prisma/migrations/ && npx prisma migrate dev --name squashed_migrations",
-    "p:seed:compile": "npx tsc tools/db-seed.mts --module NodeNext",
-    "p:seed": "yarn p:seed:compile && node tools/db-seed.mjs",
+    "db-seed:build": "npx tsc tools/db-seed.mts --module NodeNext",
+    "db-seed:dev": "yarn p:seed:compile && node tools/db-seed.mjs",
     "type-check": "tsc",
     "format": "prettier --ignore-path .gitignore \"**/*.+(ts|js|tsx)\" --write"
   },
