@@ -112,7 +112,7 @@ function ChatHistoryListItem({
   return (
     <>
       <div className={tw("mt-2")}>
-        <Card href={`/chat/${chat.id}?src=org-home`}>
+        <Card href={`/chat/${chat.id}?src=chat-history`}>
           <div className={tw("flex flex-row items-center")}>
             <h5
               className={tw(

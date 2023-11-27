@@ -1,10 +1,17 @@
 "use client";
 
 import { Avatar, Sidebar as FlowbiteSidebar } from "flowbite-react";
-import { HiArrowRight, HiArrowLeft, HiChatAlt2, HiHome } from "react-icons/hi";
+import {
+  HiArrowRight,
+  HiArrowLeft,
+  HiChatAlt2,
+  HiHome,
+  HiOutlineCog,
+} from "react-icons/hi";
 import { tw } from "twind";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 import { FrontendRoutes } from "lib/fe/routes";
 import { TokenUser } from "lib/types/core/token-user";
@@ -68,8 +75,14 @@ export function Sidebar({ orgSlug }: { orgSlug: string }) {
           >
             {collapsed ? null : (
               <div className={tw("font-medium dark:text-white overflow-clip")}>
-                <div>
+                <div className={tw("flex flex-row items-center")}>
                   {user?.firstName} {user?.lastName}
+                  <Link
+                    href={`${FrontendRoutes.USER_SETTINGS}?src=side-bar`}
+                    className={tw("ml-1")}
+                  >
+                    <HiOutlineCog className={tw("h-4 w-4")} />
+                  </Link>
                 </div>
                 <div className={tw("text-xs text-gray-500 dark:text-gray-400")}>
                   {clip(user?.email ?? "", 22)}

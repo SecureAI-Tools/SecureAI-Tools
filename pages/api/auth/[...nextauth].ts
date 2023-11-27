@@ -10,6 +10,7 @@ import { FrontendRoutes } from "lib/fe/routes";
 import { UserService } from "lib/api/services/user.service";
 import { TokenUser } from "lib/types/core/token-user";
 import { comparePasswords } from "lib/api/core/password.utils";
+import { User } from "@prisma/client";
 
 const jwtMaxAgeSeconds =
   parseInt(process.env.AUTH_TOKEN_VALIDITY_HOURS!) * 60 * 60;
@@ -74,14 +75,16 @@ export default NextAuth(authOptions);
 async function jwtCallback({
   token,
   user,
+  trigger,
 }: {
   token: JWT;
   user?: NextAuthUser;
   isNewUser?: boolean;
+  trigger?: "signIn" | "signUp" | "update";
 }): Promise<JWT> {
-  return await prismaClient.$transaction(async (tx) => {
-    if (user) {
-      let dbUser = await tx.user.findFirst({
+  if (trigger === "signIn" && user) {
+    return await prismaClient.$transaction(async (tx) => {
+      let dbUser = await tx.user.findUnique({
         where: { email: user.email! },
       });
 
@@ -89,18 +92,28 @@ async function jwtCallback({
         throw new Error("no user and jwtCallback called!");
       }
 
-      const tokenUser: TokenUser = {
-        id: dbUser.id,
-        email: dbUser.email,
-        firstName: dbUser.firstName,
-        lastName: dbUser.lastName,
-      };
-      token.user = tokenUser;
+      token.user = dbUserToTokenUser(dbUser);
       token.issued = moment().toISOString();
-    }
+      return token;
+    });
+  } else if (trigger === "update") {
+    return await prismaClient.$transaction(async (tx) => {
+      // Note: Do not rely on the session data coming from FE. We must only rely on the previous token user id and existing data from DB to create a new token user.
+      const jwtTokenUser = token.user as TokenUser;
+      let dbUser = await tx.user.findUnique({
+        where: { id: jwtTokenUser.id },
+      });
 
-    return token;
-  });
+      if (!dbUser) {
+        throw new Error(`no user for given jwt token (${jwtTokenUser.id})!`);
+      }
+
+      token.user = dbUserToTokenUser(dbUser);
+      return token;
+    });
+  }
+
+  return token;
 }
 
 async function sessionCallback({
@@ -116,4 +129,13 @@ async function sessionCallback({
     user: token.user,
     issued: token.issued,
   } as Session;
+}
+
+function dbUserToTokenUser(dbUser: User): TokenUser {
+  return {
+    id: dbUser.id,
+    email: dbUser.email,
+    firstName: dbUser.firstName,
+    lastName: dbUser.lastName,
+  };
 }

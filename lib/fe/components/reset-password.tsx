@@ -42,7 +42,7 @@ export const ResetPassword = ({
   return (
     <div className={tw("p-8")}>
       <StudioToasts toasts={toasts} />
-      <div className={tw("flex flex-col items-center")}>
+      <div className={tw("flex flex-col")}>
         <div>
           <SectionTitle title={"Change password"} />
           <form
