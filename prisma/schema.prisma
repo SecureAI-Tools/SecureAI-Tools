@@ -1,0 +1,81 @@
+// Prisma schema file -- https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String          @id
+  email              String          @unique
+  emailVerified      DateTime?
+  passwordHash       String
+  forcePasswordReset Boolean
+  firstName          String?
+  lastName           String?
+  memberships        OrgMembership[]
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  @@index([id])
+  @@index([email])
+}
+
+model Organization {
+  id           String          @id
+  name         String
+  slug         String          @unique
+  defaultModel String
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  memberships  OrgMembership[]
+
+  @@index([id])
+}
+
+// Organization membership
+model OrgMembership {
+  id        String       @id
+  role      String
+  status    String
+  orgId     String
+  org       Organization @relation(fields: [orgId], references: [id])
+  userId    String
+  user      User         @relation(fields: [userId], references: [id])
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  Chat      Chat[]
+
+  @@unique([orgId, userId])
+  @@index([id])
+}
+
+model Chat {
+  id           String        @id
+  title        String?
+  membership   OrgMembership @relation(fields: [membershipId], references: [id])
+  membershipId String
+  messages     ChatMessage[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+
+  @@index([id])
+}
+
+model ChatMessage {
+  id        String   @id
+  content   String
+  role      String // enum controlled by ChatMessageRole in TS
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  chatId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id])
+}

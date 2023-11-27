@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /api/*
+Disallow: /app/*
+Disallow: /oauth/*
+Disallow: /log-out
+Allow: /*
