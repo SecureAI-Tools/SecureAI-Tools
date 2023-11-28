@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "prisma generate && next dev -H 0.0.0.0 --port 28669",
     "build": "prisma generate && next build",
+    "build:docker": "prisma generate && env-cmd -f deployment/.env.build next build",
     "start": "next start",
     "lint": "next lint",
     "p:studio": "prisma studio",
@@ -12,8 +13,8 @@
     "p:migrate:dev": "npx prisma migrate dev --name",
     "p:generate": "npx prisma generate",
     "p:squash-migrations": "rm -rf prisma/migrations/ && npx prisma migrate dev --name squashed_migrations",
-    "p:seed:compile": "npx tsc tools/db-seed.mts --module NodeNext",
-    "p:seed": "yarn p:seed:compile && node tools/db-seed.mjs",
+    "db-seed:build": "npx tsc tools/db-seed.mts --module NodeNext",
+    "db-seed:dev": "yarn p:seed:compile && node tools/db-seed.mjs",
     "type-check": "tsc",
     "format": "prettier --ignore-path .gitignore \"**/*.+(ts|js|tsx)\" --write"
   },
@@ -33,6 +34,7 @@
     "bytes": "^3.1.2",
     "clipboard-copy": "^4.0.1",
     "crypto-random-string": "^5.0.0",
+    "env-cmd": "^10.1.0",
     "flowbite": "^1.8.1",
     "flowbite-react": "^0.6.4",
     "http-status-codes": "^2.2.0",

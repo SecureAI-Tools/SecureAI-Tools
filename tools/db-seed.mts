@@ -49,6 +49,8 @@ async function main() {
       },
     });
   });
+
+  console.log("DB seeded successfully 🎉")
 }
 main()
   .then(async () => {

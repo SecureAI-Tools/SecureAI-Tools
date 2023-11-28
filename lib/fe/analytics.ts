@@ -2,15 +2,19 @@ import mixpanelPlugin from "@analytics/mixpanel";
 import AnalyticsConstructor, { AnalyticsInstance, PageData } from "analytics";
 
 import { getInstanceConfig } from "lib/fe/instance-config";
+import { InstanceConfigResponse } from "lib/types/api/instance-config.response";
 
 let analytics: AnalyticsInstance | undefined = undefined;
-async function init(): Promise<AnalyticsInstance | undefined> {
-  const instanceConfig = await getInstanceConfig();
+let instanceConfig: InstanceConfigResponse | undefined = undefined;
+async function init(): Promise<
+  [AnalyticsInstance | undefined, InstanceConfigResponse | undefined]
+> {
+  instanceConfig = await getInstanceConfig();
   if (
     !process.env.NEXT_PUBLIC_ANALYTICS_TOKEN ||
     instanceConfig.analytics !== "enabled"
   ) {
-    return undefined;
+    return [undefined, undefined];
   }
 
   if (!analytics) {
@@ -27,7 +31,7 @@ async function init(): Promise<AnalyticsInstance | undefined> {
     });
   }
 
-  return analytics;
+  return [analytics, instanceConfig];
 }
 
 export namespace Analytics {
@@ -42,9 +46,17 @@ export namespace Analytics {
     options?: any;
     callback?: (...params: any[]) => any;
   }): Promise<any> {
-    const analyticsInstance = await init();
+    const [analyticsInstance, config] = await init();
     return analyticsInstance
-      ? analyticsInstance.identify(userId, traits, options, callback)
+      ? analyticsInstance.identify(
+          userId,
+          {
+            ...traits,
+            instanceId: config!.instanceId,
+          },
+          options,
+          callback,
+        )
       : callback?.();
   }
 
@@ -59,9 +71,17 @@ export namespace Analytics {
     options?: any;
     callback?: (...params: any[]) => any;
   }): Promise<any> {
-    const analyticsInstance = await init();
+    const [analyticsInstance, config] = await init();
     return analyticsInstance
-      ? analyticsInstance.track(event, payload, options, callback)
+      ? analyticsInstance.track(
+          event,
+          {
+            ...payload,
+            instanceId: config!.instanceId,
+          },
+          options,
+          callback,
+        )
       : callback?.();
   }
 
@@ -74,9 +94,16 @@ export namespace Analytics {
     options?: any;
     callback?: (...params: any[]) => any;
   }): Promise<any> {
-    const analyticsInstance = await init();
+    const [analyticsInstance, config] = await init();
     return analyticsInstance
-      ? analyticsInstance.page(data, options, callback)
+      ? analyticsInstance.page(
+          {
+            ...data,
+            instanceId: config!.instanceId,
+          },
+          options,
+          callback,
+        )
       : callback?.();
   }
 
@@ -85,7 +112,7 @@ export namespace Analytics {
   }: {
     callback?: (...params: any[]) => any;
   }): Promise<any> {
-    const analyticsInstance = await init();
+    const [analyticsInstance] = await init();
     return analyticsInstance ? analyticsInstance.reset(callback) : callback?.();
   }
 
