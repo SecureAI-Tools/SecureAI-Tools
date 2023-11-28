@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Metadata } from "next";
+import { tw } from "twind";
 
 import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
 import { ResetPassword } from "lib/fe/components/reset-password";
@@ -12,11 +12,13 @@ export default function ResetPasswordPage() {
 
   return (
     <AppsLoggedInLayout>
-      <ResetPassword
-        onResetPasswordSuccess={() => {
-          router.replace(FrontendRoutes.APP_HOME);
-        }}
-      />
+      <div className={tw("flex flex-col items-center")}>
+        <ResetPassword
+          onResetPasswordSuccess={() => {
+            router.replace(FrontendRoutes.APP_HOME);
+          }}
+        />
+      </div>
     </AppsLoggedInLayout>
   );
 }

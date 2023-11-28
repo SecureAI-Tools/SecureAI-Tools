@@ -5,6 +5,7 @@ import { TxPrismaClient } from "lib/api/core/db";
 import { UserResponse } from "lib/types/api/user.response";
 import { Id } from "lib/types/core/id";
 import { hashPassword } from "lib/api/core/password.utils";
+import { UserUpdateRequest } from "lib/types/api/user-update-request";
 
 export class UserCreateInput {
   email!: string;
@@ -87,6 +88,20 @@ export class UserService {
           // can safely set this to false now that the password has been reset!
           forcePasswordReset: false,
         },
+      });
+    });
+  }
+
+  async update(
+    id: Id<UserResponse>,
+    input: Prisma.UserUpdateInput,
+  ): Promise<User> {
+    return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
+      return await tx.user.update({
+        where: {
+          id: id.toString(),
+        },
+        data: input,
       });
     });
   }
