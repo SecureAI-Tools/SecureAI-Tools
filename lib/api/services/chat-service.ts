@@ -29,6 +29,9 @@ export class ChatService {
         OR: [{ orgId: i.orgIdOrSlug }, { org: { slug: i.orgIdOrSlug } }],
         userId: i.creatorId.toString(),
       },
+      include: {
+        org: true,
+      }
     });
 
     if (!orgMembership) {
@@ -40,6 +43,9 @@ export class ChatService {
         id: Id.generate(ChatResponse).toString(),
         title: i.title,
         membershipId: orgMembership.id,
+        // TODO: This assumes that users of an org can only use one model. Change this when allowing
+        // end-users to choose model at the time of chat-creation.
+        model: orgMembership.org.defaultModel,
       },
     });
   }

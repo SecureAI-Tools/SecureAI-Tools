@@ -38,6 +38,7 @@ CREATE TABLE "OrgMembership" (
 CREATE TABLE "Chat" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "title" TEXT,
+    "model" TEXT NOT NULL,
     "membershipId" TEXT NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,

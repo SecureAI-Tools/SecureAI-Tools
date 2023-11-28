@@ -58,6 +58,7 @@ model OrgMembership {
 model Chat {
   id           String        @id
   title        String?
+  model        String
   membership   OrgMembership @relation(fields: [membershipId], references: [id])
   membershipId String
   messages     ChatMessage[]

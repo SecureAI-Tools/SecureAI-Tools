@@ -77,14 +77,14 @@ export async function POST(
     },
   };
 
-  const org = await chatService.getOrganization(chatId);
-  if (!org) {
-    throw new Error("eh! this shouldn't be happening!");
+  const chat = await chatService.get(chatId);
+  if (!chat) {
+    return NextResponseErrors.notFound();
   }
 
   const llm = new ChatOllama({
     baseUrl: process.env.INFERENCE_SERVER!,
-    model: org.defaultModel,
+    model: chat.model,
   });
 
   llm
