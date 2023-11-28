@@ -53,6 +53,12 @@ COPY --from=builder --chown=nextjs:nodejs /app/LICENSE ./
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/ ./node_modules/
 COPY --from=builder --chown=nextjs:nodejs /app/prisma/ ./prisma/
 COPY --from=builder --chown=nextjs:nodejs /app/tools/db-seed.mjs ./tools/
+COPY --from=builder --chown=nextjs:nodejs /app/tools/db-migrate-and-seed.sh ./tools/
+
+# Create dirs with right permissions
+# The name must match paths in docker-compose as the dir needs to exist with right permissions before volume mounting.
+RUN mkdir /app/volume && chown nextjs:nodejs /app/volume
+VOLUME /app/volume
 
 USER nextjs
 
