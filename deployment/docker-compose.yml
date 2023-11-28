@@ -14,7 +14,20 @@ services:
     command: sh -c "cd /app && sh tools/db-migrate-and-seed.sh ${DATABASE_FILE} && node server.js"
     depends_on:
       - inference
+
   inference:
     image: ollama/ollama
     volumes:
       - ./inference:/root/.ollama
+    #
+    # Uncomment for Linux machines with Nvidia GPUs
+    # Based on https://docs.docker.com/compose/gpu-support/
+    # Requires Nvidia container toolkit: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installation
+    #
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 'all'
+    #           capabilities: [gpu]
