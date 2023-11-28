@@ -20,7 +20,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-RUN yarn build
+RUN yarn build:docker
 
 # Build db-seed script
 RUN yarn db-seed:build

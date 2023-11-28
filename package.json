@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "prisma generate && next dev -H 0.0.0.0 --port 28669",
     "build": "prisma generate && next build",
+    "build:docker": "prisma generate && env-cmd -f deployment/.env.build next build",
     "start": "next start",
     "lint": "next lint",
     "p:studio": "prisma studio",
@@ -33,6 +34,7 @@
     "bytes": "^3.1.2",
     "clipboard-copy": "^4.0.1",
     "crypto-random-string": "^5.0.0",
+    "env-cmd": "^10.1.0",
     "flowbite": "^1.8.1",
     "flowbite-react": "^0.6.4",
     "http-status-codes": "^2.2.0",
