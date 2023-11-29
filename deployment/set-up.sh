@@ -27,11 +27,11 @@ echo "Setting up instance"
 
 # Download docker-compose.yml file
 echo "  Downloading docker-compose.yml"
-curl -Os https://github.com/SecureAI-Tools/SecureAI-Tools/releases/latest/download/docker-compose.yml
+curl -OsL https://github.com/SecureAI-Tools/SecureAI-Tools/releases/latest/download/docker-compose.yml
 
 # Download .env file
 echo "  Generating .env file with sensible defaults"
-curl -s -o .env https://github.com/SecureAI-Tools/SecureAI-Tools/releases/latest/download/example.env
+curl -sL -o .env https://github.com/SecureAI-Tools/SecureAI-Tools/releases/latest/download/example.env
 
 # Set NEXTAUTH_SECRET
 NEXTAUTH_SECRET=$(openssl rand -hex 32)
