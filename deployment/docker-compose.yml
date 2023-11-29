@@ -16,7 +16,7 @@ services:
       - inference
 
   inference:
-    image: ollama/ollama
+    image: ollama/ollama:latest
     volumes:
       - ./inference:/root/.ollama
     #
