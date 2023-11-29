@@ -14,15 +14,8 @@ const OrgIndexPage = ({ params }: { params: { orgSlug: string } }) => {
   return (
     <AppsLoggedInLayout>
       <div className={tw("flex flex-row")}>
-        <Sidebar orgSlug={params.orgSlug} />
-        <div className={tw("flex flex-row grow m-8 items-center")}>
-          <div className={tw("flex flex-col grow m-8 items-center")}>
-            <SectionTitle title={"New Chat"} />
-            <div className={tw("mt-8 max-w-lg w-full")}>
-              <NewChat orgIdOrSlug={params.orgSlug} />
-            </div>
-          </div>
-        </div>
+        <Sidebar orgSlug={params.orgSlug} activeItem="new-chat" />
+        <NewChat orgSlug={params.orgSlug} />
       </div>
     </AppsLoggedInLayout>
   );

@@ -14,8 +14,8 @@ export namespace FrontendRoutes {
   export const DISCORD_INVITE = "https://discord.gg/YTyPGHcYP9";
   export const USER_SETTINGS = "/settings";
 
-  export const getChatRoute = (chatId: Id<ChatResponse>): string =>
-    `/chat/${chatId}`;
+  export const getChatRoute = (orgSlug: string, chatId: Id<ChatResponse>): string =>
+    `/${orgSlug}/chat/${chatId}`;
 
   export const getOrgHomeRoute = (orgSlug: string): string => `/${orgSlug}`;
 

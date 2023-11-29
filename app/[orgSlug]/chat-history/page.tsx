@@ -14,9 +14,11 @@ const Page = ({ params }: { params: { orgSlug: string } }) => {
   return (
     <AppsLoggedInLayout>
       <div className={tw("flex flex-row")}>
-        <Sidebar orgSlug={params.orgSlug} />
-        <div className={tw("flex flex-col m-8 grow")}>
-          <PageTitle title="Chat History" />
+        <Sidebar orgSlug={params.orgSlug} activeItem="chat-history" />
+        <div className={tw("flex flex-col ml-8 grow w-full overflow-scroll max-h-screen")}>
+          <div className={tw("mt-8")}>
+            <PageTitle title="Chat History" />
+          </div>
           <div className={tw("max-w-xl mt-8")}>
             <ChatHistory orgSlug={params.orgSlug} />
           </div>
