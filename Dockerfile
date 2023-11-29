@@ -31,36 +31,24 @@ WORKDIR /app
 
 ENV NODE_ENV production
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
 COPY --from=builder /app/public ./public
 
-# Set the correct permission for prerender cache
 RUN mkdir .next
-RUN chown nextjs:nodejs .next
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
 # Copy license
-COPY --from=builder --chown=nextjs:nodejs /app/LICENSE ./
+COPY --from=builder /app/LICENSE ./
 
 # Copy files to be able to run migration and data seeding scripts from inside Docker
 # Hackity hack to make self-hosting easier!
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/ ./node_modules/
-COPY --from=builder --chown=nextjs:nodejs /app/prisma/ ./prisma/
-COPY --from=builder --chown=nextjs:nodejs /app/tools/db-seed.mjs ./tools/
-COPY --from=builder --chown=nextjs:nodejs /app/tools/db-migrate-and-seed.sh ./tools/
-
-# Create dirs with right permissions
-# The name must match paths in docker-compose as the dir needs to exist with right permissions before volume mounting.
-RUN mkdir /app/volume && chown nextjs:nodejs /app/volume
-VOLUME /app/volume
-
-USER nextjs
+COPY --from=builder /app/node_modules/ ./node_modules/
+COPY --from=builder /app/prisma/ ./prisma/
+COPY --from=builder /app/tools/db-seed.mjs ./tools/
+COPY --from=builder /app/tools/db-migrate-and-seed.sh ./tools/
 
 EXPOSE 28669
 
