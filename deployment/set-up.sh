@@ -35,12 +35,11 @@ curl -sL -o .env https://github.com/SecureAI-Tools/SecureAI-Tools/releases/lates
 
 # Set NEXTAUTH_SECRET
 NEXTAUTH_SECRET=$(openssl rand -hex 32)
-sed -i '' "s/NEXTAUTH_SECRET=.*/NEXTAUTH_SECRET=\"${NEXTAUTH_SECRET}\"/g" .env
+sed -i.bak -e "s/NEXTAUTH_SECRET=.*/NEXTAUTH_SECRET=\"${NEXTAUTH_SECRET}\"/g" -- .env && rm .env.bak
 
 # Set INSTANCE_CONFIG_INSTANCE_ID
 INSTANCE_CONFIG_INSTANCE_ID=$(openssl rand -hex 32)
-sed -i '' "s/INSTANCE_CONFIG_INSTANCE_ID=.*/INSTANCE_CONFIG_INSTANCE_ID=\"${INSTANCE_CONFIG_INSTANCE_ID}\"/g" .env
-
+sed -i.bak -e "s/INSTANCE_CONFIG_INSTANCE_ID=.*/INSTANCE_CONFIG_INSTANCE_ID=\"${INSTANCE_CONFIG_INSTANCE_ID}\"/g" -- .env && rm .env.bak
 
 echo "Instance has been configured 🎉"
 echo "  Run \"docker compose up -d\" to start the instance"
