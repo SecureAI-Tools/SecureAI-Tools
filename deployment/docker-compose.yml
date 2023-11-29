@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   web:
-    image: public.ecr.aws/secure-ai-tools/secure-ai-tools:latest
+    image: public.ecr.aws/d8f2p0h3/secure-ai-tools:latest
     volumes:
       - ./web:/app/volume
     env_file:
