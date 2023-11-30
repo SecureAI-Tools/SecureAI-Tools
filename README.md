@@ -4,6 +4,13 @@ Private and secure AI tools for everyone's productivity.
 
 [![Discord](https://dcbadge.vercel.app/api/server/YTyPGHcYP9?style=flat&compact=true)](https://discord.gg/YTyPGHcYP9)
 
+## Highlights
+
+* **Local inference**: Runs AI models locally. Supports 100+ open-source (and semi-open-source) AI models through [Ollama](https://ollama.ai/library).
+* **Built-in authentication**: A simple email/password authentication so it can be opened to internet and accessed from anywhere.
+* **Built-in user management**: So family members or coworkers can use it as well if desired.
+* **Self-hosting optimized**: Comes with necessary scripts and docker-compose files to get started in under 5 minutes.
+* **Lightweight**: A simple web app with SQLite DB to avoid having to run docker container for DB. Data is persisted on host machine through docker volumes
 
 ## Install
 
@@ -54,3 +61,15 @@ docker compose up -d
       ```
 1. Set up the AI model by going to http://localhost:28669/-/settings?tab=ai
 1. Navigate to http://localhost:28669/- and start using AI tools
+
+
+## Features wishlist
+A set of features on our todo list (in no particular order).
+
+1. Chat with documents
+2. Support for OpenAI, Claude etc APIs
+3. Chat sharing
+4. Mobile friendly UI
+5. Specify AI model at chat-creation time
+6. Support for markdown rendering
+7. Prompt templates library
