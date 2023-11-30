@@ -1,9 +1,10 @@
 "use client";
 
-import { Button } from "flowbite-react";
+import { Spinner } from "flowbite-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { tw } from "twind";
+import Image from "next/image";
 
 import { post } from "lib/fe/api";
 import { organizationsIdOrSlugChatApiPath } from "lib/fe/api-paths";
@@ -27,7 +28,7 @@ const postChat = async (
   ).response;
 };
 
-export default function NewChat({ orgIdOrSlug }: { orgIdOrSlug: string }) {
+export default function NewChat({ orgSlug }: { orgSlug: string }) {
   const router = useRouter();
   const [input, setInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,10 +37,11 @@ export default function NewChat({ orgIdOrSlug }: { orgIdOrSlug: string }) {
   const handleSubmit = () => {
     setIsSubmitting(true);
 
-    postChat(orgIdOrSlug, {})
+    postChat(orgSlug, {})
       .then((response) => {
         router.push(
           `${FrontendRoutes.getChatRoute(
+            orgSlug,
             Id.from(response.id),
           )}?append=${encodeURIComponent(input)}`,
         );
@@ -55,35 +57,59 @@ export default function NewChat({ orgIdOrSlug }: { orgIdOrSlug: string }) {
   return (
     <>
       <StudioToasts toasts={toasts} />
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-
-          handleSubmit();
-        }}
-      >
-        <ChatInput
-          value={input}
-          placeholder="Type something to start a new chat..."
-          disabled={isSubmitting}
-          rows={3}
-          onChange={(e) => {
-            setInput(e.target.value);
-          }}
-          onEnter={handleSubmit}
-        />
-
-        <div className={tw("flex items-center mt-2")}>
-          <Button
-            type="submit"
-            className={tw("w-full")}
-            isProcessing={isSubmitting}
-            disabled={input.length < 1 || isSubmitting}
-          >
-            Submit
-          </Button>
+      <div className={tw("flex flex-col w-full h-screen")}>
+        <div className={tw("flex flex-col grow items-center justify-center")}>
+          <div className={tw("flex flex-col items-center")}>
+            <Image
+              className={tw(`h-20 w-20`)}
+              src="/logo.png"
+              alt="logo"
+              width={80}
+              height={80}
+            />
+            <span className={tw("font-semibold text-xl mt-4")}>
+              How can I help you today?
+            </span>
+          </div>
         </div>
-      </form>
+        <div
+          className={tw(
+            "shrink-0 bottom-0 left-0 w-full border-t md:border-t-0 dark:border-white/20 md:border-transparent md:dark:border-transparent md:bg-vert-light-gradient bg-white dark:bg-gray-800 md:!bg-transparent dark:md:bg-vert-dark-gradient pt-2 md:pl-2 md:w-[calc(100%-.5rem)]",
+          )}
+        >
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+    
+              handleSubmit();
+            }}
+            className={tw(
+              "stretch mx-2 flex flex-row gap-3 last:mb-2 md:mx-4 md:last:mb-6 lg:mx-auto lg:max-w-2xl xl:max-w-3xl",
+            )}
+          >
+            <div className={tw("relative flex h-full flex-1 items-stretch")}>
+              <div className={tw("flex w-full items-center")}>
+                <ChatInput
+                  value={input}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                  }}
+                  onEnter={handleSubmit}
+                  disabled={isSubmitting}
+                  placeholder="Type something and hit Enter to start a new chat..."
+                />
+              </div>
+              <div className={tw("m-auto pl-2")}>
+                <Spinner
+                  aria-label="generating response..."
+                  size="lg"
+                  className={tw(isSubmitting ? "visible" : "invisible")}
+                />
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
     </>
   );
 }

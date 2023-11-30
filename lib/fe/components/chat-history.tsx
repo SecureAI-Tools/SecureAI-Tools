@@ -17,17 +17,18 @@ import { clip } from "lib/core/string-utils";
 import { Id } from "lib/types/core/id";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { StudioToasts } from "lib/fe/components/studio-toasts";
+import { FrontendRoutes } from "../routes";
 
 export default function ChatHistory({
   orgSlug,
 }: {
-  orgSlug: string | undefined;
+  orgSlug: string;
 }) {
   const { data: session, status } = useSession();
   const { mutate } = useSWRConfig();
   const [toasts, addToast] = useToasts();
 
-  const shouldFetchChats = status === "authenticated" && orgSlug !== undefined;
+  const shouldFetchChats = status === "authenticated";
   const chatsSWRKey = chatsApiPath({
     orgIdOrSlug: orgSlug,
     userId: (session?.user as TokenUser)?.id,
@@ -51,6 +52,7 @@ export default function ChatHistory({
     return chats.map((chat) => (
       <ChatHistoryListItem
         chat={chat}
+        orgSlug={orgSlug}
         key={chat.id}
         onDeleteSuccess={(deletedChat) => {
           mutate(chatsSWRKey);
@@ -96,10 +98,12 @@ export default function ChatHistory({
 
 function ChatHistoryListItem({
   chat,
+  orgSlug,
   onDeleteSuccess,
   onDeleteError,
 }: {
   chat: ChatResponse;
+  orgSlug: string,
   onDeleteSuccess: (deletedChat: ChatResponse) => void;
   onDeleteError: (err: Error) => void;
 }) {
@@ -112,7 +116,7 @@ function ChatHistoryListItem({
   return (
     <>
       <div className={tw("mt-2")}>
-        <Card href={`/chat/${chat.id}?src=chat-history`}>
+        <Card href={`${FrontendRoutes.getChatRoute(orgSlug, Id.from(chat.id))}?src=chat-history`}>
           <div className={tw("flex flex-row items-center")}>
             <h5
               className={tw(

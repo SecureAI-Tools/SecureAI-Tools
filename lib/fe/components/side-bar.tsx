@@ -5,7 +5,7 @@ import {
   HiArrowRight,
   HiArrowLeft,
   HiChatAlt2,
-  HiHome,
+  HiPlus,
   HiOutlineCog,
 } from "react-icons/hi";
 import { tw } from "twind";
@@ -18,7 +18,15 @@ import { TokenUser } from "lib/types/core/token-user";
 import { clip } from "lib/core/string-utils";
 import { getInitials } from "lib/core/name-utils";
 
-export function Sidebar({ orgSlug }: { orgSlug: string }) {
+type ActiveItem = 'new-chat' | 'chat-history';
+
+export function Sidebar({
+  orgSlug,
+  activeItem
+}: {
+  orgSlug: string,
+  activeItem?: ActiveItem,
+}) {
   const { data: session, status: sessionStatus } = useSession();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -27,7 +35,7 @@ export function Sidebar({ orgSlug }: { orgSlug: string }) {
       ? (session.user as TokenUser)
       : undefined;
   return (
-    <FlowbiteSidebar className={tw("h-screen")} collapsed={collapsed}>
+    <FlowbiteSidebar className={tw("h-screen border-r")} collapsed={collapsed}>
       <FlowbiteSidebar.Logo
         href={FrontendRoutes.APP_HOME}
         img="/logo.png"
@@ -40,15 +48,17 @@ export function Sidebar({ orgSlug }: { orgSlug: string }) {
         <FlowbiteSidebar.ItemGroup>
           <FlowbiteSidebar.Item
             href={FrontendRoutes.getOrgHomeRoute(orgSlug)}
-            icon={HiHome}
+            icon={HiPlus}
             className={tw("mt-4")}
+            active={activeItem === 'new-chat'}
           >
-            Home
+            New Chat
           </FlowbiteSidebar.Item>
           <FlowbiteSidebar.Item
             href={FrontendRoutes.getChatHistoryRoute(orgSlug)}
             icon={HiChatAlt2}
             className={tw("mt-2")}
+            active={activeItem === 'chat-history'}
           >
             Chat History
           </FlowbiteSidebar.Item>
@@ -85,7 +95,7 @@ export function Sidebar({ orgSlug }: { orgSlug: string }) {
                   </Link>
                 </div>
                 <div className={tw("text-xs text-gray-500 dark:text-gray-400")}>
-                  {clip(user?.email ?? "", 22)}
+                  {clip(user?.email ?? "", 16)}
                 </div>
               </div>
             )}
