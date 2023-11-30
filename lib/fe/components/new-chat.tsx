@@ -96,7 +96,7 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
                   }}
                   onEnter={handleSubmit}
                   disabled={isSubmitting}
-                  placeholder="Type something to start a new chat..."
+                  placeholder="Type something and hit Enter to start a new chat..."
                 />
               </div>
               <div className={tw("m-auto pl-2")}>
