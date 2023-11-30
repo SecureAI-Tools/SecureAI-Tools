@@ -1,10 +1,11 @@
 "use client";
 
 import { Tabs, TabsRef } from "flowbite-react";
-import { HiUserCircle, HiKey } from "react-icons/hi";
+import { HiUserCircle, HiKey, HiArrowLeft } from "react-icons/hi";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { tw } from "twind";
+import Link from "next/link";
 
 import { PageTitle } from "lib/fe/components/page-title";
 import { FE } from "lib/fe/route-utils";
@@ -37,7 +38,14 @@ export function UserSettingsPage() {
       }}
     >
       <div className={tw("p-8")}>
-        <PageTitle title="User settings" />
+        <div className={tw("flex flex-row items-center")}>
+          <Link href="#" onClick={() => {
+            router.back();
+          }} className={tw("mr-4")}>
+            <HiArrowLeft className={tw("h-6 w-6")} />
+          </Link>
+          <PageTitle title="User settings" />
+        </div>
 
         <div className={tw("mt-6 overflow-x-auto max-w-4xl")}>
           <Tabs.Group
