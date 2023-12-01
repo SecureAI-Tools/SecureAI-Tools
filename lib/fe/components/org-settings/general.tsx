@@ -107,12 +107,8 @@ const OrgGeneralSettings = ({ orgSlug }: { orgSlug: string }) => {
       });
   }, [debouncedOrganizationName]);
 
-  const errorRendered = renderErrors(
-    fetchOrganizationError,
-    fetchOrgMembershipError,
-  );
-  if (errorRendered) {
-    return errorRendered;
+  if (fetchOrganizationError || fetchOrgMembershipError) {
+    return renderErrors(fetchOrganizationError, fetchOrgMembershipError);
   }
 
   return (
