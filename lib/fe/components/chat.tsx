@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Message } from "ai";
 import { useChat } from "ai/react";
 import { tw } from "twind";
@@ -17,8 +16,9 @@ import {
   chatTitleApiPath,
   getChatMessagesApiPath,
   chatApiPath,
+  postChatMessagesGenerateApiPath,
 } from "lib/fe/api-paths";
-import { createFetcher, postStreaming } from "lib/fe/api";
+import { createFetcher, post, postStreaming } from "lib/fe/api";
 import { ChatTitleRequest } from "lib/types/api/chat-title.request";
 import {
   ChatMessageResponse,
@@ -28,6 +28,7 @@ import { DEFAULT_CHAT_TITLE } from "lib/core/constants";
 import { ChatTitle } from "lib/fe/components/chat-title";
 import { Analytics } from "lib/fe/analytics";
 import { renderErrors } from "./generic-error";
+import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.request";
 
 const MessageEntry = ({ message }: { message: Message }) => {
   const [copiedToClipboard, setCopiedToClipboard] = useState<boolean>(false);
@@ -91,17 +92,10 @@ const MessageEntry = ({ message }: { message: Message }) => {
 
 export function Chat({
   chatId,
-  appendMessage,
-  onTitleGenerated,
 }: {
   chatId: Id<ChatResponse>;
-  appendMessage?: string;
-  onTitleGenerated?: () => void;
 }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const { data: session, status } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
   const [title, setTitle] = useState<string | undefined>(DEFAULT_CHAT_TITLE);
   const [isTitleGenerating, setIsTitleGenerating] = useState<boolean>(false);
   const formRef = useRef(null);
@@ -114,37 +108,10 @@ export function Chat({
     append,
     isLoading,
   } = useChat({
-    api: postChatMessagesApiPath(chatId),
-    onFinish: (message) => {
-      if (appendMessage) {
-        setIsTitleGenerating(true);
-        postStreaming<ChatTitleRequest>({
-          input: chatTitleApiPath(chatId),
-          req: {
-            messages: [
-              {
-                content: appendMessage,
-                role: "user",
-              },
-            ],
-          },
-          onGeneratedChunk: (chunk, newTitle) => {
-            setTitle(newTitle);
-            if (document) {
-              document.title = newTitle;
-            }
-          },
-          onFinish: () => {
-            setIsTitleGenerating(false);
-            onTitleGenerated?.();
-          },
-        });
-      }
-    },
+    api: postChatMessagesGenerateApiPath(chatId),
   });
 
-  const shouldFetchChat =
-    status === "authenticated" && appendMessage === undefined;
+  const shouldFetchChat = sessionStatus === "authenticated";
   const { data: fetchChatResponse, error: fetchChatError } = useSWR(
     shouldFetchChat ? chatApiPath(chatId) : null,
     createFetcher<ChatResponse>(),
@@ -155,8 +122,7 @@ export function Chat({
     },
   );
 
-  const shouldFetchChatMessages =
-    status === "authenticated" && appendMessage === undefined;
+  const shouldFetchChatMessages = sessionStatus === "authenticated";
   const { data: chatMessagesResponse, error: fetchChatMessagesError } = useSWR(
     shouldFetchChatMessages
       ? getChatMessagesApiPath({
@@ -201,27 +167,32 @@ export function Chat({
     );
 
     // Set initial message if appending it while it generates!
-    if (msgs.length === 0 && appendMessage) {
-      setMessages([
-        {
-          id: "dummy",
-          role: "user",
-          content: appendMessage,
-        },
-      ]);
+    if (msgs.length === 1 && msgs[0].role === "user") {
+      // Trigger generation
+      append(msgs[0])
+        .then((x) => {
+          console.log('x = ', x);
+          setIsTitleGenerating(true);
+          postStreaming<ChatTitleRequest>({
+            input: chatTitleApiPath(chatId),
+            req: {
+              messages: msgs,
+            },
+            onGeneratedChunk: (chunk, newTitle) => {
+              setTitle(newTitle);
+              if (document) {
+                document.title = newTitle;
+              }
+            },
+            onFinish: () => {
+              setIsTitleGenerating(false);
+            },
+          });
+        })
     } else {
       setMessages(msgs);
     }
   }, [chatMessagesResponse]);
-
-  useEffect(() => {
-    if (appendMessage) {
-      append({
-        content: appendMessage,
-        role: "user",
-      });
-    }
-  }, []);
 
   if (fetchChatError || fetchChatMessagesError) {
     return renderErrors(fetchChatError, fetchChatMessagesError);
@@ -248,7 +219,22 @@ export function Chat({
       >
         <form
           ref={formRef}
-          onSubmit={handleSubmit}
+          onSubmit={async (e) => {
+            try {
+              // First create 
+              await postChatMessage(chatId, {
+                message: {
+                  content: input,
+                  role: "user",
+                }
+              });
+              // Then trigger generation
+              handleSubmit(e);
+            } catch (e) {
+              console.log("something went wrong: ", e);
+              // TODO: Show error toast
+            }
+          }}
           className={tw(
             "stretch mx-2 flex flex-row gap-3 last:mb-2 md:mx-4 md:last:mb-6 lg:mx-auto lg:max-w-2xl xl:max-w-3xl",
           )}
@@ -284,3 +270,15 @@ export function Chat({
     </div>
   );
 }
+
+const postChatMessage = async (
+  chatId: Id<ChatResponse>,
+  req: ChatMessageCreateRequest,
+): Promise<ChatMessageResponse> => {
+  return (
+    await post<ChatMessageCreateRequest, ChatMessageResponse>(
+      postChatMessagesApiPath(chatId),
+      req,
+    )
+  ).response;
+};

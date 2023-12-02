@@ -7,7 +7,7 @@ import { tw } from "twind";
 import Image from "next/image";
 
 import { post } from "lib/fe/api";
-import { organizationsIdOrSlugChatApiPath } from "lib/fe/api-paths";
+import { organizationsIdOrSlugChatApiPath, postChatMessagesApiPath } from "lib/fe/api-paths";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { FrontendRoutes } from "lib/fe/routes";
 import ChatInput from "lib/fe/components/chat-input";
@@ -15,7 +15,8 @@ import { StudioToasts } from "lib/fe/components/studio-toasts";
 import { ChatCreateRequest } from "lib/types/api/chat-create.request";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { Id } from "lib/types/core/id";
-import { Chat } from "lib/fe/components/chat";
+import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.request";
+import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 
 const postChat = async (
   orgIdOrSlug: string,
@@ -29,101 +30,110 @@ const postChat = async (
   ).response;
 };
 
+const postChatMessage = async (
+  chatId: Id<ChatResponse>,
+  req: ChatMessageCreateRequest,
+): Promise<ChatMessageResponse> => {
+  return (
+    await post<ChatMessageCreateRequest, ChatMessageResponse>(
+      postChatMessagesApiPath(chatId),
+      req,
+    )
+  ).response;
+};
+
 export default function NewChat({ orgSlug }: { orgSlug: string }) {
   const router = useRouter();
   const [input, setInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [createdChat, setCreatedChat] = useState<ChatResponse | undefined>();
   const [toasts, addToast] = useToasts();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsSubmitting(true);
 
-    postChat(orgSlug, {})
-      .then((response) => {
-        setCreatedChat(response);
-      })
-      .catch((e) => {
-        addToast({
-          type: "failure",
-          children: <p>Something went wrong. Please try again later.</p>,
-        });
-      });
-  };
+    try {
+      const chatResponse = await postChat(orgSlug, {});
+      const chatId = Id.from(chatResponse.id);
 
-  const onTitleGenerated = () => {
-    router.push(
-      `${FrontendRoutes.getChatRoute(
-        orgSlug,
-        Id.from(createdChat!.id),
-      )}?src=new-chat`,
-    );
+      const chatMessageResponse = await postChatMessage(chatId, {
+        message: {
+          content: input,
+          role: "user",
+        }
+      });
+
+      router.push(
+        `${FrontendRoutes.getChatRoute(
+          orgSlug,
+          chatId,
+        )}?src=new-chat`,
+      );
+    } catch (e) {
+      console.log("couldn't create chat/chat-message", e);
+      addToast({
+        type: "failure",
+        children: <p>Something went wrong. Please try again later.</p>,
+      });
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <>
       <StudioToasts toasts={toasts} />
-      {createdChat ? (
-        <Chat
-          chatId={Id.from(createdChat.id)}
-          onTitleGenerated={onTitleGenerated}
-          appendMessage={input}
-        />
-      ) : (
-        <div className={tw("flex flex-col w-full h-screen")}>
-          <div className={tw("flex flex-col grow items-center justify-center")}>
-            <div className={tw("flex flex-col items-center")}>
-              <Image
-                className={tw(`h-20 w-20`)}
-                src="/logo.png"
-                alt="logo"
-                width={80}
-                height={80}
-              />
-              <span className={tw("font-semibold text-xl mt-4")}>
-                How can I help you today?
-              </span>
-            </div>
-          </div>
-          <div
-            className={tw(
-              "shrink-0 bottom-0 left-0 w-full border-t md:border-t-0 dark:border-white/20 md:border-transparent md:dark:border-transparent md:bg-vert-light-gradient bg-white dark:bg-gray-800 md:!bg-transparent dark:md:bg-vert-dark-gradient pt-2 md:pl-2 md:w-[calc(100%-.5rem)]",
-            )}
-          >
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-
-                handleSubmit();
-              }}
-              className={tw(
-                "stretch mx-2 flex flex-row gap-3 last:mb-2 md:mx-4 md:last:mb-6 lg:mx-auto lg:max-w-2xl xl:max-w-3xl",
-              )}
-            >
-              <div className={tw("relative flex h-full flex-1 items-stretch")}>
-                <div className={tw("flex w-full items-center")}>
-                  <ChatInput
-                    value={input}
-                    onChange={(e) => {
-                      setInput(e.target.value);
-                    }}
-                    onEnter={handleSubmit}
-                    disabled={isSubmitting}
-                    placeholder="Type something and hit Enter to start a new chat..."
-                  />
-                </div>
-                <div className={tw("m-auto pl-2")}>
-                  <Spinner
-                    aria-label="generating response..."
-                    size="lg"
-                    className={tw(isSubmitting ? "visible" : "invisible")}
-                  />
-                </div>
-              </div>
-            </form>
+      <div className={tw("flex flex-col w-full h-screen")}>
+        <div className={tw("flex flex-col grow items-center justify-center")}>
+          <div className={tw("flex flex-col items-center")}>
+            <Image
+              className={tw(`h-20 w-20`)}
+              src="/logo.png"
+              alt="logo"
+              width={80}
+              height={80}
+            />
+            <span className={tw("font-semibold text-xl mt-4")}>
+              How can I help you today?
+            </span>
           </div>
         </div>
-      )}
+        <div
+          className={tw(
+            "shrink-0 bottom-0 left-0 w-full border-t md:border-t-0 dark:border-white/20 md:border-transparent md:dark:border-transparent md:bg-vert-light-gradient bg-white dark:bg-gray-800 md:!bg-transparent dark:md:bg-vert-dark-gradient pt-2 md:pl-2 md:w-[calc(100%-.5rem)]",
+          )}
+        >
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+
+              handleSubmit();
+            }}
+            className={tw(
+              "stretch mx-2 flex flex-row gap-3 last:mb-2 md:mx-4 md:last:mb-6 lg:mx-auto lg:max-w-2xl xl:max-w-3xl",
+            )}
+          >
+            <div className={tw("relative flex h-full flex-1 items-stretch")}>
+              <div className={tw("flex w-full items-center")}>
+                <ChatInput
+                  value={input}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                  }}
+                  onEnter={handleSubmit}
+                  disabled={isSubmitting}
+                  placeholder="Type something and hit Enter to start a new chat..."
+                />
+              </div>
+              <div className={tw("m-auto pl-2")}>
+                <Spinner
+                  aria-label="generating response..."
+                  size="lg"
+                  className={tw(isSubmitting ? "visible" : "invisible")}
+                />
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
     </>
   );
 }
