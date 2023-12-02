@@ -3,8 +3,6 @@ import { Message } from "ai";
 import { useChat } from "ai/react";
 import { tw } from "twind";
 import { Spinner } from "flowbite-react";
-import { useSession } from "next-auth/react";
-import useSWR from "swr";
 import { HiOutlineClipboard, HiOutlineClipboardCheck } from "react-icons/hi";
 import clipboardCopy from "clipboard-copy";
 
@@ -14,11 +12,9 @@ import { ChatResponse } from "lib/types/api/chat.response";
 import {
   postChatMessagesApiPath,
   chatTitleApiPath,
-  getChatMessagesApiPath,
-  chatApiPath,
   postChatMessagesGenerateApiPath,
 } from "lib/fe/api-paths";
-import { createFetcher, post, postStreaming } from "lib/fe/api";
+import { post, postStreaming } from "lib/fe/api";
 import { ChatTitleRequest } from "lib/types/api/chat-title.request";
 import {
   ChatMessageResponse,
@@ -27,7 +23,6 @@ import {
 import { DEFAULT_CHAT_TITLE } from "lib/core/constants";
 import { ChatTitle } from "lib/fe/components/chat-title";
 import { Analytics } from "lib/fe/analytics";
-import { renderErrors } from "./generic-error";
 import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.request";
 
 const MessageEntry = ({ message }: { message: Message }) => {
@@ -91,11 +86,14 @@ const MessageEntry = ({ message }: { message: Message }) => {
 };
 
 export function Chat({
-  chatId,
+  chat,
+  chatMessages,
 }: {
-  chatId: Id<ChatResponse>;
+  chat: ChatResponse;
+  chatMessages: ChatMessageResponse[];
 }) {
-  const { data: session, status: sessionStatus } = useSession();
+  const chatId = Id.from(chat.id);
+
   const [title, setTitle] = useState<string | undefined>(DEFAULT_CHAT_TITLE);
   const [isTitleGenerating, setIsTitleGenerating] = useState<boolean>(false);
   const formRef = useRef(null);
@@ -111,67 +109,21 @@ export function Chat({
     api: postChatMessagesGenerateApiPath(chatId),
   });
 
-  const shouldFetchChat = sessionStatus === "authenticated";
-  const { data: fetchChatResponse, error: fetchChatError } = useSWR(
-    shouldFetchChat ? chatApiPath(chatId) : null,
-    createFetcher<ChatResponse>(),
-    {
-      // Don't refetch on focus.
-      // Fetching on refocus causes issues if http response is still streaming and user re-focuses!
-      revalidateOnFocus: false,
-    },
-  );
-
-  const shouldFetchChatMessages = sessionStatus === "authenticated";
-  const { data: chatMessagesResponse, error: fetchChatMessagesError } = useSWR(
-    shouldFetchChatMessages
-      ? getChatMessagesApiPath({
-          chatId: chatId,
-          ordering: {
-            orderBy: "createdAt",
-            order: "asc",
-          },
-          pagination: {
-            page: 1,
-            pageSize: 512,
-          },
-        })
-      : null,
-    createFetcher<ChatMessageResponse[]>(),
-    {
-      // Don't refetch on focus.
-      // Fetching on refocus causes issues if http response is still streaming and user re-focuses!
-      revalidateOnFocus: false,
-    },
-  );
-
   useEffect(() => {
-    if (!fetchChatResponse) {
-      return;
-    }
-
-    const chatTitle = fetchChatResponse.response.title;
+    const chatTitle = chat.title;
     setTitle(chatTitle);
     if (document) {
       document.title = chatTitle ?? DEFAULT_CHAT_TITLE;
     }
-  }, [fetchChatResponse]);
 
-  useEffect(() => {
-    if (!chatMessagesResponse) {
-      return;
-    }
-
-    const msgs = chatMessagesResponse.response.map((cm) =>
-      chatMessageResponsetoMessage(cm),
-    );
-
-    // Set initial message if appending it while it generates!
+    // DO NOT SUBMIT
+    // TODO: Change this logic to be as follows
+    //   if (chat.type === "chat-with-ai") { ... current logic ... } else { ...start indexing and then start chat... }
+    const msgs = chatMessages.map((cm) => chatMessageResponsetoMessage(cm));
     if (msgs.length === 1 && msgs[0].role === "user") {
       // Trigger generation
       append(msgs[0])
         .then((x) => {
-          console.log('x = ', x);
           setIsTitleGenerating(true);
           postStreaming<ChatTitleRequest>({
             input: chatTitleApiPath(chatId),
@@ -192,11 +144,7 @@ export function Chat({
     } else {
       setMessages(msgs);
     }
-  }, [chatMessagesResponse]);
-
-  if (fetchChatError || fetchChatMessagesError) {
-    return renderErrors(fetchChatError, fetchChatMessagesError);
-  }
+  }, []);
 
   return (
     <div className={tw("flex flex-col w-full h-screen")}>
