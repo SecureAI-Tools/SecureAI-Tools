@@ -7,7 +7,7 @@ import { tw } from "twind";
 import Image from "next/image";
 
 import { post } from "lib/fe/api";
-import { organizationsIdOrSlugChatApiPath } from "lib/fe/api-paths";
+import { organizationsIdOrSlugChatApiPath, postChatMessagesApiPath } from "lib/fe/api-paths";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { FrontendRoutes } from "lib/fe/routes";
 import ChatInput from "lib/fe/components/chat-input";
@@ -15,6 +15,8 @@ import { StudioToasts } from "lib/fe/components/studio-toasts";
 import { ChatCreateRequest } from "lib/types/api/chat-create.request";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { Id } from "lib/types/core/id";
+import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.request";
+import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 
 const postChat = async (
   orgIdOrSlug: string,
@@ -28,30 +30,52 @@ const postChat = async (
   ).response;
 };
 
+const postChatMessage = async (
+  chatId: Id<ChatResponse>,
+  req: ChatMessageCreateRequest,
+): Promise<ChatMessageResponse> => {
+  return (
+    await post<ChatMessageCreateRequest, ChatMessageResponse>(
+      postChatMessagesApiPath(chatId),
+      req,
+    )
+  ).response;
+};
+
 export default function NewChat({ orgSlug }: { orgSlug: string }) {
   const router = useRouter();
   const [input, setInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toasts, addToast] = useToasts();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsSubmitting(true);
 
-    postChat(orgSlug, {})
-      .then((response) => {
-        router.push(
-          `${FrontendRoutes.getChatRoute(
-            orgSlug,
-            Id.from(response.id),
-          )}?append=${encodeURIComponent(input)}`,
-        );
-      })
-      .catch((e) => {
-        addToast({
-          type: "failure",
-          children: <p>Something went wrong. Please try again later.</p>,
-        });
+    try {
+      const chatResponse = await postChat(orgSlug, {});
+      const chatId = Id.from(chatResponse.id);
+
+      const chatMessageResponse = await postChatMessage(chatId, {
+        message: {
+          content: input,
+          role: "user",
+        }
       });
+
+      router.push(
+        `${FrontendRoutes.getChatRoute(
+          orgSlug,
+          chatId,
+        )}?src=new-chat`,
+      );
+    } catch (e) {
+      console.log("couldn't create chat/chat-message", e);
+      addToast({
+        type: "failure",
+        children: <p>Something went wrong. Please try again later.</p>,
+      });
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -80,7 +104,7 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-    
+
               handleSubmit();
             }}
             className={tw(

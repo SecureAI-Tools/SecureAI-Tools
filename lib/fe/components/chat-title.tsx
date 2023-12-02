@@ -1,6 +1,6 @@
 import { HiArrowLeft, HiPencil, HiCheck, HiX } from "react-icons/hi";
 import { tw } from "twind";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Spinner } from "flowbite-react";
 import { useEffect, useState } from "react";

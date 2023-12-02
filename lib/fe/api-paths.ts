@@ -44,6 +44,10 @@ export const postChatMessagesApiPath = (chatId: Id<ChatResponse>): string => {
   return `/api/chats/${chatId}/messages`;
 };
 
+export const postChatMessagesGenerateApiPath = (chatId: Id<ChatResponse>): string => {
+  return `/api/chats/${chatId}/messages/generate`;
+};
+
 export const getChatMessagesApiPath = ({
   chatId,
   ordering = {
