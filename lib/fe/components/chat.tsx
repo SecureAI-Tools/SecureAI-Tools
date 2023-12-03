@@ -24,6 +24,7 @@ import { DEFAULT_CHAT_TITLE } from "lib/core/constants";
 import { ChatTitle } from "lib/fe/components/chat-title";
 import { Analytics } from "lib/fe/analytics";
 import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.request";
+import { ChatType } from "lib/types/core/chat-type";
 
 const MessageEntry = ({ message }: { message: Message }) => {
   const [copiedToClipboard, setCopiedToClipboard] = useState<boolean>(false);
@@ -116,31 +117,34 @@ export function Chat({
       document.title = chatTitle ?? DEFAULT_CHAT_TITLE;
     }
 
-    // DO NOT SUBMIT
-    // TODO: Change this logic to be as follows
-    //   if (chat.type === "chat-with-ai") { ... current logic ... } else { ...start indexing and then start chat... }
     const msgs = chatMessages.map((cm) => chatMessageResponsetoMessage(cm));
-    if (msgs.length === 1 && msgs[0].role === "user") {
+    if (chat.type === ChatType.CHAT_WITH_DOCS) {
+      setMessages(msgs);
+      // DO NOT SUBMIT
+      // TODO:
+      //   1. Start indexing
+      //   2. Once indexing is complete, append the first message (but before that setMessages([]) to not duplicate first message!)
+      //   3. After that, generate a title!
+    } else if (msgs.length === 1 && msgs[0].role === "user") {
       // Trigger generation
-      append(msgs[0])
-        .then((x) => {
-          setIsTitleGenerating(true);
-          postStreaming<ChatTitleRequest>({
-            input: chatTitleApiPath(chatId),
-            req: {
-              messages: msgs,
-            },
-            onGeneratedChunk: (chunk, newTitle) => {
-              setTitle(newTitle);
-              if (document) {
-                document.title = newTitle;
-              }
-            },
-            onFinish: () => {
-              setIsTitleGenerating(false);
-            },
-          });
-        })
+      append(msgs[0]).then((x) => {
+        setIsTitleGenerating(true);
+        postStreaming<ChatTitleRequest>({
+          input: chatTitleApiPath(chatId),
+          req: {
+            messages: msgs,
+          },
+          onGeneratedChunk: (chunk, newTitle) => {
+            setTitle(newTitle);
+            if (document) {
+              document.title = newTitle;
+            }
+          },
+          onFinish: () => {
+            setIsTitleGenerating(false);
+          },
+        });
+      });
     } else {
       setMessages(msgs);
     }
@@ -149,7 +153,7 @@ export function Chat({
   return (
     <div className={tw("flex flex-col w-full h-screen")}>
       <div className={tw("flex-1 flex-col overflow-auto")}>
-        <header className={tw("z-10 w-full bg-white font-medium")}>
+        <header className={tw("z-10 w-full bg-white font-medium sticky top-0")}>
           <ChatTitle
             title={title}
             chatId={chatId}
@@ -169,12 +173,12 @@ export function Chat({
           ref={formRef}
           onSubmit={async (e) => {
             try {
-              // First create 
+              // First create
               await postChatMessage(chatId, {
                 message: {
                   content: input,
                   role: "user",
-                }
+                },
               });
               // Then trigger generation
               handleSubmit(e);
@@ -205,13 +209,11 @@ export function Chat({
                 placeholder="Say something..."
               />
             </div>
-            <div className={tw("m-auto pl-2")}>
-              <Spinner
-                aria-label="generating response..."
-                size="lg"
-                className={tw(isLoading ? "visible" : "invisible")}
-              />
-            </div>
+            {isLoading ? (
+              <div className={tw("m-auto pl-2")}>
+                <Spinner aria-label="generating response..." size="lg" />
+              </div>
+            ) : null}
           </div>
         </form>
       </div>

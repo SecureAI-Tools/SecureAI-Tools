@@ -155,9 +155,18 @@ export const OrgAddUsersPage = ({
               {errorText}
             </Alert>
           ) : null}
-          <div className={tw("mt-4")}>
+          <div
+            className={tw(
+              "mt-4 flex items-center justify-center h-80 xl:w-[1024px] lg:w-[800px] md:w-[400px]",
+            )}
+          >
             <FilesUpload
-              helpText={`Select CSV (max ${MAX_ADD_USERS_CSV_ROWS} rows)`}
+              cta={
+                <p>
+                  <span className={tw("font-semibold")}>Click to upload</span>
+                </p>
+              }
+              help={`Select CSV (max ${MAX_ADD_USERS_CSV_ROWS} rows)`}
               onFilesSelected={handleFilesSelected}
               accept=".csv"
               onClick={() => {

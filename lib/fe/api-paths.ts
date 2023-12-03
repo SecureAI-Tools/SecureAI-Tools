@@ -5,6 +5,7 @@ import { Id } from "lib/types/core/id";
 import { OrderingParams, PaginationParams } from "lib/fe/api-params";
 import { isEmpty } from "lib/core/string-utils";
 import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
+import { ChatDocumentResponse } from "lib/types/api/chat-document.response";
 
 export const userApiPath = (userId: Id<UserResponse>): string => {
   return `/api/users/${userId}`;
@@ -40,11 +41,24 @@ export const chatApiPath = (chatId: Id<ChatResponse>): string => {
   return `/api/chats/${chatId}`;
 };
 
+export const chatDocumentsApiPath = (chatId: Id<ChatResponse>): string => {
+  return `/api/chats/${chatId}/documents`;
+};
+
+export const chatDocumentApiPath = (
+  chatId: Id<ChatResponse>,
+  documentId: Id<ChatDocumentResponse>,
+): string => {
+  return `/api/chats/${chatId}/documents/${documentId}`;
+};
+
 export const postChatMessagesApiPath = (chatId: Id<ChatResponse>): string => {
   return `/api/chats/${chatId}/messages`;
 };
 
-export const postChatMessagesGenerateApiPath = (chatId: Id<ChatResponse>): string => {
+export const postChatMessagesGenerateApiPath = (
+  chatId: Id<ChatResponse>,
+): string => {
   return `/api/chats/${chatId}/messages/generate`;
 };
 

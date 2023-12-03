@@ -9,8 +9,10 @@ import { API } from "lib/api/core/api.utils";
 
 export interface ChatDocumentCreateInput {
   id: Id<ChatDocumentResponse>;
+  name: string;
   mimeType: string;
   chatId: Id<ChatResponse>;
+  objectKey: string;
 }
 
 export class ChatDocumentService {
@@ -27,8 +29,10 @@ export class ChatDocumentService {
     return await prisma.chatDocument.create({
       data: {
         id: i.id.toString(),
+        name: i.name,
         mimeType: i.mimeType,
         chatId: i.chatId.toString(),
+        objectKey: i.objectKey,
       },
     });
   }
@@ -50,24 +54,39 @@ export class ChatDocumentService {
     });
   }
 
-  async getAll(
-    where?: Prisma.ChatDocumentWhereInput,
-    orderBy?: Prisma.ChatDocumentOrderByWithRelationInput,
-    pagination?: API.PaginationParams,
-  ): Promise<ChatDocument[]> {
-    return await prismaClient.$transaction(
-      async (prisma: TxPrismaClient): Promise<ChatDocument[]> => {
-        return await this.getAllTxn(prisma, where, orderBy);
-      },
-    );
+  async getAll({
+    where,
+    orderBy,
+    pagination
+  }: {
+    where: Prisma.ChatDocumentWhereInput;
+    orderBy?:
+      | Prisma.ChatDocumentOrderByWithRelationInput
+      | Prisma.ChatDocumentOrderByWithRelationInput[];
+    pagination?: API.PaginationParams;
+  }): Promise<ChatDocument[]> {
+    return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
+      return await this.getAllWithTxn({
+        prisma: tx,
+        where,
+        orderBy,
+      });
+    });
   }
 
-  async getAllTxn(
-    prisma: TxPrismaClient,
-    where?: Prisma.ChatDocumentWhereInput,
-    orderBy?: Prisma.ChatDocumentOrderByWithRelationInput,
-    pagination?: API.PaginationParams,
-  ): Promise<ChatDocument[]> {
+  async getAllWithTxn({
+    prisma,
+    where,
+    orderBy,
+    pagination,
+  }: {
+    prisma: TxPrismaClient;
+    where: Prisma.ChatDocumentWhereInput;
+    orderBy?:
+      | Prisma.ChatDocumentOrderByWithRelationInput
+      | Prisma.ChatDocumentOrderByWithRelationInput[];
+    pagination?: API.PaginationParams;
+  }): Promise<ChatDocument[]> {
     return await prisma.chatDocument.findMany({
       where: where,
       orderBy: orderBy,

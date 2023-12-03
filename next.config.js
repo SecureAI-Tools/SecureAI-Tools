@@ -14,6 +14,9 @@ const nextConfig = {
       use: [`@svgr/webpack`],
     });
 
+    // https://github.com/wojtekmaj/react-pdf/issues/799#issuecomment-864887752
+    config.resolve.alias.canvas = false;
+
     return config;
   },
   redirects: () => {

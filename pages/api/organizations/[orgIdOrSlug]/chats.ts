@@ -58,6 +58,7 @@ async function handlePostChat(
 
   const chatCreated = await chatService.create({
     title: chatCreateRequest.title,
+    type: chatCreateRequest.type,
     orgIdOrSlug: orgIdOrSlug,
     creatorId: userId,
   });

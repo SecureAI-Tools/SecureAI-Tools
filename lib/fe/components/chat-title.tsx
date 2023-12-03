@@ -62,7 +62,7 @@ export const ChatTitle = ({
         "group w-full text-token-text-primary border-b border-black/10 dark:border-gray-900/50 bg-gray-50 dark:bg-[#444654]",
       )}
     >
-      <div className={tw("p-4 justify-center text-base md:py-6 m-auto")}>
+      <div className={tw("p-4 justify-center text-base m-auto")}>
         <div
           className={tw(
             "flex flex-1 align-middle items-center text-base mx-auto md:max-w-2xl lg:max-w-[38rem] xl:max-w-3xl",

@@ -1,13 +1,16 @@
 "use client";
 
-import { Spinner } from "flowbite-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { tw } from "twind";
 import Image from "next/image";
 
 import { post } from "lib/fe/api";
-import { organizationsIdOrSlugChatApiPath, postChatMessagesApiPath } from "lib/fe/api-paths";
+import {
+  chatDocumentsApiPath,
+  organizationsIdOrSlugChatApiPath,
+  postChatMessagesApiPath,
+} from "lib/fe/api-paths";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { FrontendRoutes } from "lib/fe/routes";
 import ChatInput from "lib/fe/components/chat-input";
@@ -17,56 +20,40 @@ import { ChatResponse } from "lib/types/api/chat.response";
 import { Id } from "lib/types/core/id";
 import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.request";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
-
-const postChat = async (
-  orgIdOrSlug: string,
-  req: ChatCreateRequest,
-): Promise<ChatResponse> => {
-  return (
-    await post<ChatCreateRequest, ChatResponse>(
-      organizationsIdOrSlugChatApiPath(orgIdOrSlug),
-      req,
-    )
-  ).response;
-};
-
-const postChatMessage = async (
-  chatId: Id<ChatResponse>,
-  req: ChatMessageCreateRequest,
-): Promise<ChatMessageResponse> => {
-  return (
-    await post<ChatMessageCreateRequest, ChatMessageResponse>(
-      postChatMessagesApiPath(chatId),
-      req,
-    )
-  ).response;
-};
+import { FilesUpload } from "lib/fe/components/files-upload";
+import { ChatType } from "lib/types/core/chat-type";
+import { ChatDocumentResponse } from "lib/types/api/chat-document.response";
+import { FetchError } from "lib/fe/types/fetch-error";
 
 export default function NewChat({ orgSlug }: { orgSlug: string }) {
   const router = useRouter();
   const [input, setInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [toasts, addToast] = useToasts();
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
 
     try {
-      const chatResponse = await postChat(orgSlug, {});
+      const chatType: ChatType =
+        selectedFiles.length === 0
+          ? ChatType.CHAT_WITH_LLM
+          : ChatType.CHAT_WITH_DOCS;
+      const chatResponse = await postChat(orgSlug, { type: chatType });
       const chatId = Id.from(chatResponse.id);
 
       const chatMessageResponse = await postChatMessage(chatId, {
         message: {
           content: input,
           role: "user",
-        }
+        },
       });
 
+      const chatDocs = await uploadChatDocuments(chatId, selectedFiles);
+
       router.push(
-        `${FrontendRoutes.getChatRoute(
-          orgSlug,
-          chatId,
-        )}?src=new-chat`,
+        `${FrontendRoutes.getChatRoute(orgSlug, chatId)}?src=new-chat`,
       );
     } catch (e) {
       console.log("couldn't create chat/chat-message", e);
@@ -76,6 +63,18 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
       });
       setIsSubmitting(false);
     }
+  };
+
+  const handleFilesSelected = (files: File[]) => {
+    if (files.length < 1) {
+      console.log("eh! got no files");
+      return;
+    }
+
+    setSelectedFiles((currentlySelectedFiles) => {
+      // TODO: Deduplicate? How to do without full file path?
+      return [...currentlySelectedFiles, ...files];
+    });
   };
 
   return (
@@ -112,7 +111,7 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
             )}
           >
             <div className={tw("relative flex h-full flex-1 items-stretch")}>
-              <div className={tw("flex w-full items-center")}>
+              <div className={tw("flex flex-col w-full items-center")}>
                 <ChatInput
                   value={input}
                   onChange={(e) => {
@@ -122,13 +121,32 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
                   disabled={isSubmitting}
                   placeholder="Type something and hit Enter to start a new chat..."
                 />
-              </div>
-              <div className={tw("m-auto pl-2")}>
-                <Spinner
-                  aria-label="generating response..."
-                  size="lg"
-                  className={tw(isSubmitting ? "visible" : "invisible")}
-                />
+                <div id="fileUpload" className={tw("mt-4 w-full h-24")}>
+                  <FilesUpload
+                    cta={<p>Attach PDFs to chat with them (optional)</p>}
+                    help={
+                      selectedFiles.length === 0 ? (
+                        <p>Click to upload</p>
+                      ) : (
+                        <div
+                          className={tw(
+                            "flex flex-col items-center max-h-10 overflow-scroll",
+                          )}
+                        >
+                          Selected {selectedFiles.length} files
+                          {selectedFiles.map((f) => {
+                            return <div>{f.name}</div>;
+                          })}
+                        </div>
+                      )
+                    }
+                    onFilesSelected={handleFilesSelected}
+                    accept=".pdf"
+                    disabled={isSubmitting}
+                    spinner={isSubmitting}
+                    multiple
+                  />
+                </div>
               </div>
             </div>
           </form>
@@ -137,3 +155,61 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
     </>
   );
 }
+
+const postChat = async (
+  orgIdOrSlug: string,
+  req: ChatCreateRequest,
+): Promise<ChatResponse> => {
+  return (
+    await post<ChatCreateRequest, ChatResponse>(
+      organizationsIdOrSlugChatApiPath(orgIdOrSlug),
+      req,
+    )
+  ).response;
+};
+
+const postChatMessage = async (
+  chatId: Id<ChatResponse>,
+  req: ChatMessageCreateRequest,
+): Promise<ChatMessageResponse> => {
+  return (
+    await post<ChatMessageCreateRequest, ChatMessageResponse>(
+      postChatMessagesApiPath(chatId),
+      req,
+    )
+  ).response;
+};
+
+const uploadChatDocuments = async (
+  chatId: Id<ChatResponse>,
+  files: File[],
+): Promise<ChatDocumentResponse[]> => {
+  const promises = files.map((f) => {
+    return uploadChatDocument(chatId, f);
+  });
+
+  return await Promise.all(promises);
+};
+
+const uploadChatDocument = async (
+  chatId: Id<ChatResponse>,
+  file: File,
+): Promise<ChatDocumentResponse> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(chatDocumentsApiPath(chatId), {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    throw new FetchError(
+      "An error occurred while fetching the data.",
+      res.status,
+      await res.json(),
+    );
+  }
+
+  return await res.json();
+};

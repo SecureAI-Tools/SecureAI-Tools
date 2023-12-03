@@ -15,8 +15,15 @@ import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import { renderErrors } from "lib/fe/components/generic-error";
 import { Spinner } from "flowbite-react";
 import { ChatType } from "lib/types/core/chat-type";
+import { ChatWithDocs } from "lib/fe/components/chat-with-docs";
 
-const ChatPage = ({ orgSlug, chatId: chatIdRaw }: { orgSlug: string; chatId: string }) => {
+const ChatPage = ({
+  orgSlug,
+  chatId: chatIdRaw,
+}: {
+  orgSlug: string;
+  chatId: string;
+}) => {
   const { status: sessionStatus } = useSession();
 
   const chatId = Id.from(chatIdRaw);
@@ -36,16 +43,16 @@ const ChatPage = ({ orgSlug, chatId: chatIdRaw }: { orgSlug: string; chatId: str
   const { data: chatMessagesResponse, error: fetchChatMessagesError } = useSWR(
     shouldFetchChatMessages
       ? getChatMessagesApiPath({
-        chatId: chatId,
-        ordering: {
-          orderBy: "createdAt",
-          order: "asc",
-        },
-        pagination: {
-          page: 1,
-          pageSize: 512,
-        },
-      })
+          chatId: chatId,
+          ordering: {
+            orderBy: "createdAt",
+            order: "asc",
+          },
+          pagination: {
+            page: 1,
+            pageSize: 512,
+          },
+        })
       : null,
     createFetcher<ChatMessageResponse[]>(),
     {
@@ -65,20 +72,23 @@ const ChatPage = ({ orgSlug, chatId: chatIdRaw }: { orgSlug: string; chatId: str
         <div className={tw("flex flex-col justify-center items-center w-full")}>
           <Spinner size="xl" />
         </div>
-      )
+      );
     }
 
     const chat = fetchChatResponse.response;
 
     if (chat.type === ChatType.CHAT_WITH_DOCS) {
       return (
-        <>Chat with docs; Coming soon!</>
-      )
+        <ChatWithDocs
+          chat={chat}
+          chatMessages={chatMessagesResponse.response}
+        />
+      );
     }
 
     // Default to chat-with-llm!
-    return <Chat chat={chat} chatMessages={chatMessagesResponse.response} />
-  }
+    return <Chat chat={chat} chatMessages={chatMessagesResponse.response} />;
+  };
 
   return (
     <AppsLoggedInLayout>

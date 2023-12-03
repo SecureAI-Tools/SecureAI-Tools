@@ -85,7 +85,9 @@ model ChatMessage {
 
 model ChatDocument {
   id        String   @id
+  name      String
   mimeType  String
+  objectKey String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   chatId    String
