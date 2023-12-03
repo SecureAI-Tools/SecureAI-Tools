@@ -14,6 +14,7 @@ import { createFetcher } from "lib/fe/api";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import { renderErrors } from "lib/fe/components/generic-error";
 import { Spinner } from "flowbite-react";
+import { ChatType } from "lib/types/core/chat-type";
 
 const ChatPage = ({ orgSlug, chatId: chatIdRaw }: { orgSlug: string; chatId: string }) => {
   const { status: sessionStatus } = useSession();
@@ -58,17 +59,32 @@ const ChatPage = ({ orgSlug, chatId: chatIdRaw }: { orgSlug: string; chatId: str
     return renderErrors(fetchChatError, fetchChatMessagesError);
   }
 
+  const renderChat = () => {
+    if (!fetchChatResponse || !chatMessagesResponse) {
+      return (
+        <div className={tw("flex flex-col justify-center items-center w-full")}>
+          <Spinner size="xl" />
+        </div>
+      )
+    }
+
+    const chat = fetchChatResponse.response;
+
+    if (chat.type === ChatType.CHAT_WITH_DOCS) {
+      return (
+        <>Chat with docs; Coming soon!</>
+      )
+    }
+
+    // Default to chat-with-llm!
+    return <Chat chat={chat} chatMessages={chatMessagesResponse.response} />
+  }
+
   return (
     <AppsLoggedInLayout>
       <div className={tw("flex flex-row")}>
         <Sidebar orgSlug={orgSlug} />
-        {fetchChatResponse && chatMessagesResponse ? (
-          <Chat chat={fetchChatResponse.response} chatMessages={chatMessagesResponse.response} />
-        ) : (
-          <div className={tw("flex flex-col justify-center items-center w-full")}>
-            <Spinner size="xl" />
-          </div>
-        )}
+        {renderChat()}
       </div>
     </AppsLoggedInLayout>
   );
