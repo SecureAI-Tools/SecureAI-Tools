@@ -58,10 +58,12 @@ model OrgMembership {
 model Chat {
   id           String        @id
   title        String?
+  type         String?
   model        String
   membership   OrgMembership @relation(fields: [membershipId], references: [id])
   membershipId String
   messages     ChatMessage[]
+  documents    ChatDocument[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   deletedAt    DateTime?
@@ -78,5 +80,16 @@ model ChatMessage {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([id])
+}
+
+model ChatDocument {
+  id        String   @id
+  mimeType  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  
   @@index([id])
 }
