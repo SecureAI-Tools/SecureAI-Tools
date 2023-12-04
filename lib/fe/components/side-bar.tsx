@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, Sidebar as FlowbiteSidebar } from "flowbite-react";
+import { Avatar, Dropdown, Sidebar as FlowbiteSidebar } from "flowbite-react";
 import {
   HiArrowRight,
   HiArrowLeft,
@@ -35,14 +35,35 @@ export function Sidebar({
       ? (session.user as TokenUser)
       : undefined;
   return (
-    <FlowbiteSidebar className={tw("h-screen border-r")} collapsed={collapsed}>
+    <FlowbiteSidebar className={tw("h-screen border-r", collapsed ? "" : "w-80")} collapsed={collapsed}>
       <FlowbiteSidebar.Logo
-        href={FrontendRoutes.APP_HOME}
+        href="#"
         img="/logo.png"
         imgAlt="SecureAI Tools logo"
         className={tw("mt-8")}
+        onClick={(e) => { e.preventDefault() }}
       >
-        SecureAI Tools
+        <Dropdown
+          label={
+            <>SecureAI Tools</>
+          }
+          className={tw("z-50")}
+          placement="bottom"
+          inline
+        >
+          <Dropdown.Item
+            as="a"
+            href={FrontendRoutes.getOrgSettingsRoute(orgSlug)}
+          >
+            Organization settings
+          </Dropdown.Item>
+          <Dropdown.Item
+            as="a"
+            href={FrontendRoutes.getOrgUsersRoute(orgSlug)}
+          >
+            Organization users
+          </Dropdown.Item>
+        </Dropdown>
       </FlowbiteSidebar.Logo>
       <FlowbiteSidebar.Items>
         <FlowbiteSidebar.ItemGroup>
@@ -95,7 +116,7 @@ export function Sidebar({
                   </Link>
                 </div>
                 <div className={tw("text-xs text-gray-500 dark:text-gray-400")}>
-                  {clip(user?.email ?? "", 16)}
+                  {clip(user?.email ?? "", 24)}
                 </div>
               </div>
             )}
