@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Message } from "ai";
 import { useChat } from "ai/react";
 import { tw } from "twind";
-import { Spinner } from "flowbite-react";
+import { Progress, Spinner } from "flowbite-react";
 import { HiOutlineClipboard, HiOutlineClipboardCheck } from "react-icons/hi";
 import clipboardCopy from "clipboard-copy";
 
@@ -103,6 +103,8 @@ export function Chat({
 
   const [title, setTitle] = useState<string | undefined>(DEFAULT_CHAT_TITLE);
   const [isTitleGenerating, setIsTitleGenerating] = useState<boolean>(false);
+  const [isProcessingDocuments, setIsProcessingDocuments] = useState<boolean>(false);
+  const [numberOfProcessedDocuments, setNumberOfProcessedDocuments] = useState(0);
   const formRef = useRef(null);
   const {
     messages,
@@ -148,12 +150,20 @@ export function Chat({
     if (msgs.length === 1 && msgs[0].role === "user") {
       if (chat.type === ChatType.CHAT_WITH_DOCS && documents?.some(d => d.indexingStatus !== DocumentIndexingStatus.INDEXED)) {
         // Index docs, and then generate!
+        setIsProcessingDocuments(true);
         setMessages(msgs);
-  
+
         // Start indexing docs
-        indexDocuments(Id.from(chat.documentCollectionId!), documents!).then(() => {
+        indexDocuments(
+          Id.from(chat.documentCollectionId!),
+          documents!,
+          () => {
+            setNumberOfProcessedDocuments(n => n + 1);
+          }
+        ).then(() => {
           // Reset messages first -- append will re-add the first message!
           setMessages([]);
+          setIsProcessingDocuments(false);
           return generateFirstCompletionAndGenerateTitle(msgs);
         });
       } else {
@@ -177,9 +187,17 @@ export function Chat({
             isGenerating={isTitleGenerating}
           />
         </header>
-        {messages.length > 0
-          ? messages.map((m) => <MessageEntry message={m} key={m.id} />)
-          : null}
+          {messages.length > 0
+            ? messages.map((m) => <MessageEntry message={m} key={m.id} />)
+            : null}
+        {isProcessingDocuments && documents ? (
+          <div className={tw("flex flex-col items-center mt-16")}>
+            <Spinner size="xl" />
+            <div className={tw("text-xl font-semibold mt-4")}>Processing documents</div>
+            <div className={tw("text-sm mt-2")}>Processed {numberOfProcessedDocuments} of {documents.length} documents...</div>
+            <Progress progress={100 * numberOfProcessedDocuments / documents.length} className={tw("w-80 mt-1")}/>
+          </div>
+        ) : null}
       </div>
       <div
         className={tw(
@@ -222,8 +240,8 @@ export function Chat({
                   );
                 }}
                 onChange={handleInputChange}
-                disabled={isLoading}
-                placeholder="Say something..."
+                disabled={isLoading || isProcessingDocuments}
+                placeholder={isProcessingDocuments ? "Waiting for documents to be processed..." : "Say something..."}
               />
             </div>
             {isLoading ? (
@@ -253,10 +271,12 @@ const postChatMessage = async (
 const indexDocuments = async (
   documentCollectionId: Id<DocumentCollectionResponse>,
   docs: DocumentResponse[],
+  onDocumentIndexed: () => void,
 ): Promise<void> => {
   // TODO: See if we can parallelize this in batches!
   for (let i = 0; i < docs.length; i++) {
     await indexDocument(documentCollectionId, docs[i]);
+    onDocumentIndexed();
   }
 }
 
