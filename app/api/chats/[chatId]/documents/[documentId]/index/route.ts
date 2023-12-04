@@ -78,27 +78,29 @@ export async function POST(
   }
 
   const text_splitter = new CharacterTextSplitter({
-    chunkSize: 1000, 
-    chunkOverlap: 200,
+    chunkSize: parseInt(process.env.CHUNK_SIZE!), 
+    chunkOverlap: parseInt(process.env.CHUNK_OVERLAP!),
   });
   documents = await text_splitter.splitDocuments(documents);
+
+  const documentTextChunks: string[] = documents.map(document => document.pageContent);
 
   const ollamaEmbeddings = new OllamaEmbeddings({
     baseUrl: process.env.INFERENCE_SERVER
   });
 
-  const embeddings = await ollamaEmbeddings.embedDocuments(documents.map(document => document.pageContent));
+  const embeddings = await ollamaEmbeddings.embedDocuments(documentTextChunks);
 
-  const client = new ChromaClient({
+  const chromaClient = new ChromaClient({
     path: process.env.CHROMA_SERVER
   });
 
-  const collection = await client.getOrCreateCollection(chatId.toString);
+  const collection = await chromaClient.getOrCreateCollection(chatId.toString);
 
   await collection.add({
     ids: range(embeddings.length).map(i => chatDocument.id + "_" + i),
     embeddings: embeddings,
-    documents: documents.map(document => document.pageContent)
+    documents: documentTextChunks
   });
   
   // TODO: we can store index status to databse table here.
