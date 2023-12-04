@@ -13,6 +13,7 @@ import {
   postChatMessagesApiPath,
   chatTitleApiPath,
   postChatMessagesGenerateApiPath,
+  documentCollectionDocumentIndexApiPath,
 } from "lib/fe/api-paths";
 import { post, postStreaming } from "lib/fe/api";
 import { ChatTitleRequest } from "lib/types/api/chat-title.request";
@@ -25,6 +26,9 @@ import { ChatTitle } from "lib/fe/components/chat-title";
 import { Analytics } from "lib/fe/analytics";
 import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.request";
 import { ChatType } from "lib/types/core/chat-type";
+import { DocumentResponse } from "lib/types/api/document.response";
+import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";
+import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 
 const MessageEntry = ({ message }: { message: Message }) => {
   const [copiedToClipboard, setCopiedToClipboard] = useState<boolean>(false);
@@ -89,11 +93,13 @@ const MessageEntry = ({ message }: { message: Message }) => {
 export function Chat({
   chat,
   chatMessages,
+  documents,
 }: {
   chat: ChatResponse;
   chatMessages: ChatMessageResponse[];
+  documents?: DocumentResponse[];
 }) {
-  const chatId = Id.from(chat.id);
+  const chatId = Id.from<ChatResponse>(chat.id);
 
   const [title, setTitle] = useState<string | undefined>(DEFAULT_CHAT_TITLE);
   const [isTitleGenerating, setIsTitleGenerating] = useState<boolean>(false);
@@ -110,6 +116,27 @@ export function Chat({
     api: postChatMessagesGenerateApiPath(chatId),
   });
 
+  const generateFirstCompletionAndGenerateTitle = async (msgs: Message[]): Promise<void> => {
+    return append(msgs[0]).then((x) => {
+      setIsTitleGenerating(true);
+      postStreaming<ChatTitleRequest>({
+        input: chatTitleApiPath(chatId),
+        req: {
+          messages: msgs,
+        },
+        onGeneratedChunk: (chunk, newTitle) => {
+          setTitle(newTitle);
+          if (document) {
+            document.title = newTitle;
+          }
+        },
+        onFinish: () => {
+          setIsTitleGenerating(false);
+        },
+      });
+    });
+  }
+
   useEffect(() => {
     const chatTitle = chat.title;
     setTitle(chatTitle);
@@ -118,33 +145,23 @@ export function Chat({
     }
 
     const msgs = chatMessages.map((cm) => chatMessageResponsetoMessage(cm));
-    if (chat.type === ChatType.CHAT_WITH_DOCS) {
-      setMessages(msgs);
-      // DO NOT SUBMIT
-      // TODO:
-      //   1. Start indexing
-      //   2. Once indexing is complete, append the first message (but before that setMessages([]) to not duplicate first message!)
-      //   3. After that, generate a title!
-    } else if (msgs.length === 1 && msgs[0].role === "user") {
-      // Trigger generation
-      append(msgs[0]).then((x) => {
-        setIsTitleGenerating(true);
-        postStreaming<ChatTitleRequest>({
-          input: chatTitleApiPath(chatId),
-          req: {
-            messages: msgs,
-          },
-          onGeneratedChunk: (chunk, newTitle) => {
-            setTitle(newTitle);
-            if (document) {
-              document.title = newTitle;
-            }
-          },
-          onFinish: () => {
-            setIsTitleGenerating(false);
-          },
+    if (msgs.length === 1 && msgs[0].role === "user") {
+      if (chat.type === ChatType.CHAT_WITH_DOCS && documents?.some(d => d.indexingStatus !== DocumentIndexingStatus.INDEXED)) {
+        // Index docs, and then generate!
+        setMessages(msgs);
+  
+        // Start indexing docs
+        indexDocuments(Id.from(chat.documentCollectionId!), documents!).then(() => {
+          // Reset messages first -- append will re-add the first message!
+          setMessages([]);
+          return generateFirstCompletionAndGenerateTitle(msgs);
         });
-      });
+      } else {
+        // Either it's a chat-with-ai, OR (it's a chat-with-docs but has all docs indexed)
+
+        // Trigger generation
+        generateFirstCompletionAndGenerateTitle(msgs);
+      }
     } else {
       setMessages(msgs);
     }
@@ -232,3 +249,27 @@ const postChatMessage = async (
     )
   ).response;
 };
+
+const indexDocuments = async (
+  documentCollectionId: Id<DocumentCollectionResponse>,
+  docs: DocumentResponse[],
+): Promise<void> => {
+  // TODO: See if we can parallelize this in batches!
+  for (let i = 0; i < docs.length; i++) {
+    await indexDocument(documentCollectionId, docs[i]);
+  }
+}
+
+const indexDocument = async (
+  documentCollectionId: Id<DocumentCollectionResponse>,
+  doc: DocumentResponse,
+): Promise<void> => {
+  if (doc.indexingStatus === DocumentIndexingStatus.INDEXED) {
+    return;
+  }
+
+  const response = await post<{}, DocumentResponse>(
+    documentCollectionDocumentIndexApiPath(documentCollectionId, Id.from(doc.id)),
+    {},
+  )
+}

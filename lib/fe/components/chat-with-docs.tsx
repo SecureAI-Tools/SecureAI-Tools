@@ -7,16 +7,17 @@ import useSWR from "swr";
 import { Document as PDFDocument, Page as PDFPage, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/TextLayer.css";
 import { HiArrowTopRightOnSquare } from "react-icons/hi2";
+import Link from "next/link";
 
 import { ChatResponse } from "lib/types/api/chat.response";
 import { Id } from "lib/types/core/id";
-import { chatDocumentApiPath, chatDocumentsApiPath } from "lib/fe/api-paths";
+import { documentCollectionDocumentApiPath, documentCollectionDocumentsApiPath } from "lib/fe/api-paths";
 import { createFetcher } from "lib/fe/api";
-import { ChatDocumentResponse } from "lib/types/api/chat-document.response";
+import { DocumentResponse } from "lib/types/api/document.response";
 import { renderErrors } from "lib/fe/components/generic-error";
-import Link from "next/link";
-import { Chat } from "./chat";
+import { Chat } from "lib/fe/components/chat";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
+import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 
 export function ChatWithDocs({
   chat,
@@ -31,20 +32,21 @@ export function ChatWithDocs({
   >();
   const [pageNumber, setPageNumber] = useState(1);
 
-  const chatId = Id.from(chat.id);
+  const chatId = Id.from<ChatResponse>(chat.id);
+  const documentCollectionId = Id.from<DocumentCollectionResponse>(chat.documentCollectionId!);
 
-  // Fetch chat documents
-  const { data: chatDocumentsResponse, error: fetchChatDocumentsError } =
+  // Fetch documents
+  const { data: collectionDocumentsResponse, error: fetchCollectionDocumentsError } =
     useSWR(
-      chatDocumentsApiPath(chatId),
-      createFetcher<ChatDocumentResponse[]>(),
+      documentCollectionDocumentsApiPath(documentCollectionId),
+      createFetcher<DocumentResponse[]>(),
       {
         revalidateOnFocus: false,
       },
     );
 
   const map = new Map(
-    chatDocumentsResponse?.response?.map((response) => [response.id, response]),
+    collectionDocumentsResponse?.response?.map((response) => [response.id, response]),
   );
 
   useEffect(() => {
@@ -55,14 +57,14 @@ export function ChatWithDocs({
   }, []);
 
   useEffect(() => {
-    const responses = chatDocumentsResponse?.response;
+    const responses = collectionDocumentsResponse?.response;
     if (responses && responses?.length > 0) {
       setPreviewDocumentId(responses[0].id);
     }
-  }, [chatDocumentsResponse]);
+  }, [collectionDocumentsResponse]);
 
-  if (fetchChatDocumentsError) {
-    return renderErrors(fetchChatDocumentsError);
+  if (fetchCollectionDocumentsError) {
+    return renderErrors(fetchCollectionDocumentsError);
   }
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
@@ -103,16 +105,16 @@ export function ChatWithDocs({
 
   return (
     <div className={tw("flex flex-col w-full")}>
-      <div className={tw("flex")}>
-        <div className={tw("w-1/2 border-r-2")}>
-          {!chatDocumentsResponse || !previewDocument ? (
-            renderLoadingSpinner()
-          ) : (
+      {!collectionDocumentsResponse || !previewDocument ? (
+        renderLoadingSpinner()
+      ) : (
+        <div className={tw("flex")}>
+          <div className={tw("w-1/2 border-r-2")}>
             <div>
               <div>
                 <PDFDocument
-                  file={chatDocumentApiPath(
-                    chatId,
+                  file={documentCollectionDocumentApiPath(
+                    documentCollectionId,
                     Id.from(previewDocument.id),
                   )}
                   onLoadSuccess={onDocumentLoadSuccess}
@@ -135,7 +137,7 @@ export function ChatWithDocs({
                         placement="bottom"
                         inline
                       >
-                        {chatDocumentsResponse.response.map((doc) => (
+                        {collectionDocumentsResponse.response.map((doc) => (
                           <Dropdown.Item
                             onClick={() => {
                               changeDocument(doc.id);
@@ -154,8 +156,8 @@ export function ChatWithDocs({
                       </Dropdown>
                     </div>
                     <Link
-                      href={chatDocumentApiPath(
-                        chatId,
+                      href={documentCollectionDocumentApiPath(
+                        documentCollectionId,
                         Id.from(previewDocument.id),
                       )}
                       target="_blank"
@@ -195,12 +197,12 @@ export function ChatWithDocs({
                 </PDFDocument>
               </div>
             </div>
-          )}
+          </div>
+          <div className={tw("w-1/2")}>
+            <Chat chat={chat} chatMessages={chatMessages} documents={collectionDocumentsResponse.response} />
+          </div>
         </div>
-        <div className={tw("w-1/2")}>
-          <Chat chat={chat} chatMessages={chatMessages} />
-        </div>
-      </div>
+      )}
     </div>
   );
 }

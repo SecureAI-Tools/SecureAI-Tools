@@ -7,8 +7,9 @@ import Image from "next/image";
 
 import { post } from "lib/fe/api";
 import {
-  chatDocumentsApiPath,
+  documentCollectionDocumentsApiPath,
   organizationsIdOrSlugChatApiPath,
+  organizationsIdOrSlugDocumentCollectionApiPath,
   postChatMessagesApiPath,
 } from "lib/fe/api-paths";
 import useToasts from "lib/fe/hooks/use-toasts";
@@ -22,8 +23,10 @@ import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.requ
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import { FilesUpload } from "lib/fe/components/files-upload";
 import { ChatType } from "lib/types/core/chat-type";
-import { ChatDocumentResponse } from "lib/types/api/chat-document.response";
+import { DocumentResponse } from "lib/types/api/document.response";
 import { FetchError } from "lib/fe/types/fetch-error";
+import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
+import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
 
 export default function NewChat({ orgSlug }: { orgSlug: string }) {
   const router = useRouter();
@@ -40,7 +43,18 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
         selectedFiles.length === 0
           ? ChatType.CHAT_WITH_LLM
           : ChatType.CHAT_WITH_DOCS;
-      const chatResponse = await postChat(orgSlug, { type: chatType });
+
+      let documentCollectionId: Id<DocumentCollectionResponse> | undefined = undefined;
+      if (chatType === ChatType.CHAT_WITH_DOCS) {
+        const documentCollection = await createDocumentCollection(orgSlug);
+        documentCollectionId = Id.from(documentCollection.id)
+        await uploadDocuments(documentCollectionId, selectedFiles);
+      }
+
+      const chatResponse = await postChat(orgSlug, {
+        type: chatType,
+        documentCollectionId: documentCollectionId?.toString()
+      });
       const chatId = Id.from(chatResponse.id);
 
       const chatMessageResponse = await postChatMessage(chatId, {
@@ -49,8 +63,6 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
           role: "user",
         },
       });
-
-      const chatDocs = await uploadChatDocuments(chatId, selectedFiles);
 
       router.push(
         `${FrontendRoutes.getChatRoute(orgSlug, chatId)}?src=new-chat`,
@@ -180,25 +192,36 @@ const postChatMessage = async (
   ).response;
 };
 
-const uploadChatDocuments = async (
-  chatId: Id<ChatResponse>,
+const createDocumentCollection = async (
+  orgSlug: string,
+): Promise<DocumentCollectionResponse> => {
+  return (
+    await post<DocumentCollectionCreateRequest, DocumentCollectionResponse>(
+      organizationsIdOrSlugDocumentCollectionApiPath(orgSlug),
+      {},
+    )
+  ).response;
+};
+
+const uploadDocuments = async (
+  documentCollectionId: Id<DocumentCollectionCreateRequest>,
   files: File[],
-): Promise<ChatDocumentResponse[]> => {
+): Promise<DocumentResponse[]> => {
   const promises = files.map((f) => {
-    return uploadChatDocument(chatId, f);
+    return uploadDocument(documentCollectionId, f);
   });
 
   return await Promise.all(promises);
 };
 
-const uploadChatDocument = async (
-  chatId: Id<ChatResponse>,
+const uploadDocument = async (
+  documentCollectionId: Id<DocumentCollectionCreateRequest>,
   file: File,
-): Promise<ChatDocumentResponse> => {
+): Promise<DocumentResponse> => {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch(chatDocumentsApiPath(chatId), {
+  const res = await fetch(documentCollectionDocumentsApiPath(documentCollectionId), {
     method: "POST",
     body: formData,
   });

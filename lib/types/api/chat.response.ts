@@ -1,12 +1,13 @@
 import { Chat } from "@prisma/client";
-import { ChatType } from "lib/types/core/chat-type";
+import { ChatType, toChatType } from "lib/types/core/chat-type";
 
 export class ChatResponse {
   id!: string;
   title?: string;
-  type?: string;
+  type?: ChatType;
   model!: string;
   membershipId!: string;
+  documentCollectionId?: string;
   createdAt!: number;
   updatedAt!: number;
   deletedAt?: number;
@@ -15,9 +16,10 @@ export class ChatResponse {
     return {
       id: e.id,
       title: e.title ?? undefined,
-      type: e.type ?? ChatType.CHAT_WITH_LLM,
+      type: toChatType(e.type ?? ChatType.CHAT_WITH_LLM),
       model: e.model,
       membershipId: e.membershipId,
+      documentCollectionId: e.documentCollectionId ?? undefined,
       createdAt: e.createdAt.getTime(),
       updatedAt: e.updatedAt.getTime(),
       deletedAt: e.deletedAt?.getTime(),

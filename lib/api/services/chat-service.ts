@@ -13,6 +13,7 @@ export interface ChatCreateInput {
   type: ChatType;
   orgIdOrSlug: string;
   creatorId: Id<UserResponse>;
+  documentCollectionId?: string | undefined;
 }
 
 export class ChatService {
@@ -49,6 +50,7 @@ export class ChatService {
         // TODO: This assumes that users of an org can only use one model. Change this when allowing
         // end-users to choose model at the time of chat-creation.
         model: orgMembership.org.defaultModel,
+        documentCollectionId: i.documentCollectionId,
       },
     });
   }
