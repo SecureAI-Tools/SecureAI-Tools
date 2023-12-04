@@ -11,6 +11,7 @@ import { NextResponseErrors } from "lib/api/core/utils";
 import { ChatDocumentResponse } from "lib/types/api/chat-document.response";
 import { ChatDocumentService } from "lib/api/services/chat-document-service";
 import { LocalObjectStorageService } from "lib/api/services/local-object-storage-service";
+import { getDocumentPath } from "lib/core/document-path-utils";
 
 const permissionService = new PermissionService();
 const chatService = new ChatService();
@@ -52,14 +53,11 @@ export async function POST(
     return NextResponseErrors.notFound();
   }
 
-  const baseDataPath = process.env.DATA_PATH;
-  if (!baseDataPath) {
-    console.error("DATA_PATH env is not set!");
+  const chatDocumentId = Id.generate(ChatDocumentResponse);
+  const uploadDir = getDocumentPath(organization.id, chatId.toString(), chatDocumentId.toString());
+  if (!uploadDir) {
     return NextResponseErrors.internalServerError();
   }
-
-  const chatDocumentId = Id.generate(ChatDocumentResponse);
-  const uploadDir = path.join(baseDataPath, "documents", "orgs", organization.id, "chats", chatId.toString(), chatDocumentId.toString());
 
   const buffer = Buffer.from(await file.arrayBuffer());
   

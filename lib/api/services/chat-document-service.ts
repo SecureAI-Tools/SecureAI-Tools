@@ -1,10 +1,11 @@
-import { ChatDocument } from "@prisma/client";
+import { ChatDocument, Prisma } from "@prisma/client";
 
 import { TxPrismaClient } from "lib/api/core/db";
 import { Id } from "lib/types/core/id";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { prismaClient } from "lib/api/db";
 import { ChatDocumentResponse } from "lib/types/api/chat-document.response";
+import { API } from "lib/api/core/api.utils";
 
 export interface ChatDocumentCreateInput {
   id: Id<ChatDocumentResponse>;
@@ -46,6 +47,32 @@ export class ChatDocumentService {
       where: {
         id: id.toString(),
       },
+    });
+  }
+
+  async getAll(
+    where?: Prisma.ChatDocumentWhereInput,
+    orderBy?: Prisma.ChatDocumentOrderByWithRelationInput,
+    pagination?: API.PaginationParams,
+  ): Promise<ChatDocument[]> {
+    return await prismaClient.$transaction(
+      async (prisma: TxPrismaClient): Promise<ChatDocument[]> => {
+        return await this.getAllTxn(prisma, where, orderBy);
+      },
+    );
+  }
+
+  async getAllTxn(
+    prisma: TxPrismaClient,
+    where?: Prisma.ChatDocumentWhereInput,
+    orderBy?: Prisma.ChatDocumentOrderByWithRelationInput,
+    pagination?: API.PaginationParams,
+  ): Promise<ChatDocument[]> {
+    return await prisma.chatDocument.findMany({
+      where: where,
+      orderBy: orderBy,
+      skip: pagination?.skip(),
+      take: pagination?.take(),
     });
   }
 
