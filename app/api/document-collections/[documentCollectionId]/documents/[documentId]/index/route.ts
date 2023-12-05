@@ -82,8 +82,8 @@ export async function POST(
   }
 
   const textSplitter = new CharacterTextSplitter({
-    chunkSize: parseInt(process.env.CHUNK_SIZE!), 
-    chunkOverlap: parseInt(process.env.CHUNK_OVERLAP!),
+    chunkSize: process.env.CHUNK_SIZE ? parseInt(process.env.CHUNK_SIZE) : 1000, 
+    chunkOverlap: process.env.CHUNK_OVERLAP ? parseInt(process.env.CHUNK_OVERLAP) : 200,
   });
 
   langchainDocuments = await textSplitter.splitDocuments(langchainDocuments);
