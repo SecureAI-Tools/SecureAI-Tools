@@ -8,7 +8,6 @@ import { StatusCodes } from "http-status-codes";
 import { useSession } from "next-auth/react";
 
 import { isEmpty } from "lib/core/string-utils";
-import { SectionTitle } from "lib/fe/components/section-title";
 import { StudioToasts } from "lib/fe/components/studio-toasts";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { PasswordUpdateRequest } from "lib/types/api/password-update.request";
@@ -18,6 +17,7 @@ import { userPasswordApiPath } from "lib/fe/api-paths";
 import { Id } from "lib/types/core/id";
 import { TokenUser } from "lib/types/core/token-user";
 import { FetchError } from "lib/fe/types/fetch-error";
+import { PageTitle } from "./page-title";
 
 export const ResetPassword = ({
   onResetPasswordSuccess,
@@ -44,7 +44,7 @@ export const ResetPassword = ({
       <StudioToasts toasts={toasts} />
       <div className={tw("flex flex-col")}>
         <div>
-          <SectionTitle title={"Change password"} />
+          <PageTitle title={"Change password"} />
           <form
             className={tw("flex max-w-md flex-col gap-4 mt-4")}
             onSubmit={(e) => {

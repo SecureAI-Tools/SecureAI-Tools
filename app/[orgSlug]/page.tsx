@@ -4,7 +4,6 @@ import { Metadata } from "next";
 import NewChat from "lib/fe/components/new-chat";
 import { Sidebar } from "lib/fe/components/side-bar";
 import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
-import { SectionTitle } from "lib/fe/components/section-title";
 
 export const metadata: Metadata = {
   title: "Home | SecureAI Tools",
