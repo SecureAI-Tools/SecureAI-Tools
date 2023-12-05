@@ -47,3 +47,6 @@ logs/
 
 # mjs compiled files
 tools/db-seed.mjs
+
+# Chroma log files
+chroma.log

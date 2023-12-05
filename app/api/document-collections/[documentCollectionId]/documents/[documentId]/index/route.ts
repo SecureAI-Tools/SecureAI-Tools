@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ChromaClient } from "chromadb"
+import { ChromaClient } from "chromadb";
 import { range } from "lodash";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { Document as LangchainDocument } from "langchain/dist/document";
-import { CharacterTextSplitter } from "langchain/text_splitter"
-import { OllamaEmbeddings } from "langchain/embeddings/ollama"
-import { StatusCodes } from "http-status-codes";
+import { CharacterTextSplitter } from "langchain/text_splitter";
+import { OllamaEmbeddings } from "langchain/embeddings/ollama";
 
 import { isAuthenticated } from "lib/api/core/auth";
 import { Id } from "lib/types/core/id";
@@ -19,6 +18,7 @@ import { DocumentCollectionService } from "lib/api/services/document-collection-
 import { isEmpty } from "lib/core/string-utils";
 import getLogger from "lib/api/core/logger";
 import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";
+import { StreamChunkResponse } from "lib/types/api/stream-chunk.response";
 
 const logger = getLogger();
 
@@ -70,7 +70,6 @@ export async function POST(
   var langchainDocuments: LangchainDocument[] = [];
   var loader;
   var docs;
-  // TODO: currently there is some issue with docx loader, so removing it for now to unblock.
   switch(document.mimeType) {
     case "application/pdf":
       loader = new PDFLoader(new Blob([fileBuffer]));
@@ -81,46 +80,80 @@ export async function POST(
       return NextResponseErrors.badRequest(`Mime type ${document.mimeType} not supported`);
   }
 
-  const textSplitter = new CharacterTextSplitter({
-    chunkSize: process.env.CHUNK_SIZE ? parseInt(process.env.CHUNK_SIZE) : 1000, 
-    chunkOverlap: process.env.CHUNK_OVERLAP ? parseInt(process.env.CHUNK_OVERLAP) : 200,
-  });
-
-  langchainDocuments = await textSplitter.splitDocuments(langchainDocuments);
-
-  const documentTextChunks: string[] = langchainDocuments.map(document => document.pageContent);
-
   const ollamaEmbeddings = new OllamaEmbeddings({
     baseUrl: process.env.INFERENCE_SERVER,
     model: documentCollection.model,
   });
 
-  const embeddings = await ollamaEmbeddings.embedDocuments(documentTextChunks);
+  const encoder = new TextEncoder();
 
-  const collection = await chromaClient.getOrCreateCollection({
-    name: documentCollection.internalName,
-  });
+  const encodeChunk = (chunk: StreamChunkResponse): Uint8Array => {
+    const serializedChunk = JSON.stringify(chunk);
+    return encoder.encode(`${serializedChunk}\n`)
+  }
+ 
+  // Index document and yield stream-chunks
+  const indexDocument = async function*() {
+    yield encodeChunk({ status: "Splitting documents into chunks" });
 
-  const addResponse = await collection.add({
-    ids: range(embeddings.length).map(i => document.id + "_" + i),
-    embeddings: embeddings,
-    documents: documentTextChunks
-  });
-
-  if (!isEmpty(addResponse.error)) {
-    logger.error("could not add document to vector db", {
-      documentId: document.id,
-      documentCollectionId: documentCollectionId,
-      error: addResponse.error,
+    const textSplitter = new CharacterTextSplitter({
+      chunkSize: process.env.CHUNK_SIZE ? parseInt(process.env.CHUNK_SIZE) : 1000, 
+      chunkOverlap: process.env.CHUNK_OVERLAP ? parseInt(process.env.CHUNK_OVERLAP) : 200,
     });
-    return NextResponseErrors.internalServerError("something went wrong when indexing the doc");
+  
+    langchainDocuments = await textSplitter.splitDocuments(langchainDocuments);
+    const documentTextChunks: string[] = langchainDocuments.map(document => document.pageContent);
+
+    yield encodeChunk({ status: `Processing ${documentTextChunks.length} chunks` });
+    let embeddings: number[][] = [];
+    for (let i = 0; i < documentTextChunks.length; i++) {
+      yield encodeChunk({ status: `Processing chunk ${i + 1} of ${documentTextChunks.length}` });
+      const documentTextChunk = documentTextChunks[i];
+      const chunkEmbedding = await ollamaEmbeddings.embedDocuments([documentTextChunk]);
+      embeddings.push(chunkEmbedding[0]);
+    }
+
+    const collection = await chromaClient.getOrCreateCollection({
+      name: documentCollection.internalName,
+    });
+
+    const addResponse = await collection.add({
+      ids: range(embeddings.length).map(i => document.id + "_" + i),
+      embeddings: embeddings,
+      documents: documentTextChunks
+    });
+
+    if (!isEmpty(addResponse.error)) {
+      logger.error("could not add document to vector db", {
+        documentId: document.id,
+        documentCollectionId: documentCollectionId,
+        error: addResponse.error,
+      });
+      yield encodeChunk({ error: "something went wrong when indexing the doc" });
+      return;
+    }
+
+    await documentService.update(documentId, {
+      indexingStatus: DocumentIndexingStatus.INDEXED,
+    });
+    yield encodeChunk({ status: "Document processed successfully" });
   }
 
-  await documentService.update(documentId, {
-    indexingStatus: DocumentIndexingStatus.INDEXED,
-  });
+  const stream = iteratorToStream(indexDocument())
+ 
+  return new Response(stream);
+}
 
-  return NextResponse.json({
-    status: StatusCodes.CREATED
-  });
+function iteratorToStream(iterator: any) {
+  return new ReadableStream({
+    async pull(controller) {
+      const { value, done } = await iterator.next()
+ 
+      if (done) {
+        controller.close()
+      } else {
+        controller.enqueue(value)
+      }
+    },
+  })
 }
