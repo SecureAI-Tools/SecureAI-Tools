@@ -81,12 +81,12 @@ export async function POST(
       return NextResponseErrors.badRequest(`Mime type ${document.mimeType} not supported`);
   }
 
-  const text_splitter = new CharacterTextSplitter({
+  const textSplitter = new CharacterTextSplitter({
     chunkSize: parseInt(process.env.CHUNK_SIZE!), 
     chunkOverlap: parseInt(process.env.CHUNK_OVERLAP!),
   });
 
-  langchainDocuments = await text_splitter.splitDocuments(langchainDocuments);
+  langchainDocuments = await textSplitter.splitDocuments(langchainDocuments);
 
   const documentTextChunks: string[] = langchainDocuments.map(document => document.pageContent);
 
