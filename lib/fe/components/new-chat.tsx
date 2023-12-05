@@ -146,8 +146,12 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
                           )}
                         >
                           Selected {selectedFiles.length} files
-                          {selectedFiles.map((f) => {
-                            return <div>{f.name}</div>;
+                          {selectedFiles.map((f, i) => {
+                            return (
+                              <div key={i}>
+                                {f.name}
+                              </div>
+                            );
                           })}
                         </div>
                       )
