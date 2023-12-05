@@ -76,14 +76,9 @@ export async function POST(
       loader = new PDFLoader(new Blob([fileBuffer]));
       docs = await loader.load();
       langchainDocuments = langchainDocuments.concat(docs);
-    // case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-    //   loader = new DocxLoader(documentPath!);
-    //   docs = await loader.load();
-    //   documents = documents.concat(docs);
-    // case "text/plain":
-    //   loader = new TextLoader(documentPath!);
-    //   docs = await loader.load();
-    //   documents = documents.concat(docs);
+      break;
+    default:
+      return NextResponseErrors.badRequest(`Mime type ${document.mimeType} not supported`);
   }
 
   const text_splitter = new CharacterTextSplitter({
