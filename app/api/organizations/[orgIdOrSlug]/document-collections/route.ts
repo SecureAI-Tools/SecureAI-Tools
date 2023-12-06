@@ -8,6 +8,7 @@ import { DocumentCollectionService } from "lib/api/services/document-collection-
 import { OrganizationService } from "lib/api/services/organization-service";
 import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
+import { ModelType, toModelType } from "lib/types/core/model-type";
 
 const orgMembershipService = new OrgMembershipService();
 const orgService = new OrganizationService();
@@ -47,6 +48,9 @@ export async function POST(
     ownerId: userId!,
     orgId: Id.from(org.id),
     model: org.defaultModel,
+    modelType: org.defaultModelType
+      ? toModelType(org.defaultModelType)
+      : ModelType.OLLAMA,
   });
 
   return NextResponse.json(

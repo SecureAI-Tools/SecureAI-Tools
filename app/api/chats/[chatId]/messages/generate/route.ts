@@ -1,15 +1,13 @@
 import { StreamingTextResponse, LangChainStream, Message } from "ai";
-import { ChatOllama } from "langchain/chat_models/ollama";
 import { AIMessage, HumanMessage } from "langchain/schema";
 import { NextRequest } from "next/server";
 import { Chat } from "@prisma/client";
 import { PromptTemplate } from "langchain/prompts";
-import { OllamaEmbeddings } from "langchain/embeddings/ollama";
 import { LLMChain } from "langchain/chains";
 import { Chroma } from "langchain/vectorstores/chroma";
 import { Document as LangchainDocument } from "langchain/dist/document";
 import { Callbacks as LangchainCallbacks } from "langchain/dist/callbacks";
-import { SimpleChatModel } from "langchain/dist/chat_models/base";
+import { BaseChatModel } from "langchain/dist/chat_models/base";
 
 import { ChatMessageService } from "lib/api/services/chat-message-service";
 import { ChatMessageRole } from "lib/types/core/chat-message-role";
@@ -23,12 +21,14 @@ import { NextResponseErrors } from "lib/api/core/utils";
 import { DocumentCollectionService } from "lib/api/services/document-collection-service";
 import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { ChatType } from "lib/types/core/chat-type";
+import { ModelProviderService } from "lib/api/services/model-provider-service";
 import getLogger from "lib/api/core/logger";
 
 const chatMessageService = new ChatMessageService();
 const documentCollectionService = new DocumentCollectionService();
 const permissionService = new PermissionService();
 const chatService = new ChatService();
+const modelProviderService = new ModelProviderService();
 const logger = getLogger();
 
 export async function POST(
@@ -97,10 +97,7 @@ async function generateChatWithAI(
   chatMessagesRequest: ChatMessagesRequest,
   callbacks: LangchainCallbacks,
 ) {
-  const llm = new ChatOllama({
-    baseUrl: process.env.INFERENCE_SERVER!,
-    model: chat.model,
-  });
+  const llm = modelProviderService.getChatModel(chat);
 
   llm
     .call(
@@ -131,19 +128,14 @@ async function generateChatWithDocs(
     return NextResponseErrors.notFound();
   }
 
-  const embeddingsLLM = new OllamaEmbeddings({
-    baseUrl: process.env.INFERENCE_SERVER,
-    model: documentCollection.model,
-  });
+  const embeddingModel =
+    modelProviderService.getEmbeddingModel(documentCollection);
 
-  const vectorDb = await Chroma.fromExistingCollection(embeddingsLLM, {
+  const vectorDb = await Chroma.fromExistingCollection(embeddingModel, {
     collectionName: documentCollection.internalName,
   });
 
-  const llm = new ChatOllama({
-    baseUrl: process.env.INFERENCE_SERVER!,
-    model: chat.model,
-  });
+  const llm = modelProviderService.getChatModel(chat);
 
   const { messages } = chatMessagesRequest;
 
@@ -190,7 +182,7 @@ async function generateChatWithDocs(
 }
 
 const rewriteHistoryAsStandaloneQuestion = async (
-  llm: SimpleChatModel,
+  llm: BaseChatModel,
   intialQuery: string,
   chatHistory: string,
 ): Promise<string> => {

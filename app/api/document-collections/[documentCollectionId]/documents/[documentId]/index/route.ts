@@ -4,7 +4,6 @@ import { range } from "lodash";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { Document as LangchainDocument } from "langchain/dist/document";
 import { CharacterTextSplitter } from "langchain/text_splitter";
-import { OllamaEmbeddings } from "langchain/embeddings/ollama";
 
 import { isAuthenticated } from "lib/api/core/auth";
 import { Id } from "lib/types/core/id";
@@ -16,9 +15,10 @@ import { LocalObjectStorageService } from "lib/api/services/local-object-storage
 import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { DocumentCollectionService } from "lib/api/services/document-collection-service";
 import { isEmpty } from "lib/core/string-utils";
-import getLogger from "lib/api/core/logger";
 import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";
 import { StreamChunkResponse } from "lib/types/api/stream-chunk.response";
+import { ModelProviderService } from "lib/api/services/model-provider-service";
+import getLogger from "lib/api/core/logger";
 
 const logger = getLogger();
 
@@ -26,6 +26,7 @@ const permissionService = new PermissionService();
 const documentCollectionService = new DocumentCollectionService();
 const documentService = new DocumentService();
 const objectStorageService = new LocalObjectStorageService();
+const modelProviderService = new ModelProviderService();
 const chromaClient = new ChromaClient({
   path: process.env.VECTOR_DB_SERVER,
 });
@@ -86,10 +87,8 @@ export async function POST(
       );
   }
 
-  const ollamaEmbeddings = new OllamaEmbeddings({
-    baseUrl: process.env.INFERENCE_SERVER,
-    model: documentCollection.model,
-  });
+  const embeddingModel =
+    modelProviderService.getEmbeddingModel(documentCollection);
 
   const encoder = new TextEncoder();
 
@@ -125,7 +124,7 @@ export async function POST(
         status: `Processing chunk ${i + 1} of ${documentTextChunks.length}`,
       });
       const documentTextChunk = documentTextChunks[i];
-      const chunkEmbedding = await ollamaEmbeddings.embedDocuments([
+      const chunkEmbedding = await embeddingModel.embedDocuments([
         documentTextChunk,
       ]);
       embeddings.push(chunkEmbedding[0]);
