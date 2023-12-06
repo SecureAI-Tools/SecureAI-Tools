@@ -5,19 +5,19 @@ import { ObjectStorageService } from "lib/api/services/object-storage-service";
 
 export class LocalObjectStorageService implements ObjectStorageService {
   async get(key: string): Promise<Buffer> {
-    if (!process.env.DATA_PATH) {
-      throw new Error("DATA_PATH env is not set!");
+    if (!process.env.LOCAL_OBJECT_STORAGE_DIR) {
+      throw new Error("LOCAL_OBJECT_STORAGE_DIR env is not set!");
     }
-    const filePath = path.join(process.env.DATA_PATH, key);
+    const filePath = path.join(process.env.LOCAL_OBJECT_STORAGE_DIR, key);
 
     return readFileSync(filePath);
   }
 
   async put(key: string, file: any): Promise<void> {
-    if (!process.env.DATA_PATH) {
-      throw new Error("DATA_PATH env is not set!");
+    if (!process.env.LOCAL_OBJECT_STORAGE_DIR) {
+      throw new Error("LOCAL_OBJECT_STORAGE_DIR env is not set!");
     }
-    const filePath = path.join(process.env.DATA_PATH, key);
+    const filePath = path.join(process.env.LOCAL_OBJECT_STORAGE_DIR, key);
 
     const dir = path.dirname(filePath);
     const stats = statSync(dir, { throwIfNoEntry: false });

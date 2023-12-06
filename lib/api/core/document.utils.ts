@@ -18,7 +18,6 @@ export function getDocumentObjectKey({
   file: File;
 }): string {
   return path.join(
-    "documents",
     "orgs",
     orgId.toString(),
     "document-collections",

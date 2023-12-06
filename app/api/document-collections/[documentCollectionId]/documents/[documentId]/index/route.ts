@@ -27,7 +27,7 @@ const documentCollectionService = new DocumentCollectionService();
 const documentService = new DocumentService();
 const objectStorageService = new LocalObjectStorageService();
 const chromaClient = new ChromaClient({
-  path: process.env.CHROMA_SERVER
+  path: process.env.VECTOR_DB_SERVER
 });
 
 // Endpoint to index documents into vector store
@@ -97,8 +97,8 @@ export async function POST(
     yield encodeChunk({ status: "Splitting documents into chunks" });
 
     const textSplitter = new CharacterTextSplitter({
-      chunkSize: process.env.CHUNK_SIZE ? parseInt(process.env.CHUNK_SIZE) : 1000, 
-      chunkOverlap: process.env.CHUNK_OVERLAP ? parseInt(process.env.CHUNK_OVERLAP) : 200,
+      chunkSize: process.env.DOCS_INDEXING_CHUNK_SIZE ? parseInt(process.env.DOCS_INDEXING_CHUNK_SIZE) : 1000, 
+      chunkOverlap: process.env.DOCS_INDEXING_CHUNK_OVERLAP ? parseInt(process.env.DOCS_INDEXING_CHUNK_OVERLAP) : 200,
     });
   
     langchainDocuments = await textSplitter.splitDocuments(langchainDocuments);
