@@ -8,6 +8,8 @@ import { OllamaEmbeddings } from "langchain/embeddings/ollama";
 import { LLMChain } from "langchain/chains"
 import { Chroma } from "langchain/vectorstores/chroma"
 import { Document as LangchainDocument } from "langchain/dist/document";
+import { Callbacks as LangchainCallbacks } from "langchain/dist/callbacks";
+import { SimpleChatModel } from "langchain/dist/chat_models/base";
 
 import { ChatMessageService } from "lib/api/services/chat-message-service";
 import { ChatMessageRole } from "lib/types/core/chat-message-role";
@@ -59,17 +61,10 @@ export async function POST(
     return NextResponseErrors.notFound();
   }
 
-  if (chat.type == ChatType.CHAT_WITH_DOCS) {
-    return handleGenerateChatWithDocs(chat, chatMessagesRequest);
-  } else {
-    return handleGenerateChatWithAI(chat, chatMessagesRequest);
-  }
-}
-
-async function handleGenerateChatWithAI(chat: Chat, chatMessagesRequest: ChatMessagesRequest) {
+  // The langChainHandlers put data into streams on appropriate langchain events
   const { stream, handlers: langChainHandlers } = LangChainStream();
 
-  const handlerWrapper = {
+  const callbacks: LangchainCallbacks = [{
     ...langChainHandlers,
     handleLLMEnd: (output: any, runId: string): Promise<void> => {
       // Save the LLM generated responses
@@ -84,8 +79,18 @@ async function handleGenerateChatWithAI(chat: Chat, chatMessagesRequest: ChatMes
 
       return langChainHandlers.handleLLMEnd(output, runId);
     },
-  };
+  }];
 
+  if (chat.type == ChatType.CHAT_WITH_DOCS) {
+    generateChatWithDocs(chat, chatMessagesRequest, callbacks);
+  } else {
+    generateChatWithAI(chat, chatMessagesRequest, callbacks);
+  }
+
+  return new StreamingTextResponse(stream);
+}
+
+async function generateChatWithAI(chat: Chat, chatMessagesRequest: ChatMessagesRequest, callbacks: LangchainCallbacks) {
   const llm = new ChatOllama({
     baseUrl: process.env.INFERENCE_SERVER!,
     model: chat.model,
@@ -99,16 +104,15 @@ async function handleGenerateChatWithAI(chat: Chat, chatMessagesRequest: ChatMes
           : new AIMessage(m.content),
       ),
       {},
-      [handlerWrapper],
+      callbacks,
     )
     .catch(logger.error);
-  return new StreamingTextResponse(stream);
 }
 
 
-async function handleGenerateChatWithDocs(chat: Chat, chatMessagesRequest: ChatMessagesRequest) {
+async function generateChatWithDocs(chat: Chat, chatMessagesRequest: ChatMessagesRequest, callbacks: LangchainCallbacks) {
   if (!chat.documentCollectionId) {
-    return NextResponseErrors.notFound();
+    return NextResponseErrors.badRequest();
   }
 
   const documentCollection = await documentCollectionService.get(Id.from<DocumentCollectionResponse>(chat.documentCollectionId));
@@ -116,12 +120,12 @@ async function handleGenerateChatWithDocs(chat: Chat, chatMessagesRequest: ChatM
     return NextResponseErrors.notFound();
   }
 
-  const ollamaEmbeddings = new OllamaEmbeddings({
+  const embeddingsLLM = new OllamaEmbeddings({
     baseUrl: process.env.INFERENCE_SERVER,
     model: documentCollection.model,
   });
 
-  const vectorDb = await Chroma.fromExistingCollection(ollamaEmbeddings, {
+  const vectorDb = await Chroma.fromExistingCollection(embeddingsLLM, {
     collectionName: documentCollection.internalName
   });
 
@@ -130,38 +134,6 @@ async function handleGenerateChatWithDocs(chat: Chat, chatMessagesRequest: ChatM
     model: chat.model,
   });
 
-  const questionPrompt = PromptTemplate.fromTemplate(
-    `Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-  ----------
-  CONTEXT:
-
-  {context}
-  ----------
-  CHAT HISTORY:
-
-  {chatHistory}
-  ----------
-  QUESTION:
-
-  {question}
-  ----------
-  Helpful Answer:`
-  );
-
-  const queryRewritingPrompt = PromptTemplate.fromTemplate(
-    `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
-  ----------
-  CHAT HISTORY: 
-  
-  {chatHistory}
-  ----------
-  FOLLOWUP QUESTION: 
-  
-  {question}
-  ----------
-  Standalone question:`
-  );
-
   const { messages } = chatMessagesRequest;
 
   const query = messages.pop();
@@ -169,23 +141,13 @@ async function handleGenerateChatWithDocs(chat: Chat, chatMessagesRequest: ChatM
     return NextResponseErrors.badRequest();
   }
 
-  logger.debug("original query: ", { query: query.content });
+  logger.debug("original question: ", { query: query.content });
   const chatHistory = serializeChatHistory(messages);
 
-  const queryRewritingChain = new LLMChain({
-    llm: llm,
-    prompt: queryRewritingPrompt,
-  });
+  // Rewrite query if needed;
+  const rewrittenQuestion = messages.length > 0 ? await rewriteHistoryAsStandaloneQuestion(llm, query.content, chatHistory) : query.content;
 
-  const { text: rewrittenQuery } = await queryRewritingChain
-    .call({
-      question: query.content,
-      chatHistory: chatHistory,
-    });
-
-  logger.debug("re-written query: ", { rewrittenQuery: rewrittenQuery })
-
-  const sources = await vectorDb.similaritySearch(String(rewrittenQuery), 2);
+  const sources = await vectorDb.similaritySearch(rewrittenQuestion, 2);
 
   logger.debug("sources: ", { sources: sources });
 
@@ -194,18 +156,32 @@ async function handleGenerateChatWithDocs(chat: Chat, chatMessagesRequest: ChatM
     prompt: questionPrompt,
   });
 
-  const { stream, handlers } = LangChainStream();
   questionChain
     .call({
       question: query.content,
       chatHistory: chatHistory,
       context: serializeSources(sources),
     },
-      [handlers],
+      callbacks,
     )
     .catch(logger.error);
+}
 
-  return new StreamingTextResponse(stream);
+const rewriteHistoryAsStandaloneQuestion = async (llm: SimpleChatModel, intialQuery: string, chatHistory: string): Promise<string> => {
+  const questionRewritingChain = new LLMChain({
+    llm: llm,
+    prompt: questionRewritingPrompt,
+  });
+
+  const { text: rewrittenQuestion } = await questionRewritingChain
+    .call({
+      question: intialQuery,
+      chatHistory: chatHistory,
+    });
+
+  logger.debug("re-written question: ", { rewrittenQuery: rewrittenQuestion });
+
+  return rewrittenQuestion;
 }
 
 const serializeChatHistory = (messages: Pick<Message, "role" | "content">[]): string => {
@@ -228,3 +204,37 @@ const serializeSources = (sources: LangchainDocument[]): string => {
       return `Source: ${i + 1}\n` + source.pageContent;
     }).join("\n\n");
 }
+
+// Prompt that rewrites chat-history as a standalone question
+const questionRewritingPrompt = PromptTemplate.fromTemplate(
+  `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
+----------
+CHAT HISTORY: 
+
+{chatHistory}
+----------
+FOLLOWUP QUESTION: 
+
+{question}
+----------
+Standalone question:`
+);
+
+// Prompt that answers user's question
+const questionPrompt = PromptTemplate.fromTemplate(
+  `Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+----------
+CONTEXT:
+
+{context}
+----------
+CHAT HISTORY:
+
+{chatHistory}
+----------
+QUESTION:
+
+{question}
+----------
+Helpful Answer:`
+);
