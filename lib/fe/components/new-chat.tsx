@@ -44,16 +44,17 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
           ? ChatType.CHAT_WITH_LLM
           : ChatType.CHAT_WITH_DOCS;
 
-      let documentCollectionId: Id<DocumentCollectionResponse> | undefined = undefined;
+      let documentCollectionId: Id<DocumentCollectionResponse> | undefined =
+        undefined;
       if (chatType === ChatType.CHAT_WITH_DOCS) {
         const documentCollection = await createDocumentCollection(orgSlug);
-        documentCollectionId = Id.from(documentCollection.id)
+        documentCollectionId = Id.from(documentCollection.id);
         await uploadDocuments(documentCollectionId, selectedFiles);
       }
 
       const chatResponse = await postChat(orgSlug, {
         type: chatType,
-        documentCollectionId: documentCollectionId?.toString()
+        documentCollectionId: documentCollectionId?.toString(),
       });
       const chatId = Id.from(chatResponse.id);
 
@@ -147,11 +148,7 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
                         >
                           Selected {selectedFiles.length} files
                           {selectedFiles.map((f, i) => {
-                            return (
-                              <div key={i}>
-                                {f.name}
-                              </div>
-                            );
+                            return <div key={i}>{f.name}</div>;
                           })}
                         </div>
                       )
@@ -225,10 +222,13 @@ const uploadDocument = async (
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch(documentCollectionDocumentsApiPath(documentCollectionId), {
-    method: "POST",
-    body: formData,
-  });
+  const res = await fetch(
+    documentCollectionDocumentsApiPath(documentCollectionId),
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
 
   if (!res.ok) {
     throw new FetchError(

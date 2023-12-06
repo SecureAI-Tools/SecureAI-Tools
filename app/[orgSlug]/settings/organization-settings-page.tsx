@@ -44,8 +44,11 @@ export function OrganizationSettingsPage({
     >
       <div className={tw("p-8")}>
         <div className={tw("flex flex-row items-center")}>
-          <Link href={FrontendRoutes.getOrgHomeRoute(params.orgSlug)} className={tw("mr-4")}>
-            <HiArrowLeft className={tw("h-6 w-6")}/>
+          <Link
+            href={FrontendRoutes.getOrgHomeRoute(params.orgSlug)}
+            className={tw("mr-4")}
+          >
+            <HiArrowLeft className={tw("h-6 w-6")} />
           </Link>
           <PageTitle title="Organization settings" />
         </div>

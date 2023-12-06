@@ -42,7 +42,9 @@ export const chatApiPath = (chatId: Id<ChatResponse>): string => {
   return `/api/chats/${chatId}`;
 };
 
-export const documentCollectionDocumentsApiPath = (documentCollectionId: Id<DocumentCollectionResponse>): string => {
+export const documentCollectionDocumentsApiPath = (
+  documentCollectionId: Id<DocumentCollectionResponse>,
+): string => {
   return `/api/document-collections/${documentCollectionId}/documents`;
 };
 
@@ -57,7 +59,7 @@ export const documentCollectionDocumentIndexApiPath = (
   documentCollectionId: Id<DocumentCollectionResponse>,
   documentId: Id<DocumentResponse>,
 ): string => {
-  return `/api/document-collections/${documentCollectionId}/documents/${documentId}/index`
+  return `/api/document-collections/${documentCollectionId}/documents/${documentId}/index`;
 };
 
 export const postChatMessagesApiPath = (chatId: Id<ChatResponse>): string => {

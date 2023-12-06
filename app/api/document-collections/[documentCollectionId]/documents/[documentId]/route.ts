@@ -25,18 +25,19 @@ export async function GET(
     return NextResponseErrors.badRequest();
   }
 
-  const documentCollectionId = Id.from<DocumentCollectionResponse>(params.documentCollectionId);
-  const [permission, resp] = await permissionService.hasReadDocumentCollectionPermission(
-    userId!,
-    documentCollectionId,
+  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+    params.documentCollectionId,
   );
+  const [permission, resp] =
+    await permissionService.hasReadDocumentCollectionPermission(
+      userId!,
+      documentCollectionId,
+    );
   if (!permission) {
     return resp;
   }
 
-  const document = await documentService.get(
-    Id.from(params.documentId),
-  );
+  const document = await documentService.get(Id.from(params.documentId));
   if (!document) {
     return NextResponseErrors.notFound();
   }

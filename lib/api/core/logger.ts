@@ -51,7 +51,8 @@ const getFormat = () => {
     format.errors({ stack: true }),
     format.splat(),
     format.printf(
-      ({ level, message, timestamp, ...meta }) => `${timestamp} [${level}]: ${message} -> ${JSON.stringify(meta)}`,
+      ({ level, message, timestamp, ...meta }) =>
+        `${timestamp} [${level}]: ${message} -> ${JSON.stringify(meta)}`,
     ),
   );
 };

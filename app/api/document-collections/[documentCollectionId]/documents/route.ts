@@ -32,11 +32,14 @@ export async function POST(
   }
 
   // Check permissions
-  const documentCollectionId = Id.from<DocumentCollectionResponse>(params.documentCollectionId);
-  const [permission, resp] = await permissionService.hasWriteDocumentCollectionPermission(
-    userId!,
-    documentCollectionId,
+  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+    params.documentCollectionId,
   );
+  const [permission, resp] =
+    await permissionService.hasWriteDocumentCollectionPermission(
+      userId!,
+      documentCollectionId,
+    );
   if (!permission) {
     return resp;
   }
@@ -50,7 +53,8 @@ export async function POST(
     return NextResponseErrors.badRequest("file.type must be application/pdf");
   }
 
-  const documentCollection = await documentCollectionService.get(documentCollectionId);
+  const documentCollection =
+    await documentCollectionService.get(documentCollectionId);
   if (!documentCollection) {
     return NextResponseErrors.notFound();
   }
@@ -87,11 +91,14 @@ export async function GET(
   }
 
   // Check permission
-  const documentCollectionId = Id.from<DocumentCollectionResponse>(params.documentCollectionId);
-  const [permission, resp] = await permissionService.hasReadDocumentCollectionPermission(
-    userId!,
-    documentCollectionId,
+  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+    params.documentCollectionId,
   );
+  const [permission, resp] =
+    await permissionService.hasReadDocumentCollectionPermission(
+      userId!,
+      documentCollectionId,
+    );
   if (!permission) {
     return resp;
   }

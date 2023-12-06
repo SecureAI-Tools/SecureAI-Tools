@@ -11,7 +11,7 @@ import { DocumentCollectionResponse } from "lib/types/api/document-collection.re
 export interface DocumentCreateInput {
   id: Id<DocumentResponse>;
   name: string;
-  indexingStatus: DocumentIndexingStatus,
+  indexingStatus: DocumentIndexingStatus;
   mimeType: string;
   collectionId: Id<DocumentCollectionResponse>;
   objectKey: string;
@@ -60,12 +60,12 @@ export class DocumentService {
   async getAll({
     where,
     orderBy,
-    pagination
+    pagination,
   }: {
     where: Prisma.DocumentWhereInput;
     orderBy?:
-    | Prisma.DocumentOrderByWithRelationInput
-    | Prisma.DocumentOrderByWithRelationInput[];
+      | Prisma.DocumentOrderByWithRelationInput
+      | Prisma.DocumentOrderByWithRelationInput[];
     pagination?: API.PaginationParams;
   }): Promise<Document[]> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
@@ -86,8 +86,8 @@ export class DocumentService {
     prisma: TxPrismaClient;
     where: Prisma.DocumentWhereInput;
     orderBy?:
-    | Prisma.DocumentOrderByWithRelationInput
-    | Prisma.DocumentOrderByWithRelationInput[];
+      | Prisma.DocumentOrderByWithRelationInput
+      | Prisma.DocumentOrderByWithRelationInput[];
     pagination?: API.PaginationParams;
   }): Promise<Document[]> {
     return await prisma.document.findMany({
@@ -110,14 +110,17 @@ export class DocumentService {
 
   async update(
     id: Id<DocumentResponse>,
-    data: Pick<Prisma.DocumentUpdateInput, "name" | "indexingStatus" | "mimeType" | "objectKey">,
+    data: Pick<
+      Prisma.DocumentUpdateInput,
+      "name" | "indexingStatus" | "mimeType" | "objectKey"
+    >,
   ): Promise<Document | null> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
       return await tx.document.update({
         where: {
           id: id.toString(),
         },
-        data: data
+        data: data,
       });
     });
   }

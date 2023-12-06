@@ -6,13 +6,16 @@ import { tw } from "twind";
 import useSWR from "swr";
 import { HiArrowTopRightOnSquare } from "react-icons/hi2";
 import Link from "next/link";
-import { Viewer, Worker } from '@react-pdf-viewer/core';
+import { Viewer, Worker } from "@react-pdf-viewer/core";
 
-import '@react-pdf-viewer/core/lib/styles/index.css';
+import "@react-pdf-viewer/core/lib/styles/index.css";
 
 import { ChatResponse } from "lib/types/api/chat.response";
 import { Id } from "lib/types/core/id";
-import { documentCollectionDocumentApiPath, documentCollectionDocumentsApiPath } from "lib/fe/api-paths";
+import {
+  documentCollectionDocumentApiPath,
+  documentCollectionDocumentsApiPath,
+} from "lib/fe/api-paths";
 import { createFetcher } from "lib/fe/api";
 import { DocumentResponse } from "lib/types/api/document.response";
 import { renderErrors } from "lib/fe/components/generic-error";
@@ -32,20 +35,27 @@ export function ChatWithDocs({
   >();
 
   const chatId = Id.from<ChatResponse>(chat.id);
-  const documentCollectionId = Id.from<DocumentCollectionResponse>(chat.documentCollectionId!);
+  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+    chat.documentCollectionId!,
+  );
 
   // Fetch documents
-  const { data: collectionDocumentsResponse, error: fetchCollectionDocumentsError } =
-    useSWR(
-      documentCollectionDocumentsApiPath(documentCollectionId),
-      createFetcher<DocumentResponse[]>(),
-      {
-        revalidateOnFocus: false,
-      },
-    );
+  const {
+    data: collectionDocumentsResponse,
+    error: fetchCollectionDocumentsError,
+  } = useSWR(
+    documentCollectionDocumentsApiPath(documentCollectionId),
+    createFetcher<DocumentResponse[]>(),
+    {
+      revalidateOnFocus: false,
+    },
+  );
 
   const map = new Map(
-    collectionDocumentsResponse?.response?.map((response) => [response.id, response]),
+    collectionDocumentsResponse?.response?.map((response) => [
+      response.id,
+      response,
+    ]),
   );
 
   useEffect(() => {
@@ -144,7 +154,11 @@ export function ChatWithDocs({
             </Worker>
           </div>
           <div className={tw("w-1/2")}>
-            <Chat chat={chat} chatMessages={chatMessages} documents={collectionDocumentsResponse.response} />
+            <Chat
+              chat={chat}
+              chatMessages={chatMessages}
+              documents={collectionDocumentsResponse.response}
+            />
           </div>
         </div>
       )}

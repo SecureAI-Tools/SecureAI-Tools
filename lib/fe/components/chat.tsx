@@ -105,8 +105,10 @@ export function Chat({
 
   const [title, setTitle] = useState<string | undefined>(DEFAULT_CHAT_TITLE);
   const [isTitleGenerating, setIsTitleGenerating] = useState<boolean>(false);
-  const [isProcessingDocuments, setIsProcessingDocuments] = useState<boolean>(false);
-  const [numberOfProcessedDocuments, setNumberOfProcessedDocuments] = useState(0);
+  const [isProcessingDocuments, setIsProcessingDocuments] =
+    useState<boolean>(false);
+  const [numberOfProcessedDocuments, setNumberOfProcessedDocuments] =
+    useState(0);
   const [processingDocumentName, setProcessingDocumentName] = useState("");
   const [processingDocumentStatus, setProcessingDocumentStatus] = useState("");
   const [processingDocumentsError, setProcessingDocumentsError] = useState("");
@@ -123,7 +125,9 @@ export function Chat({
     api: postChatMessagesGenerateApiPath(chatId),
   });
 
-  const generateFirstCompletionAndGenerateTitle = async (msgs: Message[]): Promise<void> => {
+  const generateFirstCompletionAndGenerateTitle = async (
+    msgs: Message[],
+  ): Promise<void> => {
     return append(msgs[0]).then((x) => {
       setIsTitleGenerating(true);
       postStreaming<ChatTitleRequest>({
@@ -142,11 +146,9 @@ export function Chat({
         },
       });
     });
-  }
+  };
 
-  const indexDocuments = async (
-    docs: DocumentResponse[],
-  ): Promise<boolean> => {
+  const indexDocuments = async (docs: DocumentResponse[]): Promise<boolean> => {
     try {
       // TODO: See if we can parallelize this in batches!
       for (let i = 0; i < docs.length; i++) {
@@ -164,13 +166,13 @@ export function Chat({
       }
       setProcessingDocumentName("");
       setProcessingDocumentStatus("Processed all documents");
-    } catch(e) {
+    } catch (e) {
       console.error("could not index documents: ", e);
       return false;
     }
 
     return true;
-  }
+  };
 
   useEffect(() => {
     const chatTitle = chat.title;
@@ -181,7 +183,12 @@ export function Chat({
 
     const msgs = chatMessages.map((cm) => chatMessageResponsetoMessage(cm));
     if (msgs.length === 1 && msgs[0].role === "user") {
-      if (chat.type === ChatType.CHAT_WITH_DOCS && documents?.some(d => d.indexingStatus !== DocumentIndexingStatus.INDEXED)) {
+      if (
+        chat.type === ChatType.CHAT_WITH_DOCS &&
+        documents?.some(
+          (d) => d.indexingStatus !== DocumentIndexingStatus.INDEXED,
+        )
+      ) {
         // Index docs, and then generate!
         setIsProcessingDocuments(true);
         setMessages(msgs);
@@ -194,7 +201,9 @@ export function Chat({
             setMessages([]);
             return generateFirstCompletionAndGenerateTitle(msgs);
           } else {
-            setProcessingDocumentsError("Something went wrong while trying to process documents. Please refresh this page to retry");
+            setProcessingDocumentsError(
+              "Something went wrong while trying to process documents. Please refresh this page to retry",
+            );
           }
         });
       } else {
@@ -218,20 +227,32 @@ export function Chat({
             isGenerating={isTitleGenerating}
           />
         </header>
-          {messages.length > 0
-            ? messages.map((m) => <MessageEntry message={m} key={m.id} />)
-            : null}
+        {messages.length > 0
+          ? messages.map((m) => <MessageEntry message={m} key={m.id} />)
+          : null}
         {isProcessingDocuments && documents ? (
           <div className={tw("flex flex-col items-center mt-16")}>
             <Spinner size="xl" />
-            <div className={tw("text-xl font-semibold mt-4")}>Processing documents</div>
-            <div className={tw("text-sm mt-2")}>Processed {numberOfProcessedDocuments} of {documents.length} documents...</div>
-            <Progress progress={numberOfProcessedDocuments * 100 / documents.length} className={tw("w-80 mt-1")}/>
+            <div className={tw("text-xl font-semibold mt-4")}>
+              Processing documents
+            </div>
+            <div className={tw("text-sm mt-2")}>
+              Processed {numberOfProcessedDocuments} of {documents.length}{" "}
+              documents...
+            </div>
+            <Progress
+              progress={(numberOfProcessedDocuments * 100) / documents.length}
+              className={tw("w-80 mt-1")}
+            />
             {!isEmpty(processingDocumentName) ? (
-              <div className={tw("text-xs mt-2")}>Processing {processingDocumentName}</div>
+              <div className={tw("text-xs mt-2")}>
+                Processing {processingDocumentName}
+              </div>
             ) : null}
             {!isEmpty(processingDocumentStatus) ? (
-              <div className={tw("text-xs mt-2")}>{processingDocumentStatus}</div>
+              <div className={tw("text-xs mt-2")}>
+                {processingDocumentStatus}
+              </div>
             ) : null}
           </div>
         ) : null}
@@ -283,7 +304,11 @@ export function Chat({
                 }}
                 onChange={handleInputChange}
                 disabled={isLoading || isProcessingDocuments}
-                placeholder={isProcessingDocuments ? "Waiting for documents to be processed..." : "Say something..."}
+                placeholder={
+                  isProcessingDocuments
+                    ? "Waiting for documents to be processed..."
+                    : "Say something..."
+                }
               />
             </div>
             {isLoading ? (
@@ -314,8 +339,8 @@ const indexDocument = async ({
   doc,
   onGeneratedChunk,
 }: {
-  doc: DocumentResponse,
-  onGeneratedChunk: (chunk: StreamChunkResponse) => void,
+  doc: DocumentResponse;
+  onGeneratedChunk: (chunk: StreamChunkResponse) => void;
 }): Promise<void> => {
   return new Promise((resolve, reject) => {
     if (doc.indexingStatus === DocumentIndexingStatus.INDEXED) {
@@ -324,22 +349,25 @@ const indexDocument = async ({
     }
 
     postStreaming<{}>({
-      input: documentCollectionDocumentIndexApiPath(Id.from(doc.collectionId), Id.from(doc.id)),
+      input: documentCollectionDocumentIndexApiPath(
+        Id.from(doc.collectionId),
+        Id.from(doc.id),
+      ),
       req: {},
       onGeneratedChunk: (chunk) => {
         let parsedResponses = [];
         try {
-          const lines = chunk.split("\n").filter(l => !isEmpty(l));
-          parsedResponses = lines.map(line => JSON.parse(line));
+          const lines = chunk.split("\n").filter((l) => !isEmpty(l));
+          parsedResponses = lines.map((line) => JSON.parse(line));
         } catch (e) {
           console.log("could not parse stream chunk response", chunk, e);
         }
-        parsedResponses.forEach(r => {
+        parsedResponses.forEach((r) => {
           if (r.error) {
             reject(r.error);
           }
 
-          onGeneratedChunk(r)
+          onGeneratedChunk(r);
         });
       },
       onFinish: () => {
@@ -347,4 +375,4 @@ const indexDocument = async ({
       },
     });
   });
-}
+};

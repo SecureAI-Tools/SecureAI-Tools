@@ -17,14 +17,14 @@ import { TokenUser } from "lib/types/core/token-user";
 import { clip } from "lib/core/string-utils";
 import { getInitials } from "lib/core/name-utils";
 
-type ActiveItem = 'new-chat' | 'chat-history';
+type ActiveItem = "new-chat" | "chat-history";
 
 export function Sidebar({
   orgSlug,
-  activeItem
+  activeItem,
 }: {
-  orgSlug: string,
-  activeItem?: ActiveItem,
+  orgSlug: string;
+  activeItem?: ActiveItem;
 }) {
   const { data: session, status: sessionStatus } = useSession();
   const [collapsed, setCollapsed] = useState(false);
@@ -34,13 +34,18 @@ export function Sidebar({
       ? (session.user as TokenUser)
       : undefined;
   return (
-    <FlowbiteSidebar className={tw("h-screen border-r", collapsed ? "" : "w-80")} collapsed={collapsed}>
+    <FlowbiteSidebar
+      className={tw("h-screen border-r", collapsed ? "" : "w-80")}
+      collapsed={collapsed}
+    >
       <FlowbiteSidebar.Logo
         href={FrontendRoutes.APP_HOME}
         img="/logo.png"
         imgAlt="SecureAI Tools logo"
         className={tw("mt-8")}
-        onClick={(e) => { e.preventDefault() }}
+        onClick={(e) => {
+          e.preventDefault();
+        }}
       >
         SecureAI Tools
       </FlowbiteSidebar.Logo>
@@ -50,7 +55,7 @@ export function Sidebar({
             href={FrontendRoutes.getOrgHomeRoute(orgSlug)}
             icon={HiPlus}
             className={tw("mt-4")}
-            active={activeItem === 'new-chat'}
+            active={activeItem === "new-chat"}
           >
             New Chat
           </FlowbiteSidebar.Item>
@@ -58,7 +63,7 @@ export function Sidebar({
             href={FrontendRoutes.getChatHistoryRoute(orgSlug)}
             icon={HiChatAlt2}
             className={tw("mt-2")}
-            active={activeItem === 'chat-history'}
+            active={activeItem === "chat-history"}
           >
             Chat History
           </FlowbiteSidebar.Item>
@@ -91,7 +96,9 @@ export function Sidebar({
                     label=""
                     dismissOnClick={false}
                     renderTrigger={() => (
-                      <HiOutlineCog className={tw("ml-1 h-4 w-4 cursor-pointer")} />
+                      <HiOutlineCog
+                        className={tw("ml-1 h-4 w-4 cursor-pointer")}
+                      />
                     )}
                     className={tw("z-50")}
                     placement="top"
@@ -108,17 +115,11 @@ export function Sidebar({
                     >
                       Organization users
                     </Dropdown.Item>
-                    <Dropdown.Item
-                      as="a"
-                      href={FrontendRoutes.USER_SETTINGS}
-                    >
+                    <Dropdown.Item as="a" href={FrontendRoutes.USER_SETTINGS}>
                       User settings
                     </Dropdown.Item>
                     <Dropdown.Divider />
-                    <Dropdown.Item
-                      as="a"
-                      href={FrontendRoutes.LOG_OUT}
-                    >
+                    <Dropdown.Item as="a" href={FrontendRoutes.LOG_OUT}>
                       Log out
                     </Dropdown.Item>
                   </Dropdown>

@@ -38,10 +38,11 @@ export async function POST(
 
   // Check if user has permission to read given document collection
   if (chatCreateRequest.documentCollectionId) {
-    const [permission, resp] = await permissionService.hasReadDocumentCollectionPermission(
-      userId!,
-      Id.from(chatCreateRequest.documentCollectionId)
-    );
+    const [permission, resp] =
+      await permissionService.hasReadDocumentCollectionPermission(
+        userId!,
+        Id.from(chatCreateRequest.documentCollectionId),
+      );
     if (!permission) {
       return resp;
     }

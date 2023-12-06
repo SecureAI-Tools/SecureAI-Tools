@@ -7,7 +7,12 @@ import useSWR, { useSWRConfig } from "swr";
 import { tw } from "twind";
 import ReactTimeAgo from "react-time-ago";
 import { useSession } from "next-auth/react";
-import { HiOutlineTrash, HiOutlineExclamationCircle, HiOutlineChatAlt, HiOutlineDocumentText } from "react-icons/hi";
+import {
+  HiOutlineTrash,
+  HiOutlineExclamationCircle,
+  HiOutlineChatAlt,
+  HiOutlineDocumentText,
+} from "react-icons/hi";
 import { useState } from "react";
 
 import { createFetcher, delete_ } from "lib/fe/api";
@@ -20,11 +25,7 @@ import { StudioToasts } from "lib/fe/components/studio-toasts";
 import { FrontendRoutes } from "lib/fe/routes";
 import { ChatType } from "lib/types/core/chat-type";
 
-export default function ChatHistory({
-  orgSlug,
-}: {
-  orgSlug: string;
-}) {
+export default function ChatHistory({ orgSlug }: { orgSlug: string }) {
   const { data: session, status } = useSession();
   const { mutate } = useSWRConfig();
   const [toasts, addToast] = useToasts();
@@ -104,7 +105,7 @@ function ChatHistoryListItem({
   onDeleteError,
 }: {
   chat: ChatResponse;
-  orgSlug: string,
+  orgSlug: string;
   onDeleteSuccess: (deletedChat: ChatResponse) => void;
   onDeleteError: (err: Error) => void;
 }) {
@@ -117,12 +118,17 @@ function ChatHistoryListItem({
   return (
     <>
       <div className={tw("mt-2")}>
-        <Card href={`${FrontendRoutes.getChatRoute(orgSlug, Id.from(chat.id))}?src=chat-history`}>
+        <Card
+          href={`${FrontendRoutes.getChatRoute(
+            orgSlug,
+            Id.from(chat.id),
+          )}?src=chat-history`}
+        >
           <div className={tw("flex flex-row items-center")}>
             {chat.type === ChatType.CHAT_WITH_DOCS ? (
-              <HiOutlineDocumentText className={tw("mr-4 h-8 w-8")}/>
+              <HiOutlineDocumentText className={tw("mr-4 h-8 w-8")} />
             ) : (
-              <HiOutlineChatAlt className={tw("mr-4 h-8 w-8")}/>
+              <HiOutlineChatAlt className={tw("mr-4 h-8 w-8")} />
             )}
             <div className={tw("grow")}>
               <div className={tw("flex flex-row items-center")}>

@@ -39,7 +39,8 @@ export async function POST(
     return NextResponseErrors.forbidden();
   }
 
-  const documentCollectionCreateRequest = (await req.json()) as DocumentCollectionCreateRequest;
+  const documentCollectionCreateRequest =
+    (await req.json()) as DocumentCollectionCreateRequest;
 
   const documentCollection = await documentCollectionService.create({
     name: documentCollectionCreateRequest.name,
@@ -48,5 +49,7 @@ export async function POST(
     model: org.defaultModel,
   });
 
-  return NextResponse.json(DocumentCollectionResponse.fromEntity(documentCollection));
+  return NextResponse.json(
+    DocumentCollectionResponse.fromEntity(documentCollection),
+  );
 }

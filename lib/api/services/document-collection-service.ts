@@ -34,11 +34,13 @@ export class DocumentCollectionService {
         ownerId: i.ownerId.toString(),
         organizationId: i.orgId.toString(),
         model: i.model,
-      }
+      },
     });
   }
 
-  async get(id: Id<DocumentCollectionResponse>): Promise<DocumentCollection | null> {
+  async get(
+    id: Id<DocumentCollectionResponse>,
+  ): Promise<DocumentCollection | null> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
       return await this.getWithTxn(tx, id);
     });
@@ -64,9 +66,12 @@ export class DocumentCollectionService {
 //    (3) otherwise contains only alphanumeric characters, underscores or hyphens (-),
 //    (4) contains no two consecutive periods (..) and
 //    (5) is not a valid IPv4 address
-const customAlphabetNanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', 32);
+const customAlphabetNanoid = customAlphabet(
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+  32,
+);
 
 // Generates a compatible internal name of a doc collection
 const generateInternalName = (): string => {
   return customAlphabetNanoid();
-}
+};

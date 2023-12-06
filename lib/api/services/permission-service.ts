@@ -46,7 +46,10 @@ export class PermissionService {
     // Only chat creators can write to document collection for now.
     //
     // Revisit this when allowing sharing!
-    return await this.isDocumentCollectionCreatorWithActiveMembership(userId, documentCollectionId);
+    return await this.isDocumentCollectionCreatorWithActiveMembership(
+      userId,
+      documentCollectionId,
+    );
   }
 
   async hasReadDocumentCollectionPermission(
@@ -56,7 +59,10 @@ export class PermissionService {
     // Only chat creators can read to document collection for now.
     //
     // Revisit this when allowing sharing!
-    return await this.isDocumentCollectionCreatorWithActiveMembership(userId, documentCollectionId);
+    return await this.isDocumentCollectionCreatorWithActiveMembership(
+      userId,
+      documentCollectionId,
+    );
   }
 
   private async isChatCreatorWithActiveMembership(
@@ -77,7 +83,10 @@ export class PermissionService {
       throw new Error("heh why no org membership bro?");
     }
 
-    if (orgMembership.userId === userId.toString() && orgMembership.status === OrgMembershipStatus.ACTIVE) {
+    if (
+      orgMembership.userId === userId.toString() &&
+      orgMembership.status === OrgMembershipStatus.ACTIVE
+    ) {
       return [true, undefined];
     }
     return [false, NextResponse.json({ status: StatusCodes.FORBIDDEN })];
@@ -87,7 +96,8 @@ export class PermissionService {
     userId: Id<UserResponse>,
     documentCollectionId: Id<DocumentCollectionResponse>,
   ): Promise<[boolean, NextResponse | undefined]> {
-    const collection = await this.documentCollectionService.get(documentCollectionId);
+    const collection =
+      await this.documentCollectionService.get(documentCollectionId);
 
     if (!collection) {
       return [false, NextResponseErrors.notFound()];

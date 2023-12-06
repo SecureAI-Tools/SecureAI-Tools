@@ -26,7 +26,11 @@ export async function POST(
 
   const { message } = (await req.json()) as ChatMessageCreateRequest;
 
-  if (message.content.length < 1 || message.role.length < 1 || params.chatId.length < 1) {
+  if (
+    message.content.length < 1 ||
+    message.role.length < 1 ||
+    params.chatId.length < 1
+  ) {
     return NextResponseErrors.badRequest();
   }
 

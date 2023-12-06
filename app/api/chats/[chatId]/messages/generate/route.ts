@@ -5,8 +5,8 @@ import { NextRequest } from "next/server";
 import { Chat } from "@prisma/client";
 import { PromptTemplate } from "langchain/prompts";
 import { OllamaEmbeddings } from "langchain/embeddings/ollama";
-import { LLMChain } from "langchain/chains"
-import { Chroma } from "langchain/vectorstores/chroma"
+import { LLMChain } from "langchain/chains";
+import { Chroma } from "langchain/vectorstores/chroma";
 import { Document as LangchainDocument } from "langchain/dist/document";
 import { Callbacks as LangchainCallbacks } from "langchain/dist/callbacks";
 import { SimpleChatModel } from "langchain/dist/chat_models/base";
@@ -64,22 +64,24 @@ export async function POST(
   // The langChainHandlers put data into streams on appropriate langchain events
   const { stream, handlers: langChainHandlers } = LangChainStream();
 
-  const callbacks: LangchainCallbacks = [{
-    ...langChainHandlers,
-    handleLLMEnd: (output: any, runId: string): Promise<void> => {
-      // Save the LLM generated responses
-      output.generations.map((generation: any) => {
-        const content = generation.map((chunk: any) => chunk.text).join();
-        chatMessageService.create({
-          content: content,
-          role: ChatMessageRole.ASSISTANT,
-          chatId: chat.id,
+  const callbacks: LangchainCallbacks = [
+    {
+      ...langChainHandlers,
+      handleLLMEnd: (output: any, runId: string): Promise<void> => {
+        // Save the LLM generated responses
+        output.generations.map((generation: any) => {
+          const content = generation.map((chunk: any) => chunk.text).join();
+          chatMessageService.create({
+            content: content,
+            role: ChatMessageRole.ASSISTANT,
+            chatId: chat.id,
+          });
         });
-      });
 
-      return langChainHandlers.handleLLMEnd(output, runId);
+        return langChainHandlers.handleLLMEnd(output, runId);
+      },
     },
-  }];
+  ];
 
   if (chat.type == ChatType.CHAT_WITH_DOCS) {
     generateChatWithDocs(chat, chatMessagesRequest, callbacks);
@@ -90,7 +92,11 @@ export async function POST(
   return new StreamingTextResponse(stream);
 }
 
-async function generateChatWithAI(chat: Chat, chatMessagesRequest: ChatMessagesRequest, callbacks: LangchainCallbacks) {
+async function generateChatWithAI(
+  chat: Chat,
+  chatMessagesRequest: ChatMessagesRequest,
+  callbacks: LangchainCallbacks,
+) {
   const llm = new ChatOllama({
     baseUrl: process.env.INFERENCE_SERVER!,
     model: chat.model,
@@ -109,13 +115,18 @@ async function generateChatWithAI(chat: Chat, chatMessagesRequest: ChatMessagesR
     .catch(logger.error);
 }
 
-
-async function generateChatWithDocs(chat: Chat, chatMessagesRequest: ChatMessagesRequest, callbacks: LangchainCallbacks) {
+async function generateChatWithDocs(
+  chat: Chat,
+  chatMessagesRequest: ChatMessagesRequest,
+  callbacks: LangchainCallbacks,
+) {
   if (!chat.documentCollectionId) {
     return NextResponseErrors.badRequest();
   }
 
-  const documentCollection = await documentCollectionService.get(Id.from<DocumentCollectionResponse>(chat.documentCollectionId));
+  const documentCollection = await documentCollectionService.get(
+    Id.from<DocumentCollectionResponse>(chat.documentCollectionId),
+  );
   if (!documentCollection) {
     return NextResponseErrors.notFound();
   }
@@ -126,7 +137,7 @@ async function generateChatWithDocs(chat: Chat, chatMessagesRequest: ChatMessage
   });
 
   const vectorDb = await Chroma.fromExistingCollection(embeddingsLLM, {
-    collectionName: documentCollection.internalName
+    collectionName: documentCollection.internalName,
   });
 
   const llm = new ChatOllama({
@@ -145,9 +156,19 @@ async function generateChatWithDocs(chat: Chat, chatMessagesRequest: ChatMessage
   const chatHistory = serializeChatHistory(messages);
 
   // Rewrite query if needed;
-  const rewrittenQuestion = messages.length > 0 ? await rewriteHistoryAsStandaloneQuestion(llm, query.content, chatHistory) : query.content;
+  const rewrittenQuestion =
+    messages.length > 0
+      ? await rewriteHistoryAsStandaloneQuestion(
+          llm,
+          query.content,
+          chatHistory,
+        )
+      : query.content;
 
-  const sources = await vectorDb.similaritySearch(rewrittenQuestion, process.env.DOCS_RETRIEVAL_K ? parseInt(process.env.DOCS_RETRIEVAL_K) : 4);
+  const sources = await vectorDb.similaritySearch(
+    rewrittenQuestion,
+    process.env.DOCS_RETRIEVAL_K ? parseInt(process.env.DOCS_RETRIEVAL_K) : 4,
+  );
 
   logger.debug("sources: ", { sources: sources });
 
@@ -157,34 +178,40 @@ async function generateChatWithDocs(chat: Chat, chatMessagesRequest: ChatMessage
   });
 
   questionChain
-    .call({
-      question: query.content,
-      chatHistory: chatHistory,
-      context: serializeSources(sources),
-    },
+    .call(
+      {
+        question: query.content,
+        chatHistory: chatHistory,
+        context: serializeSources(sources),
+      },
       callbacks,
     )
     .catch(logger.error);
 }
 
-const rewriteHistoryAsStandaloneQuestion = async (llm: SimpleChatModel, intialQuery: string, chatHistory: string): Promise<string> => {
+const rewriteHistoryAsStandaloneQuestion = async (
+  llm: SimpleChatModel,
+  intialQuery: string,
+  chatHistory: string,
+): Promise<string> => {
   const questionRewritingChain = new LLMChain({
     llm: llm,
     prompt: questionRewritingPrompt,
   });
 
-  const { text: rewrittenQuestion } = await questionRewritingChain
-    .call({
-      question: intialQuery,
-      chatHistory: chatHistory,
-    });
+  const { text: rewrittenQuestion } = await questionRewritingChain.call({
+    question: intialQuery,
+    chatHistory: chatHistory,
+  });
 
   logger.debug("re-written question: ", { rewrittenQuery: rewrittenQuestion });
 
   return rewrittenQuestion;
-}
+};
 
-const serializeChatHistory = (messages: Pick<Message, "role" | "content">[]): string => {
+const serializeChatHistory = (
+  messages: Pick<Message, "role" | "content">[],
+): string => {
   return messages
     .map((m) => {
       if (m.role === "user") {
@@ -196,14 +223,15 @@ const serializeChatHistory = (messages: Pick<Message, "role" | "content">[]): st
       }
     })
     .join("\n\n");
-}
+};
 
 const serializeSources = (sources: LangchainDocument[]): string => {
   return sources
     .map((source, i) => {
       return `Source: ${i + 1}\n` + source.pageContent;
-    }).join("\n\n");
-}
+    })
+    .join("\n\n");
+};
 
 // Prompt that rewrites chat-history as a standalone question
 const questionRewritingPrompt = PromptTemplate.fromTemplate(
@@ -217,7 +245,7 @@ FOLLOWUP QUESTION:
 
 {question}
 ----------
-Standalone question:`
+Standalone question:`,
 );
 
 // Prompt that answers user's question
@@ -236,5 +264,5 @@ QUESTION:
 
 {question}
 ----------
-Helpful Answer:`
+Helpful Answer:`,
 );

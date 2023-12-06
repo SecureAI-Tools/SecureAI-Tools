@@ -39,9 +39,13 @@ export function UserSettingsPage() {
     >
       <div className={tw("p-8")}>
         <div className={tw("flex flex-row items-center")}>
-          <Link href="#" onClick={() => {
-            router.back();
-          }} className={tw("mr-4")}>
+          <Link
+            href="#"
+            onClick={() => {
+              router.back();
+            }}
+            className={tw("mr-4")}
+          >
             <HiArrowLeft className={tw("h-6 w-6")} />
           </Link>
           <PageTitle title="User settings" />

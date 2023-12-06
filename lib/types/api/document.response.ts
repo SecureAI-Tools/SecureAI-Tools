@@ -1,5 +1,8 @@
 import { Document } from "@prisma/client";
-import { DocumentIndexingStatus, toDocumentIndexingStatus } from "lib/types/core/document-indexing-status";
+import {
+  DocumentIndexingStatus,
+  toDocumentIndexingStatus,
+} from "lib/types/core/document-indexing-status";
 
 export class DocumentResponse {
   id!: string;
