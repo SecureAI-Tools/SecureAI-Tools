@@ -2,6 +2,12 @@ import { StreamingTextResponse, LangChainStream, Message } from "ai";
 import { ChatOllama } from "langchain/chat_models/ollama";
 import { AIMessage, HumanMessage } from "langchain/schema";
 import { NextRequest } from "next/server";
+import { Chat } from "@prisma/client";
+import { PromptTemplate } from "langchain/prompts";
+import { OllamaEmbeddings } from "langchain/embeddings/ollama";
+import { LLMChain } from "langchain/chains"
+import { Chroma } from "langchain/vectorstores/chroma"
+import { Document as LangchainDocument } from "langchain/dist/document";
 
 import { ChatMessageService } from "lib/api/services/chat-message-service";
 import { ChatMessageRole } from "lib/types/core/chat-message-role";
@@ -12,23 +18,17 @@ import { PermissionService } from "lib/api/services/permission-service";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { ChatService } from "lib/api/services/chat-service";
 import { NextResponseErrors } from "lib/api/core/utils";
-import { OllamaEmbeddings } from "langchain/embeddings/ollama";
-import { LLMChain } from "langchain/chains"
-import { Chroma } from "langchain/vectorstores/chroma"
 import { DocumentCollectionService } from "lib/api/services/document-collection-service";
 import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { ChatType } from "lib/types/core/chat-type";
-import { Chat } from "@prisma/client";
-import { PromptTemplate } from "langchain/prompts";
-import { StringOutputParser } from "langchain/schema/output_parser";
-import { Document } from "langchain/dist/document";
+import getLogger from "lib/api/core/logger";
 
 const chatMessageService = new ChatMessageService();
 const documentCollectionService = new DocumentCollectionService();
 const permissionService = new PermissionService();
 const chatService = new ChatService();
+const logger = getLogger();
 
-// Vercel AI SDK compatible API Route to handle chat messages
 export async function POST(
   req: NextRequest,
   { params }: { params: { chatId: string } },
@@ -101,7 +101,7 @@ async function handleGenerateChatWithAI(chat: Chat, chatMessagesRequest: ChatMes
       {},
       [handlerWrapper],
     )
-    .catch(console.error);
+    .catch(logger.error);
   return new StreamingTextResponse(stream);
 }
 
@@ -161,7 +161,7 @@ async function handleGenerateChatWithDocs(chat: Chat, chatMessagesRequest: ChatM
   ----------
   Standalone question:`
   );
-  
+
   const { messages } = chatMessagesRequest;
 
   const query = messages.pop();
@@ -169,7 +169,7 @@ async function handleGenerateChatWithDocs(chat: Chat, chatMessagesRequest: ChatM
     return NextResponseErrors.badRequest();
   }
 
-  console.log("original query: ", query.content);
+  logger.debug("original query: ", { query: query.content });
   const chatHistory = serializeChatHistory(messages);
 
   const queryRewritingChain = new LLMChain({
@@ -179,17 +179,16 @@ async function handleGenerateChatWithDocs(chat: Chat, chatMessagesRequest: ChatM
 
   const { text: rewrittenQuery } = await queryRewritingChain
     .call({
-        question: query.content,
-        chatHistory: chatHistory,
-      }
-    );
+      question: query.content,
+      chatHistory: chatHistory,
+    });
 
-  console.log("re-written query: ", rewrittenQuery);
+  logger.debug("re-written query: ", { rewrittenQuery: rewrittenQuery })
 
   const sources = await vectorDb.similaritySearch(String(rewrittenQuery), 2);
 
-  console.log("sources: ", sources);
-  
+  logger.debug("sources: ", { sources: sources });
+
   const questionChain = new LLMChain({
     llm: llm,
     prompt: questionPrompt,
@@ -198,14 +197,14 @@ async function handleGenerateChatWithDocs(chat: Chat, chatMessagesRequest: ChatM
   const { stream, handlers } = LangChainStream();
   questionChain
     .call({
-        question: query.content,
-        chatHistory: chatHistory,
-        context: serializeSources(sources),
-      },
+      question: query.content,
+      chatHistory: chatHistory,
+      context: serializeSources(sources),
+    },
       [handlers],
     )
-    .catch(console.error);
-  
+    .catch(logger.error);
+
   return new StreamingTextResponse(stream);
 }
 
@@ -223,11 +222,9 @@ const serializeChatHistory = (messages: Pick<Message, "role" | "content">[]): st
     .join("\n\n");
 }
 
-const serializeSources = (sources: Document[]): string => {
-  var i = 0;
+const serializeSources = (sources: LangchainDocument[]): string => {
   return sources
-  .map((source) => {
-    i = i + 1;
-    return "Source: ${i}\n" + source.pageContent;
-  }).join("\n\n");
+    .map((source, i) => {
+      return `Source: ${i + 1}\n` + source.pageContent;
+    }).join("\n\n");
 }
