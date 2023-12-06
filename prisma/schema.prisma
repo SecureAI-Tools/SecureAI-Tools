@@ -11,29 +11,31 @@ datasource db {
 }
 
 model User {
-  id                 String          @id
-  email              String          @unique
+  id                 String               @id
+  email              String               @unique
   emailVerified      DateTime?
   passwordHash       String
   forcePasswordReset Boolean
   firstName          String?
   lastName           String?
   memberships        OrgMembership[]
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
+  documentCollection DocumentCollection[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
 
   @@index([id])
   @@index([email])
 }
 
 model Organization {
-  id           String          @id
-  name         String
-  slug         String          @unique
-  defaultModel String
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-  memberships  OrgMembership[]
+  id                  String               @id
+  name                String
+  slug                String               @unique
+  defaultModel        String
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  memberships         OrgMembership[]
+  documentCollections DocumentCollection[]
 
   @@index([id])
 }
@@ -56,15 +58,19 @@ model OrgMembership {
 }
 
 model Chat {
-  id           String        @id
-  title        String?
-  model        String
-  membership   OrgMembership @relation(fields: [membershipId], references: [id])
-  membershipId String
-  messages     ChatMessage[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  deletedAt    DateTime?
+  id                   String              @id
+  title                String?
+  // Enum controlled by ChatType in TS
+  type                 String?
+  model                String
+  membership           OrgMembership       @relation(fields: [membershipId], references: [id])
+  membershipId         String
+  messages             ChatMessage[]
+  documentCollectionId String?
+  documentCollection   DocumentCollection? @relation(fields: [documentCollectionId], references: [id])
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  deletedAt            DateTime?
 
   @@index([id])
 }
@@ -72,11 +78,47 @@ model Chat {
 model ChatMessage {
   id        String   @id
   content   String
-  role      String // enum controlled by ChatMessageRole in TS
+  // Enum controlled by ChatMessageRole in TS
+  role      String
   chat      Chat     @relation(fields: [chatId], references: [id])
   chatId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([id])
+}
+
+model DocumentCollection {
+  id             String       @id
+  // User facing name of the collection
+  name           String?
+  // Internal name for vector db etc
+  internalName   String       @unique
+  // The AI model used for indexing documents of this collection
+  model          String
+  chats          Chat[]
+  documents      Document[]
+  ownerId        String
+  owner          User         @relation(fields: [ownerId], references: [id])
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([id])
+}
+
+model Document {
+  id             String             @id
+  name           String
+  mimeType       String
+  objectKey      String
+  // Enum controlled by DocumentIndexingStatus in TS
+  indexingStatus String
+  collectionId   String
+  collection     DocumentCollection @relation(fields: [collectionId], references: [id])
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
 
   @@index([id])
 }

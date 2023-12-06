@@ -6,11 +6,14 @@ import { ChatResponse } from "lib/types/api/chat.response";
 import { prismaClient } from "lib/api/db";
 import { API } from "lib/api/core/api.utils";
 import { UserResponse } from "lib/types/api/user.response";
+import { ChatType } from "lib/types/core/chat-type";
 
 export interface ChatCreateInput {
   title: string | undefined;
+  type: ChatType;
   orgIdOrSlug: string;
   creatorId: Id<UserResponse>;
+  documentCollectionId?: string | undefined;
 }
 
 export class ChatService {
@@ -31,7 +34,7 @@ export class ChatService {
       },
       include: {
         org: true,
-      }
+      },
     });
 
     if (!orgMembership) {
@@ -42,10 +45,12 @@ export class ChatService {
       data: {
         id: Id.generate(ChatResponse).toString(),
         title: i.title,
+        type: i.type,
         membershipId: orgMembership.id,
         // TODO: This assumes that users of an org can only use one model. Change this when allowing
         // end-users to choose model at the time of chat-creation.
         model: orgMembership.org.defaultModel,
+        documentCollectionId: i.documentCollectionId,
       },
     });
   }

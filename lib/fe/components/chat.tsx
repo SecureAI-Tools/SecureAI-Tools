@@ -2,9 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Message } from "ai";
 import { useChat } from "ai/react";
 import { tw } from "twind";
-import { Spinner } from "flowbite-react";
-import { useSession } from "next-auth/react";
-import useSWR from "swr";
+import { Progress, Spinner } from "flowbite-react";
 import { HiOutlineClipboard, HiOutlineClipboardCheck } from "react-icons/hi";
 import clipboardCopy from "clipboard-copy";
 
@@ -14,11 +12,10 @@ import { ChatResponse } from "lib/types/api/chat.response";
 import {
   postChatMessagesApiPath,
   chatTitleApiPath,
-  getChatMessagesApiPath,
-  chatApiPath,
   postChatMessagesGenerateApiPath,
+  documentCollectionDocumentIndexApiPath,
 } from "lib/fe/api-paths";
-import { createFetcher, post, postStreaming } from "lib/fe/api";
+import { post, postStreaming } from "lib/fe/api";
 import { ChatTitleRequest } from "lib/types/api/chat-title.request";
 import {
   ChatMessageResponse,
@@ -27,8 +24,13 @@ import {
 import { DEFAULT_CHAT_TITLE } from "lib/core/constants";
 import { ChatTitle } from "lib/fe/components/chat-title";
 import { Analytics } from "lib/fe/analytics";
-import { renderErrors } from "./generic-error";
 import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.request";
+import { ChatType } from "lib/types/core/chat-type";
+import { DocumentResponse } from "lib/types/api/document.response";
+import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";
+import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
+import { StreamChunkResponse } from "lib/types/api/stream-chunk.response";
+import { isEmpty } from "lib/core/string-utils";
 
 const MessageEntry = ({ message }: { message: Message }) => {
   const [copiedToClipboard, setCopiedToClipboard] = useState<boolean>(false);
@@ -91,13 +93,23 @@ const MessageEntry = ({ message }: { message: Message }) => {
 };
 
 export function Chat({
-  chatId,
+  chat,
+  chatMessages,
+  documents,
 }: {
-  chatId: Id<ChatResponse>;
+  chat: ChatResponse;
+  chatMessages: ChatMessageResponse[];
+  documents?: DocumentResponse[];
 }) {
-  const { data: session, status: sessionStatus } = useSession();
+  const chatId = Id.from<ChatResponse>(chat.id);
+
   const [title, setTitle] = useState<string | undefined>(DEFAULT_CHAT_TITLE);
   const [isTitleGenerating, setIsTitleGenerating] = useState<boolean>(false);
+  const [isProcessingDocuments, setIsProcessingDocuments] = useState<boolean>(false);
+  const [numberOfProcessedDocuments, setNumberOfProcessedDocuments] = useState(0);
+  const [processingDocumentName, setProcessingDocumentName] = useState("");
+  const [processingDocumentStatus, setProcessingDocumentStatus] = useState("");
+  const [processingDocumentsError, setProcessingDocumentsError] = useState("");
   const formRef = useRef(null);
   const {
     messages,
@@ -111,106 +123,123 @@ export function Chat({
     api: postChatMessagesGenerateApiPath(chatId),
   });
 
-  const shouldFetchChat = sessionStatus === "authenticated";
-  const { data: fetchChatResponse, error: fetchChatError } = useSWR(
-    shouldFetchChat ? chatApiPath(chatId) : null,
-    createFetcher<ChatResponse>(),
-    {
-      // Don't refetch on focus.
-      // Fetching on refocus causes issues if http response is still streaming and user re-focuses!
-      revalidateOnFocus: false,
-    },
-  );
+  const generateFirstCompletionAndGenerateTitle = async (msgs: Message[]): Promise<void> => {
+    return append(msgs[0]).then((x) => {
+      setIsTitleGenerating(true);
+      postStreaming<ChatTitleRequest>({
+        input: chatTitleApiPath(chatId),
+        req: {
+          messages: msgs,
+        },
+        onGeneratedChunk: (chunk, newTitle) => {
+          setTitle(newTitle);
+          if (document) {
+            document.title = newTitle;
+          }
+        },
+        onFinish: () => {
+          setIsTitleGenerating(false);
+        },
+      });
+    });
+  }
 
-  const shouldFetchChatMessages = sessionStatus === "authenticated";
-  const { data: chatMessagesResponse, error: fetchChatMessagesError } = useSWR(
-    shouldFetchChatMessages
-      ? getChatMessagesApiPath({
-          chatId: chatId,
-          ordering: {
-            orderBy: "createdAt",
-            order: "asc",
+  const indexDocuments = async (
+    docs: DocumentResponse[],
+  ): Promise<boolean> => {
+    try {
+      // TODO: See if we can parallelize this in batches!
+      for (let i = 0; i < docs.length; i++) {
+        const doc = docs[i];
+        setProcessingDocumentName(doc.name);
+        await indexDocument({
+          doc: doc,
+          onGeneratedChunk: (chunk) => {
+            if (chunk.status) {
+              setProcessingDocumentStatus(chunk.status);
+            }
           },
-          pagination: {
-            page: 1,
-            pageSize: 512,
-          },
-        })
-      : null,
-    createFetcher<ChatMessageResponse[]>(),
-    {
-      // Don't refetch on focus.
-      // Fetching on refocus causes issues if http response is still streaming and user re-focuses!
-      revalidateOnFocus: false,
-    },
-  );
-
-  useEffect(() => {
-    if (!fetchChatResponse) {
-      return;
+        });
+        setNumberOfProcessedDocuments(i + 1);
+      }
+      setProcessingDocumentName("");
+      setProcessingDocumentStatus("Processed all documents");
+    } catch(e) {
+      console.error("could not index documents: ", e);
+      return false;
     }
 
-    const chatTitle = fetchChatResponse.response.title;
+    return true;
+  }
+
+  useEffect(() => {
+    const chatTitle = chat.title;
     setTitle(chatTitle);
     if (document) {
       document.title = chatTitle ?? DEFAULT_CHAT_TITLE;
     }
-  }, [fetchChatResponse]);
 
-  useEffect(() => {
-    if (!chatMessagesResponse) {
-      return;
-    }
-
-    const msgs = chatMessagesResponse.response.map((cm) =>
-      chatMessageResponsetoMessage(cm),
-    );
-
-    // Set initial message if appending it while it generates!
+    const msgs = chatMessages.map((cm) => chatMessageResponsetoMessage(cm));
     if (msgs.length === 1 && msgs[0].role === "user") {
-      // Trigger generation
-      append(msgs[0])
-        .then((x) => {
-          console.log('x = ', x);
-          setIsTitleGenerating(true);
-          postStreaming<ChatTitleRequest>({
-            input: chatTitleApiPath(chatId),
-            req: {
-              messages: msgs,
-            },
-            onGeneratedChunk: (chunk, newTitle) => {
-              setTitle(newTitle);
-              if (document) {
-                document.title = newTitle;
-              }
-            },
-            onFinish: () => {
-              setIsTitleGenerating(false);
-            },
-          });
-        })
+      if (chat.type === ChatType.CHAT_WITH_DOCS && documents?.some(d => d.indexingStatus !== DocumentIndexingStatus.INDEXED)) {
+        // Index docs, and then generate!
+        setIsProcessingDocuments(true);
+        setMessages(msgs);
+
+        // Start indexing docs
+        indexDocuments(documents!).then((success) => {
+          // Reset messages first -- append will re-add the first message!
+          setIsProcessingDocuments(false);
+          if (success) {
+            setMessages([]);
+            return generateFirstCompletionAndGenerateTitle(msgs);
+          } else {
+            setProcessingDocumentsError("Something went wrong while trying to process documents. Please refresh this page to retry");
+          }
+        });
+      } else {
+        // Either it's a chat-with-ai, OR (it's a chat-with-docs but has all docs indexed)
+
+        // Trigger generation
+        generateFirstCompletionAndGenerateTitle(msgs);
+      }
     } else {
       setMessages(msgs);
     }
-  }, [chatMessagesResponse]);
-
-  if (fetchChatError || fetchChatMessagesError) {
-    return renderErrors(fetchChatError, fetchChatMessagesError);
-  }
+  }, []);
 
   return (
     <div className={tw("flex flex-col w-full h-screen")}>
       <div className={tw("flex-1 flex-col overflow-auto")}>
-        <header className={tw("z-10 w-full bg-white font-medium")}>
+        <header className={tw("z-10 w-full bg-white font-medium sticky top-0")}>
           <ChatTitle
             title={title}
             chatId={chatId}
             isGenerating={isTitleGenerating}
           />
         </header>
-        {messages.length > 0
-          ? messages.map((m) => <MessageEntry message={m} key={m.id} />)
-          : null}
+          {messages.length > 0
+            ? messages.map((m) => <MessageEntry message={m} key={m.id} />)
+            : null}
+        {isProcessingDocuments && documents ? (
+          <div className={tw("flex flex-col items-center mt-16")}>
+            <Spinner size="xl" />
+            <div className={tw("text-xl font-semibold mt-4")}>Processing documents</div>
+            <div className={tw("text-sm mt-2")}>Processed {numberOfProcessedDocuments} of {documents.length} documents...</div>
+            <Progress progress={numberOfProcessedDocuments * 100 / documents.length} className={tw("w-80 mt-1")}/>
+            {!isEmpty(processingDocumentName) ? (
+              <div className={tw("text-xs mt-2")}>Processing {processingDocumentName}</div>
+            ) : null}
+            {!isEmpty(processingDocumentStatus) ? (
+              <div className={tw("text-xs mt-2")}>{processingDocumentStatus}</div>
+            ) : null}
+          </div>
+        ) : null}
+        {processingDocumentsError ? (
+          <div className={tw("flex flex-col items-center m-16 text-red-500")}>
+            <div>{processingDocumentsError}</div>
+          </div>
+        ) : null}
       </div>
       <div
         className={tw(
@@ -221,12 +250,12 @@ export function Chat({
           ref={formRef}
           onSubmit={async (e) => {
             try {
-              // First create 
+              // First create
               await postChatMessage(chatId, {
                 message: {
                   content: input,
                   role: "user",
-                }
+                },
               });
               // Then trigger generation
               handleSubmit(e);
@@ -253,17 +282,15 @@ export function Chat({
                   );
                 }}
                 onChange={handleInputChange}
-                disabled={isLoading}
-                placeholder="Say something..."
+                disabled={isLoading || isProcessingDocuments}
+                placeholder={isProcessingDocuments ? "Waiting for documents to be processed..." : "Say something..."}
               />
             </div>
-            <div className={tw("m-auto pl-2")}>
-              <Spinner
-                aria-label="generating response..."
-                size="lg"
-                className={tw(isLoading ? "visible" : "invisible")}
-              />
-            </div>
+            {isLoading ? (
+              <div className={tw("m-auto pl-2")}>
+                <Spinner aria-label="generating response..." size="lg" />
+              </div>
+            ) : null}
           </div>
         </form>
       </div>
@@ -282,3 +309,42 @@ const postChatMessage = async (
     )
   ).response;
 };
+
+const indexDocument = async ({
+  doc,
+  onGeneratedChunk,
+}: {
+  doc: DocumentResponse,
+  onGeneratedChunk: (chunk: StreamChunkResponse) => void,
+}): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if (doc.indexingStatus === DocumentIndexingStatus.INDEXED) {
+      resolve();
+      return;
+    }
+
+    postStreaming<{}>({
+      input: documentCollectionDocumentIndexApiPath(Id.from(doc.collectionId), Id.from(doc.id)),
+      req: {},
+      onGeneratedChunk: (chunk) => {
+        let parsedResponses = [];
+        try {
+          const lines = chunk.split("\n").filter(l => !isEmpty(l));
+          parsedResponses = lines.map(line => JSON.parse(line));
+        } catch (e) {
+          console.log("could not parse stream chunk response", chunk, e);
+        }
+        parsedResponses.forEach(r => {
+          if (r.error) {
+            reject(r.error);
+          }
+
+          onGeneratedChunk(r)
+        });
+      },
+      onFinish: () => {
+        resolve();
+      },
+    });
+  });
+}

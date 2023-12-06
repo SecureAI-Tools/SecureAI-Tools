@@ -7,6 +7,9 @@ import { Id } from "lib/types/core/id";
 import { sendUnauthorizedError } from "lib/api/core/utils";
 import { UserResponse } from "lib/types/api/user.response";
 import { TokenUser } from "lib/types/core/token-user";
+import { UserService } from "lib/api/services/user.service";
+
+const userService = new UserService();
 
 export async function isAuthenticated<T>(
   req: NextApiRequest | NextRequest,
@@ -15,7 +18,11 @@ export async function isAuthenticated<T>(
   const token = await getToken({ req });
 
   if (token) {
-    return [true, Id.from((token.user as TokenUser).id)];
+    const userId = Id.from<UserResponse>((token.user as TokenUser).id);
+    const user = await userService.get(userId);
+    if (user) {
+      return [true, userId];
+    }
   }
 
   if (res) {

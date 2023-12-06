@@ -7,7 +7,7 @@ import useSWR, { useSWRConfig } from "swr";
 import { tw } from "twind";
 import ReactTimeAgo from "react-time-ago";
 import { useSession } from "next-auth/react";
-import { HiOutlineTrash, HiOutlineExclamationCircle } from "react-icons/hi";
+import { HiOutlineTrash, HiOutlineExclamationCircle, HiOutlineChatAlt, HiOutlineDocumentText } from "react-icons/hi";
 import { useState } from "react";
 
 import { createFetcher, delete_ } from "lib/fe/api";
@@ -17,7 +17,8 @@ import { clip } from "lib/core/string-utils";
 import { Id } from "lib/types/core/id";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { StudioToasts } from "lib/fe/components/studio-toasts";
-import { FrontendRoutes } from "../routes";
+import { FrontendRoutes } from "lib/fe/routes";
+import { ChatType } from "lib/types/core/chat-type";
 
 export default function ChatHistory({
   orgSlug,
@@ -118,23 +119,33 @@ function ChatHistoryListItem({
       <div className={tw("mt-2")}>
         <Card href={`${FrontendRoutes.getChatRoute(orgSlug, Id.from(chat.id))}?src=chat-history`}>
           <div className={tw("flex flex-row items-center")}>
-            <h5
-              className={tw(
-                "w-full text-md font-medium tracking-tight text-gray-900",
-              )}
-            >
-              <p>{chatTitle}</p>
-            </h5>
-            <HiOutlineTrash
-              onClick={(event) => {
-                event.preventDefault();
-                props.setOpenModal(true);
-              }}
-            />
+            {chat.type === ChatType.CHAT_WITH_DOCS ? (
+              <HiOutlineDocumentText className={tw("mr-4 h-8 w-8")}/>
+            ) : (
+              <HiOutlineChatAlt className={tw("mr-4 h-8 w-8")}/>
+            )}
+            <div className={tw("grow")}>
+              <div className={tw("flex flex-row items-center")}>
+                <h5
+                  className={tw(
+                    "w-full text-md font-medium tracking-tight text-gray-900",
+                  )}
+                >
+                  <p>{chatTitle}</p>
+                </h5>
+                <HiOutlineTrash
+                  onClick={(event) => {
+                    event.preventDefault();
+                    props.setOpenModal(true);
+                  }}
+                  className={tw("h-4 w-4")}
+                />
+              </div>
+              <p className={tw("text-xs font-normal text-gray-700")}>
+                Created <ReactTimeAgo date={chat.createdAt} locale="en-US" />
+              </p>
+            </div>
           </div>
-          <p className={tw("text-sm font-normal text-gray-700")}>
-            Created <ReactTimeAgo date={chat.createdAt} locale="en-US" />
-          </p>
         </Card>
       </div>
 

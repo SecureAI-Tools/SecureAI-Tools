@@ -5,6 +5,8 @@ import { Id } from "lib/types/core/id";
 import { OrderingParams, PaginationParams } from "lib/fe/api-params";
 import { isEmpty } from "lib/core/string-utils";
 import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
+import { DocumentResponse } from "lib/types/api/document.response";
+import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 
 export const userApiPath = (userId: Id<UserResponse>): string => {
   return `/api/users/${userId}`;
@@ -40,11 +42,31 @@ export const chatApiPath = (chatId: Id<ChatResponse>): string => {
   return `/api/chats/${chatId}`;
 };
 
+export const documentCollectionDocumentsApiPath = (documentCollectionId: Id<DocumentCollectionResponse>): string => {
+  return `/api/document-collections/${documentCollectionId}/documents`;
+};
+
+export const documentCollectionDocumentApiPath = (
+  documentCollectionId: Id<DocumentCollectionResponse>,
+  documentId: Id<DocumentResponse>,
+): string => {
+  return `/api/document-collections/${documentCollectionId}/documents/${documentId}`;
+};
+
+export const documentCollectionDocumentIndexApiPath = (
+  documentCollectionId: Id<DocumentCollectionResponse>,
+  documentId: Id<DocumentResponse>,
+): string => {
+  return `/api/document-collections/${documentCollectionId}/documents/${documentId}/index`
+};
+
 export const postChatMessagesApiPath = (chatId: Id<ChatResponse>): string => {
   return `/api/chats/${chatId}/messages`;
 };
 
-export const postChatMessagesGenerateApiPath = (chatId: Id<ChatResponse>): string => {
+export const postChatMessagesGenerateApiPath = (
+  chatId: Id<ChatResponse>,
+): string => {
   return `/api/chats/${chatId}/messages/generate`;
 };
 
@@ -89,6 +111,12 @@ export const organizationsIdOrSlugModelsApiPath = (
 
 export const modelsPullApiPath = (orgIdOrSlug: string): string => {
   return `/api/organizations/${orgIdOrSlug}/models/pull`;
+};
+
+export const organizationsIdOrSlugDocumentCollectionApiPath = (
+  orgIdOrSlug: string,
+): string => {
+  return `/api/organizations/${orgIdOrSlug}/document-collections`;
 };
 
 export const getOrgMembershipsApiPath = (
