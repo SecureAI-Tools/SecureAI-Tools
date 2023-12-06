@@ -147,7 +147,7 @@ async function generateChatWithDocs(chat: Chat, chatMessagesRequest: ChatMessage
   // Rewrite query if needed;
   const rewrittenQuestion = messages.length > 0 ? await rewriteHistoryAsStandaloneQuestion(llm, query.content, chatHistory) : query.content;
 
-  const sources = await vectorDb.similaritySearch(rewrittenQuestion, 2);
+  const sources = await vectorDb.similaritySearch(rewrittenQuestion, process.env.DOCS_RETRIEVAL_K ? parseInt(process.env.DOCS_RETRIEVAL_K) : 4);
 
   logger.debug("sources: ", { sources: sources });
 
