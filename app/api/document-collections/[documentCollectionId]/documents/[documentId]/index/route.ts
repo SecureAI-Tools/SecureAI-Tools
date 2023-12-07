@@ -3,7 +3,7 @@ import { ChromaClient } from "chromadb";
 import { range } from "lodash";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { Document as LangchainDocument } from "langchain/dist/document";
-import { CharacterTextSplitter } from "langchain/text_splitter";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 import { isAuthenticated } from "lib/api/core/auth";
 import { Id } from "lib/types/core/id";
@@ -71,6 +71,11 @@ export async function POST(
     return NextResponse.json(NextResponseErrors.notFound);
   }
 
+  const textSplitter = new RecursiveCharacterTextSplitter({
+    chunkSize: process.env.DOCS_INDEXING_CHUNK_SIZE ? parseInt(process.env.DOCS_INDEXING_CHUNK_SIZE) : 1000, 
+    chunkOverlap: process.env.DOCS_INDEXING_CHUNK_OVERLAP ? parseInt(process.env.DOCS_INDEXING_CHUNK_OVERLAP) : 200,
+  });
+
   const fileBuffer = await objectStorageService.get(document.objectKey);
   var langchainDocuments: LangchainDocument[] = [];
   var loader;
@@ -78,7 +83,7 @@ export async function POST(
   switch (document.mimeType) {
     case "application/pdf":
       loader = new PDFLoader(new Blob([fileBuffer]));
-      docs = await loader.load();
+      docs = await loader.loadAndSplit(textSplitter);
       langchainDocuments = langchainDocuments.concat(docs);
       break;
     default:
@@ -101,16 +106,6 @@ export async function POST(
   const indexDocument = async function* () {
     yield encodeChunk({ status: "Splitting documents into chunks" });
 
-    const textSplitter = new CharacterTextSplitter({
-      chunkSize: process.env.DOCS_INDEXING_CHUNK_SIZE
-        ? parseInt(process.env.DOCS_INDEXING_CHUNK_SIZE)
-        : 1000,
-      chunkOverlap: process.env.DOCS_INDEXING_CHUNK_OVERLAP
-        ? parseInt(process.env.DOCS_INDEXING_CHUNK_OVERLAP)
-        : 200,
-    });
-
-    langchainDocuments = await textSplitter.splitDocuments(langchainDocuments);
     const documentTextChunks: string[] = langchainDocuments.map(
       (document) => document.pageContent,
     );
@@ -138,6 +133,13 @@ export async function POST(
       ids: range(embeddings.length).map((i) => document.id + "_" + i),
       embeddings: embeddings,
       documents: documentTextChunks,
+      metadatas: langchainDocuments.map(document => {
+          return {
+            "pageNumber": document.metadata["loc"]["pageNumber"], 
+            "fromLine": document.metadata["loc"]["lines"]["from"], 
+            "toLine": document.metadata["loc"]["lines"]["to"],
+          };
+        }),
     });
 
     if (!isEmpty(addResponse.error)) {
