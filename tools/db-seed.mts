@@ -36,6 +36,7 @@ async function main() {
         name: 'Wayne Enterprises',
         slug: '-',
         defaultModel: 'mistral',
+        defaultModelType: 'OLLAMA',
       },
     });
 
