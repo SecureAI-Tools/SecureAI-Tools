@@ -183,13 +183,13 @@ const OrgAISettings = ({
             onChange={(e) => {
               setModelType(toModelType(e.target.value));
             }}
+            value={modelType}
           >
             {modelProvidersResponse?.response.map((config, i) => {
               return (
                 <option
                   key={config.type}
                   value={config.type}
-                  selected={config.type === modelType}
                 >
                   {toReadable(config.type)}
                 </option>
