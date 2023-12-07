@@ -1,10 +1,12 @@
 import { Organization } from "@prisma/client";
+import { ModelType, toModelType } from "lib/types/core/model-type";
 
 export class OrganizationResponse {
   id!: string;
   name!: string;
   slug!: string;
   defaultModel!: string;
+  defaultModelType!: ModelType;
   createdAt!: number;
   updatedAt!: number;
 
@@ -14,6 +16,9 @@ export class OrganizationResponse {
       name: e.name,
       slug: e.slug,
       defaultModel: e.defaultModel,
+      defaultModelType: e.defaultModelType
+        ? toModelType(e.defaultModelType)
+        : ModelType.OLLAMA,
       createdAt: e.createdAt.getTime(),
       updatedAt: e.updatedAt.getTime(),
     };

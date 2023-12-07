@@ -3,11 +3,12 @@
 import { useSession } from "next-auth/react";
 import { tw } from "twind";
 import useSWR from "swr";
-import { Button, Label, TextInput } from "flowbite-react";
+import { Button, Label, Select, TextInput } from "flowbite-react";
 import { useEffect, useState } from "react";
 
 import {
   getOrgMembershipsApiPath,
+  modelProvidersApiPath,
   organizationsIdOrSlugApiPath,
   organizationsIdOrSlugModelsApiPath,
 } from "lib/fe/api-paths";
@@ -24,6 +25,8 @@ import { ModelsResponse } from "lib/types/api/models.response";
 import { ModelDownloadModal } from "lib/fe/components/org-settings/model-download-modal";
 import { renderErrors } from "lib/fe/components/generic-error";
 import { Link } from "lib/fe/components/link";
+import { ModelProviderResponse } from "lib/types/api/mode-provider.response";
+import { ModelType, toModelType } from "lib/types/core/model-type";
 
 const OrgAISettings = ({
   orgSlug,
@@ -36,6 +39,7 @@ const OrgAISettings = ({
 }) => {
   const { data: session } = useSession();
   const [modelName, setModelName] = useState<string>("");
+  const [modelType, setModelType] = useState<ModelType | undefined>(undefined);
   const [isOrgAdmin, setIsOrgAdmin] = useState<boolean>(false);
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
   const [toasts, addToast] = useToasts();
@@ -61,12 +65,18 @@ const OrgAISettings = ({
       createFetcher<OrgMembershipResponse[]>(),
     );
 
+  const { data: modelProvidersResponse, error: fetchModelProvidersError } =
+    useSWR(modelProvidersApiPath(), createFetcher<ModelProviderResponse[]>());
+
   useEffect(() => {
     if (!fetchOrganizationResponse) {
       return;
     }
 
     setModelName(fetchOrganizationResponse.response.defaultModel);
+    setModelType(
+      fetchOrganizationResponse.response.defaultModelType ?? ModelType.OLLAMA,
+    );
   }, [fetchOrganizationResponse]);
 
   useEffect(() => {
@@ -93,6 +103,7 @@ const OrgAISettings = ({
     setIsFormSubmitting(true);
 
     updateOrganization(fetchOrganizationResponse!.response.id, {
+      defaultModelType: modelType,
       defaultModel: modelName,
     })
       .then(({ response: updatedOrganization }) => {
@@ -112,6 +123,12 @@ const OrgAISettings = ({
   const onFormSubmit = () => {
     setIsFormSubmitting(true);
 
+    if (modelType !== ModelType.OLLAMA) {
+      updateOrganizationDefaultModel();
+      return;
+    }
+
+    // Ollama model type. Continue with download if need be!
     get<ModelsResponse>(
       organizationsIdOrSlugModelsApiPath(orgSlug, modelName ?? ""),
     )
@@ -130,8 +147,16 @@ const OrgAISettings = ({
       });
   };
 
-  if (fetchOrganizationError || fetchOrgMembershipError) {
-    return renderErrors(fetchOrganizationError, fetchOrgMembershipError);
+  if (
+    fetchOrganizationError ||
+    fetchOrgMembershipError ||
+    fetchModelProvidersError
+  ) {
+    return renderErrors(
+      fetchOrganizationError,
+      fetchOrgMembershipError,
+      fetchModelProvidersError,
+    );
   }
 
   return (
@@ -148,32 +173,48 @@ const OrgAISettings = ({
         <div>
           <div className={tw("mb-2 block")}>
             <Label
+              htmlFor="model-type"
+              value="Large Language Model (LLM) Type"
+            />
+          </div>
+          <Select
+            id="model-type"
+            required
+            onChange={(e) => {
+              setModelType(toModelType(e.target.value));
+            }}
+            value={modelType}
+          >
+            {modelProvidersResponse?.response.map((config, i) => {
+              return (
+                <option
+                  key={config.type}
+                  value={config.type}
+                >
+                  {toReadable(config.type)}
+                </option>
+              );
+            })}
+          </Select>
+        </div>
+        <div>
+          <div className={tw("mb-2 block")}>
+            <Label
               htmlFor="model-name"
               value="Large Language Model (LLM) Name"
             />
           </div>
           <TextInput
             id="model-name"
-            placeholder="mistral"
+            placeholder={getModelNamePlaceholder(modelType)}
             required
             type="text"
             value={modelName}
             onChange={(event) => {
-              setModelName(event.target.value);
+              setModelName(event.target.value.toLowerCase());
             }}
             disabled={!isOrgAdmin}
-            helperText={
-              <span>
-                <Link href="https://ollama.ai/library" target="_blank">
-                  Ollama compatible
-                </Link>{" "}
-                model name. If you're unsure, then use{" "}
-                <Link href="https://ollama.ai/library/mistral" target="_blank">
-                  mistral
-                </Link>
-                . It is one of the best smaller models.
-              </span>
-            }
+            helperText={renderModelNameHelpText(modelType)}
           />
         </div>
         <Button
@@ -217,4 +258,58 @@ const updateOrganization = async (
     organizationsIdOrSlugApiPath(orgId),
     req,
   );
+};
+
+const toReadable = (type: ModelType): string => {
+  switch (type) {
+    case ModelType.OPENAI:
+      return "OpenAI";
+    case ModelType.OLLAMA:
+      return "Ollama";
+    default:
+      return type;
+  }
+};
+
+const renderModelNameHelpText = (type: ModelType | undefined) => {
+  switch (type) {
+    case ModelType.OLLAMA:
+      return (
+        <span>
+          <Link href="https://ollama.ai/library" target="_blank">
+            Ollama compatible
+          </Link>{" "}
+          model name. If you're unsure, then use{" "}
+          <Link href="https://ollama.ai/library/mistral" target="_blank">
+            mistral
+          </Link>
+          . It is one of the best smaller models.
+        </span>
+      );
+    case ModelType.OPENAI:
+      return (
+        <span>
+          <Link
+            href="https://platform.openai.com/docs/models/overview"
+            target="_blank"
+          >
+            OpenAI compatible
+          </Link>{" "}
+          model name.
+        </span>
+      );
+    default:
+      return null;
+  }
+};
+
+const getModelNamePlaceholder = (type: ModelType | undefined): string | undefined => {
+  switch (type) {
+    case ModelType.OLLAMA:
+      return "mistral";
+    case ModelType.OPENAI:
+      return "gpt-3.5-turbo"
+    default:
+      return undefined;
+  }
 };

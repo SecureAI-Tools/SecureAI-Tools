@@ -10,9 +10,11 @@ import { ChatTitleRequest } from "lib/types/api/chat-title.request";
 import { ChatService } from "lib/api/services/chat-service";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { NextResponseErrors } from "lib/api/core/utils";
+import { ModelProviderService } from "lib/api/services/model-provider-service";
 
 const permissionService = new PermissionService();
 const chatService = new ChatService();
+const modelProviderService = new ModelProviderService();
 
 export async function POST(
   req: NextRequest,
@@ -71,9 +73,9 @@ export async function POST(
     throw new Error("eh! this shouldn't be happening!");
   }
 
-  const llm = new ChatOllama({
-    baseUrl: process.env.INFERENCE_SERVER!,
+  const llm = modelProviderService.getChatModel({
     model: org.defaultModel,
+    modelType: org.defaultModelType,
   });
 
   llm

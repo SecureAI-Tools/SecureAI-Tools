@@ -14,6 +14,7 @@ import { OrganizationResponse } from "lib/types/api/organization.response";
 import { OrganizationService } from "lib/api/services/organization-service";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { OrganizationUpdateRequest } from "lib/types/api/organization-update.request";
+import { ModelType } from "lib/types/core/model-type";
 
 const organizationService = new OrganizationService();
 const orgMembershipService = new OrgMembershipService();
@@ -94,7 +95,8 @@ async function handlePatchOrganization(
   if (
     !updateOrgRequest.name &&
     !updateOrgRequest.slug &&
-    !updateOrgRequest.defaultModel
+    !updateOrgRequest.defaultModel &&
+    !updateOrgRequest.defaultModelType
   ) {
     return sendBadRequestError(res);
   }

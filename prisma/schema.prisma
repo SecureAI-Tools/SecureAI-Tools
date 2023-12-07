@@ -31,7 +31,10 @@ model Organization {
   id                  String               @id
   name                String
   slug                String               @unique
+  // Default model name
   defaultModel        String
+  // Enum controlled by ModelType
+  defaultModelType    String?
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   memberships         OrgMembership[]
@@ -63,6 +66,8 @@ model Chat {
   // Enum controlled by ChatType in TS
   type                 String?
   model                String
+  // Enum controlled by ModelType
+  modelType            String?
   membership           OrgMembership       @relation(fields: [membershipId], references: [id])
   membershipId         String
   messages             ChatMessage[]
@@ -96,6 +101,8 @@ model DocumentCollection {
   internalName   String       @unique
   // The AI model used for indexing documents of this collection
   model          String
+  // Enum controlled by ModelType
+  modelType      String?
   chats          Chat[]
   documents      Document[]
   ownerId        String

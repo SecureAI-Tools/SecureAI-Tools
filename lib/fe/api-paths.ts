@@ -176,3 +176,7 @@ export const userForcePasswordResetApiPath = (
 export const instanceConfigApiPath = (): string => {
   return "/api/instance-config";
 };
+
+export const modelProvidersApiPath = (): string => {
+  return `/api/model-providers`;
+};

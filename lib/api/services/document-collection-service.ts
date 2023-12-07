@@ -7,12 +7,14 @@ import { prismaClient } from "lib/api/db";
 import { UserResponse } from "lib/types/api/user.response";
 import { OrganizationResponse } from "lib/types/api/organization.response";
 import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
+import { ModelType } from "lib/types/core/model-type";
 
 export interface DocumentCollectionCreateInput {
   name?: string;
   ownerId: Id<UserResponse>;
   orgId: Id<OrganizationResponse>;
   model: string;
+  modelType: ModelType;
 }
 
 export class DocumentCollectionService {
@@ -34,6 +36,7 @@ export class DocumentCollectionService {
         ownerId: i.ownerId.toString(),
         organizationId: i.orgId.toString(),
         model: i.model,
+        modelType: i.modelType,
       },
     });
   }
