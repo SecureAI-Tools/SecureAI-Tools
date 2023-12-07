@@ -206,12 +206,12 @@ const OrgAISettings = ({
           </div>
           <TextInput
             id="model-name"
-            placeholder="mistral"
+            placeholder={getModelNamePlaceholder(modelType)}
             required
             type="text"
             value={modelName}
             onChange={(event) => {
-              setModelName(event.target.value);
+              setModelName(event.target.value.toLowerCase());
             }}
             disabled={!isOrgAdmin}
             helperText={renderModelNameHelpText(modelType)}
@@ -300,5 +300,16 @@ const renderModelNameHelpText = (type: ModelType | undefined) => {
       );
     default:
       return null;
+  }
+};
+
+const getModelNamePlaceholder = (type: ModelType | undefined): string | undefined => {
+  switch (type) {
+    case ModelType.OLLAMA:
+      return "mistral";
+    case ModelType.OPENAI:
+      return "gpt-3.5-turbo"
+    default:
+      return undefined;
   }
 };
