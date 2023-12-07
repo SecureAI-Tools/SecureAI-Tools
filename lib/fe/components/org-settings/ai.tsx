@@ -187,10 +187,7 @@ const OrgAISettings = ({
           >
             {modelProvidersResponse?.response.map((config, i) => {
               return (
-                <option
-                  key={config.type}
-                  value={config.type}
-                >
+                <option key={config.type} value={config.type}>
                   {toReadable(config.type)}
                 </option>
               );
@@ -303,12 +300,14 @@ const renderModelNameHelpText = (type: ModelType | undefined) => {
   }
 };
 
-const getModelNamePlaceholder = (type: ModelType | undefined): string | undefined => {
+const getModelNamePlaceholder = (
+  type: ModelType | undefined,
+): string | undefined => {
   switch (type) {
     case ModelType.OLLAMA:
       return "mistral";
     case ModelType.OPENAI:
-      return "gpt-3.5-turbo"
+      return "gpt-3.5-turbo";
     default:
       return undefined;
   }
