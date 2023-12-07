@@ -72,8 +72,12 @@ export async function POST(
   }
 
   const textSplitter = new RecursiveCharacterTextSplitter({
-    chunkSize: process.env.DOCS_INDEXING_CHUNK_SIZE ? parseInt(process.env.DOCS_INDEXING_CHUNK_SIZE) : 1000, 
-    chunkOverlap: process.env.DOCS_INDEXING_CHUNK_OVERLAP ? parseInt(process.env.DOCS_INDEXING_CHUNK_OVERLAP) : 200,
+    chunkSize: process.env.DOCS_INDEXING_CHUNK_SIZE
+      ? parseInt(process.env.DOCS_INDEXING_CHUNK_SIZE)
+      : 1000,
+    chunkOverlap: process.env.DOCS_INDEXING_CHUNK_OVERLAP
+      ? parseInt(process.env.DOCS_INDEXING_CHUNK_OVERLAP)
+      : 200,
   });
 
   const fileBuffer = await objectStorageService.get(document.objectKey);
@@ -133,13 +137,13 @@ export async function POST(
       ids: range(embeddings.length).map((i) => document.id + "_" + i),
       embeddings: embeddings,
       documents: documentTextChunks,
-      metadatas: langchainDocuments.map(document => {
-          return {
-            "pageNumber": document.metadata["loc"]["pageNumber"], 
-            "fromLine": document.metadata["loc"]["lines"]["from"], 
-            "toLine": document.metadata["loc"]["lines"]["to"],
-          };
-        }),
+      metadatas: langchainDocuments.map((document) => {
+        return {
+          pageNumber: document.metadata["loc"]["pageNumber"],
+          fromLine: document.metadata["loc"]["lines"]["from"],
+          toLine: document.metadata["loc"]["lines"]["to"],
+        };
+      }),
     });
 
     if (!isEmpty(addResponse.error)) {
