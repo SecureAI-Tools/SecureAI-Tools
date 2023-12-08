@@ -133,6 +133,7 @@ async function generateChatWithDocs(
     modelProviderService.getEmbeddingModel(documentCollection);
 
   const vectorDb = await Chroma.fromExistingCollection(embeddingModel, {
+    url: process.env.VECTOR_DB_SERVER,
     collectionName: documentCollection.internalName,
   });
 
