@@ -6,7 +6,6 @@ import { PromptTemplate } from "langchain/prompts";
 import { LLMChain } from "langchain/chains";
 import { Chroma } from "langchain/vectorstores/chroma";
 import { Document as LangchainDocument } from "langchain/dist/document";
-import { Callbacks as LangchainCallbacks } from "langchain/dist/callbacks";
 import { BaseChatModel } from "langchain/dist/chat_models/base";
 
 import { ChatMessageService } from "lib/api/services/chat-message-service";
@@ -22,6 +21,11 @@ import { DocumentCollectionService } from "lib/api/services/document-collection-
 import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { ChatType } from "lib/types/core/chat-type";
 import { ModelProviderService } from "lib/api/services/model-provider-service";
+import { CitationService } from "lib/api/services/citation-service";
+import { TxPrismaClient } from "lib/api/core/db";
+import { prismaClient } from "lib/api/db";
+import { DocumentChunkMetadata } from "lib/types/core/document-chunk-metadata";
+import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import getLogger from "lib/api/core/logger";
 
 const chatMessageService = new ChatMessageService();
@@ -29,6 +33,7 @@ const documentCollectionService = new DocumentCollectionService();
 const permissionService = new PermissionService();
 const chatService = new ChatService();
 const modelProviderService = new ModelProviderService();
+const citationService = new CitationService();
 const logger = getLogger();
 
 export async function POST(
@@ -61,42 +66,37 @@ export async function POST(
     return NextResponseErrors.notFound();
   }
 
-  // The langChainHandlers put data into streams on appropriate langchain events
-  const { stream, handlers: langChainHandlers } = LangChainStream();
-
-  const callbacks: LangchainCallbacks = [
-    {
-      ...langChainHandlers,
-      handleLLMEnd: (output: any, runId: string): Promise<void> => {
-        // Save the LLM generated responses
-        output.generations.map((generation: any) => {
-          const content = generation.map((chunk: any) => chunk.text).join();
-          chatMessageService.create({
-            content: content,
-            role: ChatMessageRole.ASSISTANT,
-            chatId: chat.id,
-          });
-        });
-
-        return langChainHandlers.handleLLMEnd(output, runId);
-      },
-    },
-  ];
-
   if (chat.type == ChatType.CHAT_WITH_DOCS) {
-    generateChatWithDocs(chat, chatMessagesRequest, callbacks);
+    return generateChatWithDocs(chat, chatMessagesRequest);
   } else {
-    generateChatWithAI(chat, chatMessagesRequest, callbacks);
+    return generateChatWithAI(chat, chatMessagesRequest);
   }
-
-  return new StreamingTextResponse(stream);
 }
 
 async function generateChatWithAI(
   chat: Chat,
   chatMessagesRequest: ChatMessagesRequest,
-  callbacks: LangchainCallbacks,
 ) {
+  // The langChainHandlers put data into streams on appropriate langchain events
+  const { stream, handlers: langChainHandlers } = LangChainStream();
+
+  const wrappedHandlers = {
+    ...langChainHandlers,
+    handleLLMEnd: (output: any, runId: string): Promise<void> => {
+      // Save the LLM generated responses
+      output.generations.map((generation: any) => {
+        const content = generation.map((chunk: any) => chunk.text).join();
+        chatMessageService.create({
+          content: content,
+          role: ChatMessageRole.ASSISTANT,
+          chatId: chat.id,
+        });
+      });
+
+      return langChainHandlers.handleLLMEnd(output, runId);
+    },
+  };
+
   const llm = modelProviderService.getChatModel(chat);
 
   llm
@@ -107,15 +107,16 @@ async function generateChatWithAI(
           : new AIMessage(m.content),
       ),
       {},
-      callbacks,
+      [wrappedHandlers],
     )
     .catch(logger.error);
+
+  return new StreamingTextResponse(stream);
 }
 
 async function generateChatWithDocs(
   chat: Chat,
   chatMessagesRequest: ChatMessagesRequest,
-  callbacks: LangchainCallbacks,
 ) {
   if (!chat.documentCollectionId) {
     return NextResponseErrors.badRequest();
@@ -157,12 +158,48 @@ async function generateChatWithDocs(
         )
       : query.content;
 
-  const sources = await vectorDb.similaritySearch(
+  const sourcesWithScores = await vectorDb.similaritySearchWithScore(
     rewrittenQuestion,
     process.env.DOCS_RETRIEVAL_K ? parseInt(process.env.DOCS_RETRIEVAL_K) : 4,
   );
 
-  logger.debug("sources: ", { sources: sources });
+  logger.debug("sources: ", { sources: sourcesWithScores });
+
+  // The langChainHandlers put data into streams on appropriate langchain events
+  const { stream, handlers: langChainHandlers } = LangChainStream();
+
+  const wrappedHandlers = {
+    ...langChainHandlers,
+    handleLLMEnd: (output: any, runId: string): Promise<void> => {
+      // Save the LLM generated responses
+      output.generations.map(async (generation: any) => {
+        const content = generation.map((chunk: any) => chunk.text).join();
+        await prismaClient.$transaction(async (tx: TxPrismaClient) => {
+          const chatMessage = await chatMessageService.createWithTxn(tx, {
+            content: content,
+            role: ChatMessageRole.ASSISTANT,
+            chatId: chat.id,
+          });
+
+          const chatMessageId = Id.from<ChatMessageResponse>(chatMessage.id);
+          const promises = sourcesWithScores.map(async (s) => {
+            const [lcDoc, score] = s;
+            const meta = lcDoc.metadata as DocumentChunkMetadata;
+            await citationService.createWithTxn(tx, {
+              documentChunkId: meta.documentChunkId,
+              score: score,
+              chatMessageId: chatMessageId,
+              documentId: Id.from(meta.documentId),
+            });
+          });
+
+          await Promise.all(promises);
+        });
+      });
+
+      return langChainHandlers.handleLLMEnd(output, runId);
+    },
+  };
 
   const questionChain = new LLMChain({
     llm: llm,
@@ -174,11 +211,13 @@ async function generateChatWithDocs(
       {
         question: query.content,
         chatHistory: chatHistory,
-        context: serializeSources(sources),
+        context: serializeSources(sourcesWithScores.map((s) => s[0])),
       },
-      callbacks,
+      [wrappedHandlers],
     )
     .catch(logger.error);
+
+  return new StreamingTextResponse(stream);
 }
 
 const rewriteHistoryAsStandaloneQuestion = async (

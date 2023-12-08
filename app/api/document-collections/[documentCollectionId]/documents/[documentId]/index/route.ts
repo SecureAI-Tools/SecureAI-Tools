@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ChromaClient } from "chromadb";
-import { range } from "lodash";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { Document as LangchainDocument } from "langchain/dist/document";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
@@ -18,6 +17,7 @@ import { isEmpty } from "lib/core/string-utils";
 import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";
 import { StreamChunkResponse } from "lib/types/api/stream-chunk.response";
 import { ModelProviderService } from "lib/api/services/model-provider-service";
+import { DocumentChunkMetadata } from "lib/types/core/document-chunk-metadata";
 import getLogger from "lib/api/core/logger";
 
 const logger = getLogger();
@@ -134,16 +134,12 @@ export async function POST(
     });
 
     const addResponse = await collection.add({
-      ids: range(embeddings.length).map((i) => document.id + "_" + i),
+      ids: embeddings.map((_, i) => toDocumentChunkId(document.id, i)),
       embeddings: embeddings,
       documents: documentTextChunks,
-      metadatas: langchainDocuments.map((document) => {
-        return {
-          pageNumber: document.metadata["loc"]["pageNumber"],
-          fromLine: document.metadata["loc"]["lines"]["from"],
-          toLine: document.metadata["loc"]["lines"]["to"],
-        };
-      }),
+      metadatas: langchainDocuments.map((langchainDocument, i) =>
+        toDocumentChunkMetadata(document.id, i, langchainDocument),
+      ),
     });
 
     if (!isEmpty(addResponse.error)) {
@@ -181,4 +177,24 @@ function iteratorToStream(iterator: any) {
       }
     },
   });
+}
+
+function toDocumentChunkMetadata(
+  documentId: string,
+  chunkIndex: number,
+  lcDoc: LangchainDocument,
+): DocumentChunkMetadata {
+  return {
+    // We have to stuff document-chunk-id in metadata because Langchain doesn't return it during retrieval
+    // https://github.com/langchain-ai/langchain/issues/11592
+    documentChunkId: toDocumentChunkId(documentId, chunkIndex),
+    pageNumber: lcDoc.metadata["loc"]["pageNumber"],
+    fromLine: lcDoc.metadata["loc"]["lines"]["from"],
+    toLine: lcDoc.metadata["loc"]["lines"]["to"],
+    documentId: documentId,
+  };
+}
+
+function toDocumentChunkId(documentId: string, i: number): string {
+  return `${documentId}:${i}`;
 }

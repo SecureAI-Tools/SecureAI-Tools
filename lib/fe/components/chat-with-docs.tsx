@@ -7,14 +7,17 @@ import useSWR from "swr";
 import { HiArrowTopRightOnSquare } from "react-icons/hi2";
 import Link from "next/link";
 import { Viewer, Worker } from "@react-pdf-viewer/core";
+import { pageNavigationPlugin } from "@react-pdf-viewer/page-navigation";
 
 import "@react-pdf-viewer/core/lib/styles/index.css";
+import "@react-pdf-viewer/page-navigation/lib/styles/index.css";
 
 import { ChatResponse } from "lib/types/api/chat.response";
 import { Id } from "lib/types/core/id";
 import {
   documentCollectionDocumentApiPath,
   documentCollectionDocumentsApiPath,
+  getChatMessageCitationsApiPath,
 } from "lib/fe/api-paths";
 import { createFetcher } from "lib/fe/api";
 import { DocumentResponse } from "lib/types/api/document.response";
@@ -22,6 +25,7 @@ import { renderErrors } from "lib/fe/components/generic-error";
 import { Chat } from "lib/fe/components/chat";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
+import { CitationResponse } from "lib/types/api/citation-response";
 
 export function ChatWithDocs({
   chat,
@@ -34,7 +38,15 @@ export function ChatWithDocs({
     string | undefined
   >();
 
-  const chatId = Id.from<ChatResponse>(chat.id);
+  // A state that doesn't need to re-render component. So it's never set -- only values are modified on
+  // appropriate events.
+  const [documentsCurrentPageIndexMap, _] = useState<Map<string, number>>(
+    new Map(),
+  );
+
+  const pageNavigationPluginInstance = pageNavigationPlugin();
+  const { jumpToPage } = pageNavigationPluginInstance;
+
   const documentCollectionId = Id.from<DocumentCollectionResponse>(
     chat.documentCollectionId!,
   );
@@ -58,6 +70,20 @@ export function ChatWithDocs({
     ]),
   );
 
+  // Fetch citation sources and pass it down!
+  const { data: citationsResponse, error: fetchCitationsError } = useSWR(
+    getChatMessageCitationsApiPath({
+      chatId: Id.from(chat.id),
+      chatMessageIds: chatMessages.map((r) => Id.from(r.id)),
+    }),
+    createFetcher<CitationResponse[]>(),
+    {
+      // Don't refetch on focus.
+      // Fetching on refocus causes issues if http response is still streaming and user re-focuses!
+      revalidateOnFocus: false,
+    },
+  );
+
   useEffect(() => {
     const responses = collectionDocumentsResponse?.response;
     if (responses && responses?.length > 0) {
@@ -65,12 +91,12 @@ export function ChatWithDocs({
     }
   }, [collectionDocumentsResponse]);
 
-  if (fetchCollectionDocumentsError) {
-    return renderErrors(fetchCollectionDocumentsError);
-  }
-
   function changeDocument(docId: string) {
     setPreviewDocumentId(docId);
+  }
+
+  if (fetchCollectionDocumentsError || fetchCitationsError) {
+    return renderErrors(fetchCollectionDocumentsError, fetchCitationsError);
   }
 
   // Loading spinner for various doc preview elements
@@ -89,7 +115,9 @@ export function ChatWithDocs({
 
   return (
     <div className={tw("flex flex-col w-full")}>
-      {!collectionDocumentsResponse || !previewDocument ? (
+      {!collectionDocumentsResponse ||
+      !citationsResponse ||
+      !previewDocument ? (
         renderLoadingSpinner()
       ) : (
         <div className={tw("flex")}>
@@ -148,6 +176,26 @@ export function ChatWithDocs({
                       documentCollectionId,
                       Id.from(previewDocument.id),
                     )}
+                    plugins={[pageNavigationPluginInstance]}
+                    onDocumentLoad={(e) => {
+                      // Extract document id
+                      // file.name is the URL path, and last part is document id
+                      const parts = e.file.name.split("/");
+                      const docId = parts[parts.length - 1];
+                      const currentPageIndex =
+                        documentsCurrentPageIndexMap.get(docId);
+                      if (currentPageIndex !== undefined) {
+                        jumpToPage(currentPageIndex);
+                      }
+                    }}
+                    onPageChange={(e) => {
+                      if (previewDocumentId) {
+                        documentsCurrentPageIndexMap.set(
+                          previewDocumentId,
+                          e.currentPage,
+                        );
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -158,6 +206,15 @@ export function ChatWithDocs({
               chat={chat}
               chatMessages={chatMessages}
               documents={collectionDocumentsResponse.response}
+              citations={citationsResponse?.response}
+              onJumpToPage={(docId: string, pageIndex: number) => {
+                if (docId === previewDocumentId) {
+                  jumpToPage(pageIndex);
+                } else {
+                  documentsCurrentPageIndexMap.set(docId, pageIndex);
+                  setPreviewDocumentId(docId);
+                }
+              }}
             />
           </div>
         </div>
