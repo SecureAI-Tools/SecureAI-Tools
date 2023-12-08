@@ -8,6 +8,7 @@ import { OllamaEmbeddings } from "langchain/embeddings/ollama";
 import { Embeddings } from "langchain/dist/embeddings/base";
 import { ModelProviderConfig } from "lib/types/core/model-provider-config";
 import getLogger from "lib/api/core/logger";
+import { removeTrailingSlash } from "lib/core/string-utils";
 
 const logger = getLogger();
 
@@ -91,7 +92,8 @@ export class ModelProviderService {
 
       case ModelType.OLLAMA:
         return new OllamaEmbeddings({
-          baseUrl: config.apiBaseUrl,
+          // OllamaEmbeddings does not like extra slash at the end!
+          baseUrl: removeTrailingSlash(config.apiBaseUrl),
           model: modelName,
         });
 

@@ -10,12 +10,13 @@ import { OrganizationService } from "lib/api/services/organization-service";
 import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
 import { ModelType, toModelType } from "lib/types/core/model-type";
+import { removeTrailingSlash } from "lib/core/string-utils";
 
 const orgMembershipService = new OrgMembershipService();
 const orgService = new OrganizationService();
 const documentCollectionService = new DocumentCollectionService();
 const chromaClient = new ChromaClient({
-  path: process.env.VECTOR_DB_SERVER,
+  path: removeTrailingSlash(process.env.VECTOR_DB_SERVER!),
 });
 
 export async function POST(

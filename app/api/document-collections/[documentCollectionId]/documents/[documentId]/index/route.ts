@@ -13,7 +13,7 @@ import { DocumentResponse } from "lib/types/api/document.response";
 import { LocalObjectStorageService } from "lib/api/services/local-object-storage-service";
 import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { DocumentCollectionService } from "lib/api/services/document-collection-service";
-import { isEmpty } from "lib/core/string-utils";
+import { isEmpty, removeTrailingSlash } from "lib/core/string-utils";
 import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";
 import { StreamChunkResponse } from "lib/types/api/stream-chunk.response";
 import { ModelProviderService } from "lib/api/services/model-provider-service";
@@ -28,7 +28,7 @@ const documentService = new DocumentService();
 const objectStorageService = new LocalObjectStorageService();
 const modelProviderService = new ModelProviderService();
 const chromaClient = new ChromaClient({
-  path: process.env.VECTOR_DB_SERVER,
+  path: removeTrailingSlash(process.env.VECTOR_DB_SERVER!),
 });
 
 // Endpoint to index documents into vector store

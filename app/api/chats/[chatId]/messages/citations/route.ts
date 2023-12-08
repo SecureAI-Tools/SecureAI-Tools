@@ -13,13 +13,14 @@ import { DocumentCollectionService } from "lib/api/services/document-collection-
 import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { ChatType } from "lib/types/core/chat-type";
 import { DocumentChunkMetadata } from "lib/types/core/document-chunk-metadata";
+import { removeTrailingSlash } from "lib/core/string-utils";
 
 const chatService = new ChatService();
 const documentCollectionService = new DocumentCollectionService();
 const citationService = new CitationService();
 const permissionService = new PermissionService();
 const chromaClient = new ChromaClient({
-  path: process.env.VECTOR_DB_SERVER,
+  path: removeTrailingSlash(process.env.VECTOR_DB_SERVER!),
 });
 
 // Endpoint to fetch a list of citations scoped to given chatId

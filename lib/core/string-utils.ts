@@ -21,3 +21,7 @@ export function isEmpty(s: string | undefined | null): boolean {
 export function clip(s: string, n: number): string {
   return s.length > n ? `${s.substring(0, n)}…` : s;
 }
+
+export function removeTrailingSlash(s: string | undefined): string | undefined {
+  return s?.endsWith('/') ? s.slice(0, -1) : s;
+}
