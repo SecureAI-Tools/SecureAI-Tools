@@ -81,14 +81,15 @@ model Chat {
 }
 
 model ChatMessage {
-  id        String   @id
+  id        String     @id
   content   String
   // Enum controlled by ChatMessageRole in TS
   role      String
-  chat      Chat     @relation(fields: [chatId], references: [id])
+  chat      Chat       @relation(fields: [chatId], references: [id])
   chatId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  sources   Citation[]
 
   @@index([id])
 }
@@ -126,6 +127,24 @@ model Document {
   collection     DocumentCollection @relation(fields: [collectionId], references: [id])
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
+  citations      Citation[]
+
+  @@index([id])
+}
+
+// Citation
+// i.e. chat-message cites documents
+model Citation {
+  id              String      @id
+  // Id of document chunk in vector db
+  documentChunkId String
+  score           Float
+  document        Document    @relation(fields: [documentId], references: [id])
+  documentId      String
+  chatMessage     ChatMessage @relation(fields: [chatMessageId], references: [id])
+  chatMessageId   String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
   @@index([id])
 }

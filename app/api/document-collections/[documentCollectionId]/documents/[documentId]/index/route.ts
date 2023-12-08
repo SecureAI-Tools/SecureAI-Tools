@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ChromaClient } from "chromadb";
-import { range } from "lodash";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { Document as LangchainDocument } from "langchain/dist/document";
-import { CharacterTextSplitter } from "langchain/text_splitter";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 import { isAuthenticated } from "lib/api/core/auth";
 import { Id } from "lib/types/core/id";
@@ -18,6 +17,7 @@ import { isEmpty } from "lib/core/string-utils";
 import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";
 import { StreamChunkResponse } from "lib/types/api/stream-chunk.response";
 import { ModelProviderService } from "lib/api/services/model-provider-service";
+import { DocumentChunkMetadata } from "lib/types/core/document-chunk-metadata";
 import getLogger from "lib/api/core/logger";
 
 const logger = getLogger();
@@ -71,6 +71,15 @@ export async function POST(
     return NextResponse.json(NextResponseErrors.notFound);
   }
 
+  const textSplitter = new RecursiveCharacterTextSplitter({
+    chunkSize: process.env.DOCS_INDEXING_CHUNK_SIZE
+      ? parseInt(process.env.DOCS_INDEXING_CHUNK_SIZE)
+      : 1000,
+    chunkOverlap: process.env.DOCS_INDEXING_CHUNK_OVERLAP
+      ? parseInt(process.env.DOCS_INDEXING_CHUNK_OVERLAP)
+      : 200,
+  });
+
   const fileBuffer = await objectStorageService.get(document.objectKey);
   var langchainDocuments: LangchainDocument[] = [];
   var loader;
@@ -78,7 +87,7 @@ export async function POST(
   switch (document.mimeType) {
     case "application/pdf":
       loader = new PDFLoader(new Blob([fileBuffer]));
-      docs = await loader.load();
+      docs = await loader.loadAndSplit(textSplitter);
       langchainDocuments = langchainDocuments.concat(docs);
       break;
     default:
@@ -101,16 +110,6 @@ export async function POST(
   const indexDocument = async function* () {
     yield encodeChunk({ status: "Splitting documents into chunks" });
 
-    const textSplitter = new CharacterTextSplitter({
-      chunkSize: process.env.DOCS_INDEXING_CHUNK_SIZE
-        ? parseInt(process.env.DOCS_INDEXING_CHUNK_SIZE)
-        : 1000,
-      chunkOverlap: process.env.DOCS_INDEXING_CHUNK_OVERLAP
-        ? parseInt(process.env.DOCS_INDEXING_CHUNK_OVERLAP)
-        : 200,
-    });
-
-    langchainDocuments = await textSplitter.splitDocuments(langchainDocuments);
     const documentTextChunks: string[] = langchainDocuments.map(
       (document) => document.pageContent,
     );
@@ -135,9 +134,12 @@ export async function POST(
     });
 
     const addResponse = await collection.add({
-      ids: range(embeddings.length).map((i) => document.id + "_" + i),
+      ids: embeddings.map((_, i) => toDocumentChunkId(document.id, i)),
       embeddings: embeddings,
       documents: documentTextChunks,
+      metadatas: langchainDocuments.map((langchainDocument, i) =>
+        toDocumentChunkMetadata(document.id, i, langchainDocument),
+      ),
     });
 
     if (!isEmpty(addResponse.error)) {
@@ -175,4 +177,24 @@ function iteratorToStream(iterator: any) {
       }
     },
   });
+}
+
+function toDocumentChunkMetadata(
+  documentId: string,
+  chunkIndex: number,
+  lcDoc: LangchainDocument,
+): DocumentChunkMetadata {
+  return {
+    // We have to stuff document-chunk-id in metadata because Langchain doesn't return it during retrieval
+    // https://github.com/langchain-ai/langchain/issues/11592
+    documentChunkId: toDocumentChunkId(documentId, chunkIndex),
+    pageNumber: lcDoc.metadata["loc"]["pageNumber"],
+    fromLine: lcDoc.metadata["loc"]["lines"]["from"],
+    toLine: lcDoc.metadata["loc"]["lines"]["to"],
+    documentId: documentId,
+  };
+}
+
+function toDocumentChunkId(documentId: string, i: number): string {
+  return `${documentId}:${i}`;
 }

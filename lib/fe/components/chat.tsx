@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Message } from "ai";
 import { useChat } from "ai/react";
 import { tw } from "twind";
-import { Progress, Spinner } from "flowbite-react";
+import { Progress, Spinner, Tooltip } from "flowbite-react";
 import { HiOutlineClipboard, HiOutlineClipboardCheck } from "react-icons/hi";
 import clipboardCopy from "clipboard-copy";
 
@@ -14,12 +14,14 @@ import {
   chatTitleApiPath,
   postChatMessagesGenerateApiPath,
   documentCollectionDocumentIndexApiPath,
+  getChatMessagesApiPath,
+  getChatMessageCitationsApiPath,
 } from "lib/fe/api-paths";
-import { post, postStreaming } from "lib/fe/api";
+import { get, post, postStreaming } from "lib/fe/api";
 import { ChatTitleRequest } from "lib/types/api/chat-title.request";
 import {
   ChatMessageResponse,
-  chatMessageResponsetoMessage,
+  chatMessageResponseToMessage,
 } from "lib/types/api/chat-message.response";
 import { DEFAULT_CHAT_TITLE } from "lib/core/constants";
 import { ChatTitle } from "lib/fe/components/chat-title";
@@ -28,11 +30,23 @@ import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.requ
 import { ChatType } from "lib/types/core/chat-type";
 import { DocumentResponse } from "lib/types/api/document.response";
 import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { StreamChunkResponse } from "lib/types/api/stream-chunk.response";
 import { isEmpty } from "lib/core/string-utils";
+import { CitationResponse } from "lib/types/api/citation-response";
+import { Link } from "lib/fe/components/link";
+import { ChatMessageRole } from "lib/types/core/chat-message-role";
 
-const MessageEntry = ({ message }: { message: Message }) => {
+const MessageEntry = ({
+  message,
+  citations,
+  documents,
+  onJumpToPage,
+}: {
+  message: Message;
+  citations?: CitationResponse[];
+  documents?: DocumentResponse[];
+  onJumpToPage?: (docId: string, pageIndex: number) => void;
+}) => {
   const [copiedToClipboard, setCopiedToClipboard] = useState<boolean>(false);
 
   return (
@@ -56,12 +70,54 @@ const MessageEntry = ({ message }: { message: Message }) => {
           <div className={tw("flex-shrink-0 flex flex-col relative w-10")}>
             {message.role === "user" ? "User: " : "AI: "}
           </div>
-          <div
-            className={tw(
-              "relative flex w-[calc(100%-50px)] flex-col gap-1 md:gap-3 lg:w-[calc(100%-115px)] whitespace-pre-wrap",
-            )}
-          >
-            {message.content}
+          <div className={tw("flex flex-col w-[calc(100%-50px)]")}>
+            <div
+              className={tw(
+                "relative flex gap-1 md:gap-3 lg:w-[calc(100%-115px)] whitespace-pre-wrap",
+              )}
+            >
+              {message.content}
+            </div>
+            {citations && citations.length > 0 ? (
+              <div className={tw("mt-4 border-t")}>
+                <div className={tw("mt-2 text-xs")}>
+                  <span className={tw("font-semibold")}>Sources:</span>
+                  <ul className={tw("ml-2 mt-3 list-disc")}>
+                    {citations
+                      .sort((a, b) => b.score - a.score)
+                      .map((c) => {
+                        const doc = documents?.find(
+                          (d) => d.id === c.documentId,
+                        );
+                        return (
+                          <li key={c.id} className={tw("ml-5 pb-2")}>
+                            <Tooltip
+                              content={`Jump to page ${c.pageNumber} of ${
+                                doc?.name ?? ""
+                              }`}
+                              animation="duration-1000"
+                            >
+                              <Link
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  onJumpToPage?.(
+                                    c.documentId,
+                                    c.pageNumber - 1,
+                                  );
+                                }}
+                              >
+                                Page {c.pageNumber} (lines {c.fromLine}-
+                                {c.toLine}){doc ? `, ${doc.name}` : null}
+                              </Link>
+                            </Tooltip>
+                          </li>
+                        );
+                      })}
+                  </ul>
+                </div>
+              </div>
+            ) : null}
           </div>
           {copiedToClipboard ? (
             <HiOutlineClipboardCheck />
@@ -96,10 +152,14 @@ export function Chat({
   chat,
   chatMessages,
   documents,
+  citations,
+  onJumpToPage,
 }: {
   chat: ChatResponse;
   chatMessages: ChatMessageResponse[];
   documents?: DocumentResponse[];
+  citations?: CitationResponse[];
+  onJumpToPage?: (docId: string, pageIndex: number) => void;
 }) {
   const chatId = Id.from<ChatResponse>(chat.id);
 
@@ -112,7 +172,11 @@ export function Chat({
   const [processingDocumentName, setProcessingDocumentName] = useState("");
   const [processingDocumentStatus, setProcessingDocumentStatus] = useState("");
   const [processingDocumentsError, setProcessingDocumentsError] = useState("");
+  const [messageCitations, setMessageCitations] = useState<
+    Map<string /* messageId */, CitationResponse[]>
+  >(toCitationMap(citations));
   const formRef = useRef(null);
+  const messagesRef = useRef<Message[]>([]);
   const {
     messages,
     setMessages,
@@ -122,8 +186,68 @@ export function Chat({
     append,
     isLoading,
   } = useChat({
+    id: chat.id,
     api: postChatMessagesGenerateApiPath(chatId),
+    onFinish: async (message) => {
+      if (message.role !== "assistant") {
+        return;
+      }
+
+      // Fetch latest message from backend to get the correct message id
+      const { response: chatMessageResponses } = await get<
+        ChatMessageResponse[]
+      >(
+        getChatMessagesApiPath({
+          chatId: chatId,
+          ordering: {
+            orderBy: "createdAt",
+            order: "desc",
+          },
+          pagination: {
+            page: 1,
+            pageSize: 1,
+          },
+        }),
+      );
+
+      if (chatMessageResponses.length < 1) {
+        console.log("something went wrong! Didn't receive any chat messages.");
+        return;
+      }
+
+      const lastChatMessage = chatMessageResponses[0];
+      if (lastChatMessage.role !== ChatMessageRole.ASSISTANT) {
+        console.log(
+          "something went wrong! Last chat message isn't from assistant.",
+        );
+        return;
+      }
+
+      // Fetch citations of the last generated message;
+      const { response: citationResponses } = await get<CitationResponse[]>(
+        getChatMessageCitationsApiPath({
+          chatId: chatId,
+          chatMessageIds: [Id.from(lastChatMessage.id)],
+        }),
+      );
+
+      // Update state to re-render messages
+      setMessageCitations((current) => {
+        return new Map(current.set(lastChatMessage.id, citationResponses));
+      });
+
+      // Update messages so that the last message gets correct message id!
+      const newMessages: Message[] = [...messagesRef.current];
+      newMessages.pop();
+      newMessages.push(chatMessageResponseToMessage(lastChatMessage));
+      setMessages(newMessages);
+    },
   });
+
+  // Use ref to pass messages state into onFinish() callback.
+  // Directly using the messages state inside onFinish only gives the initial value
+  // https://stackoverflow.com/a/60643670
+  messagesRef.current = messages;
 
   const generateFirstCompletionAndGenerateTitle = async (
     msgs: Message[],
@@ -181,7 +305,7 @@ export function Chat({
       document.title = chatTitle ?? DEFAULT_CHAT_TITLE;
     }
 
-    const msgs = chatMessages.map((cm) => chatMessageResponsetoMessage(cm));
+    const msgs = chatMessages.map((cm) => chatMessageResponseToMessage(cm));
     if (msgs.length === 1 && msgs[0].role === "user") {
       if (
         chat.type === ChatType.CHAT_WITH_DOCS &&
@@ -228,7 +352,15 @@ export function Chat({
           />
         </header>
         {messages.length > 0
-          ? messages.map((m) => <MessageEntry message={m} key={m.id} />)
+          ? messages.map((m) => (
+              <MessageEntry
+                key={m.id}
+                message={m}
+                citations={messageCitations.get(m.id)}
+                documents={documents}
+                onJumpToPage={onJumpToPage}
+              />
+            ))
           : null}
         {isProcessingDocuments && documents ? (
           <div className={tw("flex flex-col items-center mt-16")}>
@@ -375,4 +507,20 @@ const indexDocument = async ({
       },
     });
   });
+};
+
+const toCitationMap = (
+  citations: CitationResponse[] | undefined,
+): Map<string, CitationResponse[]> => {
+  const map = new Map<string, CitationResponse[]>();
+  citations?.forEach((c) => {
+    const list = map.get(c.chatMessageId);
+    if (list) {
+      list.push(c);
+    } else {
+      map.set(c.chatMessageId, [c]);
+    }
+  });
+
+  return map;
 };

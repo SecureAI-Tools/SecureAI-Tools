@@ -41,7 +41,7 @@ export class ChatMessageService {
   ): Promise<ChatMessage[]> {
     return await prismaClient.$transaction(
       async (prisma: TxPrismaClient): Promise<ChatMessage[]> => {
-        return await this.getAllTxn(prisma, where, orderBy);
+        return await this.getAllTxn(prisma, where, orderBy, pagination);
       },
     );
   }

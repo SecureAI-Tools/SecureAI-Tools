@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ChromaClient } from "chromadb";
 
 import { isAuthenticated } from "lib/api/core/auth";
 import { Id } from "lib/types/core/id";
@@ -13,6 +14,9 @@ import { ModelType, toModelType } from "lib/types/core/model-type";
 const orgMembershipService = new OrgMembershipService();
 const orgService = new OrganizationService();
 const documentCollectionService = new DocumentCollectionService();
+const chromaClient = new ChromaClient({
+  path: process.env.VECTOR_DB_SERVER,
+});
 
 export async function POST(
   req: NextRequest,
@@ -51,6 +55,11 @@ export async function POST(
     modelType: org.defaultModelType
       ? toModelType(org.defaultModelType)
       : ModelType.OLLAMA,
+  });
+
+  // Create corresponding collection in vector db
+  const collection = await chromaClient.createCollection({
+    name: documentCollection.internalName,
   });
 
   return NextResponse.json(

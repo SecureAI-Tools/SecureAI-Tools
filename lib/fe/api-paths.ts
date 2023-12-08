@@ -7,6 +7,7 @@ import { isEmpty } from "lib/core/string-utils";
 import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 import { DocumentResponse } from "lib/types/api/document.response";
 import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
+import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 
 export const userApiPath = (userId: Id<UserResponse>): string => {
   return `/api/users/${userId}`;
@@ -92,6 +93,18 @@ export const getChatMessagesApiPath = ({
 
 export const chatTitleApiPath = (chatId: Id<ChatResponse>): string => {
   return `/api/chats/${chatId}/title`;
+};
+
+export const getChatMessageCitationsApiPath = ({
+  chatId,
+  chatMessageIds,
+}: {
+  chatId: Id<ChatResponse>;
+  chatMessageIds: Id<ChatMessageResponse>[];
+}): string => {
+  return `/api/chats/${chatId}/messages/citations?chatMessageIds=${chatMessageIds.join(
+    ",",
+  )}`;
 };
 
 export const organizationsIdOrSlugApiPath = (orgIdOrSlug: string): string => {

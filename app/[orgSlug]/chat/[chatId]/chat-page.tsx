@@ -29,7 +29,7 @@ const ChatPage = ({
   const chatId = Id.from(chatIdRaw);
 
   const shouldFetchChat = sessionStatus === "authenticated";
-  const { data: fetchChatResponse, error: fetchChatError } = useSWR(
+  const { data: chatResponse, error: fetchChatError } = useSWR(
     shouldFetchChat ? chatApiPath(chatId) : null,
     createFetcher<ChatResponse>(),
     {
@@ -67,7 +67,7 @@ const ChatPage = ({
   }
 
   const renderChat = () => {
-    if (!fetchChatResponse || !chatMessagesResponse) {
+    if (!chatResponse || !chatMessagesResponse) {
       return (
         <div className={tw("flex flex-col justify-center items-center w-full")}>
           <Spinner size="xl" />
@@ -75,7 +75,7 @@ const ChatPage = ({
       );
     }
 
-    const chat = fetchChatResponse.response;
+    const chat = chatResponse.response;
 
     if (chat.type === ChatType.CHAT_WITH_DOCS) {
       return (

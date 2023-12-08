@@ -27,7 +27,7 @@ export class ChatMessageResponse {
   }
 }
 
-export function chatMessageResponsetoMessage(r: ChatMessageResponse): Message {
+export function chatMessageResponseToMessage(r: ChatMessageResponse): Message {
   return {
     id: r.id,
     createdAt: new Date(r.createdAt),
