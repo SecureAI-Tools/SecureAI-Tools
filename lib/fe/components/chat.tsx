@@ -349,6 +349,8 @@ export function Chat({
             title={title}
             chatId={chatId}
             isGenerating={isTitleGenerating}
+            modelType={chat.modelType}
+            model={chat.model}
           />
         </header>
         {messages.length > 0

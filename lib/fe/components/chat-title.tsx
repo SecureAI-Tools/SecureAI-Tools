@@ -11,6 +11,7 @@ import { ChatUpdateRequest } from "lib/types/api/chat-update.request";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { chatApiPath } from "lib/fe/api-paths";
 import { Id } from "lib/types/core/id";
+import { ModelType, modelTypeToReadableName } from "lib/types/core/model-type";
 
 const DefaultChatTitle = () => (
   <div className={tw("italic text-gray-600")}>{DEFAULT_CHAT_TITLE}</div>
@@ -20,10 +21,14 @@ export const ChatTitle = ({
   title,
   chatId,
   isGenerating,
+  modelType,
+  model,
 }: {
   title: string | undefined;
   chatId: Id<ChatResponse>;
   isGenerating: boolean;
+  modelType: ModelType;
+  model: string;
 }) => {
   const router = useRouter();
 
@@ -77,9 +82,9 @@ export const ChatTitle = ({
           >
             <HiArrowLeft />
           </Link>
-          <div>
+          <div className={tw("ml-4 flex flex-col")}>
             {isEditing ? (
-              <div className={tw("ml-4 flex flex-row items-center")}>
+              <div className={tw("flex flex-row items-center")}>
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -103,7 +108,7 @@ export const ChatTitle = ({
               </div>
             ) : (
               <div className={tw("flex flex-row items-center")}>
-                <span className={tw("ml-4")}>
+                <span>
                   {currentTitle ? currentTitle : <DefaultChatTitle />}
                 </span>
                 {isGenerating ? (
@@ -115,6 +120,9 @@ export const ChatTitle = ({
                 )}
               </div>
             )}
+            <div className={tw("text-xs font-normal mt-1 ml-0.5")}>
+              {model} ({modelTypeToReadableName(modelType)})
+            </div>
           </div>
         </div>
       </div>
