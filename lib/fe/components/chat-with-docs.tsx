@@ -126,7 +126,7 @@ export function ChatWithDocs({
               <div className={tw("flex flex-col h-screen")}>
                 <div
                   className={tw(
-                    "flex flex-row flex p-4 bg-gray-50 top-0 items-center z-50 border-b border-black/10",
+                    "flex flex-row flex p-4 mt-1 bg-gray-50 top-0 items-center z-50 border-b border-black/10",
                   )}
                 >
                   <div className={tw("grow flex flex-row justify-center")}>
