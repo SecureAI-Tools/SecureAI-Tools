@@ -6,11 +6,21 @@ Private and secure AI tools for everyone's productivity.
 
 ## Highlights
 
+* **Chat with AI**: Allows you to chat with AI models (i.e. ChatGPT).
+* **Chat with Documents**: Allows you to chat with documents (PDFs for now). Demo videos below
 * **Local inference**: Runs AI models locally. Supports 100+ open-source (and semi-open-source) AI models through [Ollama](https://ollama.ai/library).
 * **Built-in authentication**: A simple email/password authentication so it can be opened to internet and accessed from anywhere.
 * **Built-in user management**: So family members or coworkers can use it as well if desired.
 * **Self-hosting optimized**: Comes with necessary scripts and docker-compose files to get started in under 5 minutes.
 * **Lightweight**: A simple web app with SQLite DB to avoid having to run docker container for DB. Data is persisted on host machine through docker volumes
+
+## Demos
+
+#### Chat with documents demo: OpenAI's GPT3.5
+[![Chat with documents demo: OpenAI's GPT3.5](https://img.youtube.com/vi/Br2D3G9O47s/0.jpg)](https://www.youtube.com/watch?v=Br2D3G9O47s)
+
+#### Chat with documents demo: Locally running Mistral (M2 MacBook)
+[![Chat with documents demo: Locally running Mistral](https://img.youtube.com/vi/UvRHL6f_w74/0.jpg)](https://www.youtube.com/watch?v=UvRHL6f_w74)
 
 ## Install
 
