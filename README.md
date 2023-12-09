@@ -66,10 +66,10 @@ docker compose up -d
 ## Features wishlist
 A set of features on our todo list (in no particular order).
 
-1. Chat with documents
-2. Support for OpenAI, Claude etc APIs
-3. Chat sharing
-4. Mobile friendly UI
-5. Specify AI model at chat-creation time
-6. Support for markdown rendering
-7. Prompt templates library
+* ✅ Chat with documents
+* ✅ Support for OpenAI, Claude etc APIs
+* Support for markdown rendering
+* Chat sharing
+* Mobile friendly UI
+* Specify AI model at chat-creation time
+* Prompt templates library
