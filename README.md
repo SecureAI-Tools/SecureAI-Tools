@@ -12,7 +12,6 @@ Private and secure AI tools for everyone's productivity.
 * **Built-in authentication**: A simple email/password authentication so it can be opened to internet and accessed from anywhere.
 * **Built-in user management**: So family members or coworkers can use it as well if desired.
 * **Self-hosting optimized**: Comes with necessary scripts and docker-compose files to get started in under 5 minutes.
-* **Lightweight**: A simple web app with SQLite DB to avoid having to run docker container for DB. Data is persisted on host machine through docker volumes
 
 ## Demos
 
