@@ -1,0 +1,22 @@
+# Dependencies for development environment
+version: "3.8"
+
+services:
+  db-dev:
+    image: postgres:latest
+    volumes:
+      - ./dev-data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=secure-ai-tools-dev
+      - POSTGRES_PASSWORD=SecureAIToolsFTW!
+      - POSTGRES_DB=secure-ai-tools-dev-db
+    ports:
+      - 5432:5432
+
+  vector-db-dev:
+    image: chromadb/chroma:latest
+    volumes:
+      # Default configuration for persist_directory is "/chroma/chroma/"
+      - ./dev-data/vector-db:/chroma/chroma/
+    ports:
+      - 8000:8000

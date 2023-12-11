@@ -27,6 +27,8 @@ RUN yarn db-seed:build
 
 # Production image, copy all the files and run next
 FROM base AS runner
+# pgloader is needed for SQLite to Postgres migration
+RUN apk add --no-cache pgloader
 WORKDIR /app
 
 ENV NODE_ENV production
@@ -49,6 +51,7 @@ COPY --from=builder /app/node_modules/ ./node_modules/
 COPY --from=builder /app/prisma/ ./prisma/
 COPY --from=builder /app/tools/db-seed.mjs ./tools/
 COPY --from=builder /app/tools/db-migrate-and-seed.sh ./tools/
+COPY --from=builder /app/tools/migrate-to-postgres-db.load ./tools/
 
 EXPOSE 28669
 
