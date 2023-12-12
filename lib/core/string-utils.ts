@@ -23,5 +23,5 @@ export function clip(s: string, n: number): string {
 }
 
 export function removeTrailingSlash(s: string | undefined): string | undefined {
-  return s?.endsWith('/') ? s.slice(0, -1) : s;
+  return s?.endsWith("/") ? s.slice(0, -1) : s;
 }

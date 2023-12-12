@@ -26,7 +26,11 @@ import { ModelDownloadModal } from "lib/fe/components/org-settings/model-downloa
 import { renderErrors } from "lib/fe/components/generic-error";
 import { Link } from "lib/fe/components/link";
 import { ModelProviderResponse } from "lib/types/api/mode-provider.response";
-import { ModelType, modelTypeToReadableName, toModelType } from "lib/types/core/model-type";
+import {
+  ModelType,
+  modelTypeToReadableName,
+  toModelType,
+} from "lib/types/core/model-type";
 
 const OrgAISettings = ({
   orgSlug,
