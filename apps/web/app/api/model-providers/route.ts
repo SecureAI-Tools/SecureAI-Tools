@@ -5,9 +5,9 @@ import { ModelProviderResponse } from "lib/types/api/mode-provider.response";
 import { NextResponseErrors } from "lib/api/core/utils";
 import { ModelProviderService } from "lib/api/services/model-provider-service";
 import { ModelType } from "lib/types/core/model-type";
-import getLogger from "lib/api/core/logger";
+import { getWebLogger } from "lib/api/core/logger";
 
-const logger = getLogger();
+const logger = getWebLogger();
 const modelProviderService = new ModelProviderService();
 
 export async function GET(req: NextRequest) {

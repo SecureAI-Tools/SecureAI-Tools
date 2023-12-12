@@ -7,10 +7,10 @@ import { OllamaEmbeddings } from "langchain/embeddings/ollama";
 
 import { Embeddings } from "langchain/dist/embeddings/base";
 import { ModelProviderConfig } from "lib/types/core/model-provider-config";
-import getLogger from "lib/api/core/logger";
 import { removeTrailingSlash } from "lib/core/string-utils";
+import { getWebLogger } from "lib/api/core/logger";
 
-const logger = getLogger();
+const logger = getWebLogger();
 
 export class ModelProviderService {
   // Instantiates a new LangChain chat-model for given type.

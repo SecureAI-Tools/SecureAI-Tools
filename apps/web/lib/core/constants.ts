@@ -1,4 +1,3 @@
-export const SERVICE_NAME = "secure-ai-tools";
 export const DOMAIN_NAME = "SecureAI.tools";
 export const TWITTER_HANDLE = "SecureAI_tools";
 export const PUBLIC_FACING_NAME = "SecureAI Tools";

@@ -54,6 +54,7 @@ const nextConfig = {
     ];
   },
   transpilePackages: [
+    "@repo/core",
     "@repo/database",
   ],
 };

@@ -1,12 +1,14 @@
 import { prismaClient } from "@repo/database";
+import { getLogger } from "@repo/core";
+
+const logger = getLogger("task-master");
 
 async function main() {
-  // TODO: Convert into logger after splitting out logger into its package!
-  console.log("Starting task-master...");
+  logger.info("Starting task-master...");
 
   const chats = await prismaClient.chat.findMany()
-  console.log(`found ${chats.length} chats`);
-  console.log("chats = ", chats);
+  logger.info(`found ${chats.length} chats`);
+  logger.info("chats ", chats);
 }
 
 main();

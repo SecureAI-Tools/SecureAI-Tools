@@ -1,8 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next/types";
+import { getWebLogger } from "lib/api/core/logger";
 
-import getLogger from "lib/api/core/logger";
-
-const logger = getLogger();
+const logger = getWebLogger();
 
 type ApiHandler<T> = (req: NextApiRequest, res: NextApiResponse<T>) => void;
 

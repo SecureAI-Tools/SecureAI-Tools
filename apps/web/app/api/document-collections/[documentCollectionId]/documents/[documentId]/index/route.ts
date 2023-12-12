@@ -18,9 +18,9 @@ import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status"
 import { StreamChunkResponse } from "lib/types/api/stream-chunk.response";
 import { ModelProviderService } from "lib/api/services/model-provider-service";
 import { DocumentChunkMetadata } from "lib/types/core/document-chunk-metadata";
-import getLogger from "lib/api/core/logger";
+import { getWebLogger } from "lib/api/core/logger";
 
-const logger = getLogger();
+const logger = getWebLogger();
 
 const permissionService = new PermissionService();
 const documentCollectionService = new DocumentCollectionService();

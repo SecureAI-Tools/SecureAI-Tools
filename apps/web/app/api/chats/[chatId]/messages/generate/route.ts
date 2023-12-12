@@ -24,7 +24,7 @@ import { ModelProviderService } from "lib/api/services/model-provider-service";
 import { CitationService } from "lib/api/services/citation-service";
 import { DocumentChunkMetadata } from "lib/types/core/document-chunk-metadata";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
-import getLogger from "lib/api/core/logger";
+import { getWebLogger } from "lib/api/core/logger";
 
 const chatMessageService = new ChatMessageService();
 const documentCollectionService = new DocumentCollectionService();
@@ -32,7 +32,7 @@ const permissionService = new PermissionService();
 const chatService = new ChatService();
 const modelProviderService = new ModelProviderService();
 const citationService = new CitationService();
-const logger = getLogger();
+const logger = getWebLogger();
 
 export async function POST(
   req: NextRequest,
