@@ -1,0 +1,20 @@
+{
+  "name": "task-master",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "dev": "env-cmd -f .env.development ts-node ./src/main.ts"
+  },
+  "dependencies": {
+    "@repo/core": "*",
+    "@repo/database": "*",
+    "env-cmd": "^10.1.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "*",
+    "@types/node": "^20.9.4",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.2"
+  }
+}
