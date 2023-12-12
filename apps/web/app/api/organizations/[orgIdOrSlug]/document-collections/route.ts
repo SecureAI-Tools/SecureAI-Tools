@@ -50,6 +50,7 @@ export async function POST(
 
   const documentCollection = await documentCollectionService.create({
     name: documentCollectionCreateRequest.name,
+    description: documentCollectionCreateRequest.description,
     ownerId: userId!,
     orgId: Id.from(org.id),
     model: org.defaultModel,
