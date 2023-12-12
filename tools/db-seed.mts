@@ -17,6 +17,12 @@ const IDS = {
 }
 
 async function main() {
+  const organizationsCount = await prisma.organization.count();
+  if (organizationsCount > 0) {
+    console.log("DB is already seeded. No need to seed it again");
+    return;
+  }
+
   await prisma.$transaction(async (tx) => {
     // TODO: Use service layer instead to keep creation consistent!
     const createdUser = await tx.user.create({
