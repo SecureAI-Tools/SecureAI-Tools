@@ -1,6 +1,7 @@
 // A shared global instance of prisma client avoids creating multiple connections
 // File name is pronounced https://www.youtube.com/watch?v=6zXDo4dL7SU
 import { Prisma, PrismaClient } from "@prisma/client";
+import { DefaultArgs } from "@prisma/client/runtime/library";
 
 declare global {
   // allow global `var` declarations
@@ -56,3 +57,8 @@ function newPrismaClient(): PrismaClient {
 
   return extendedClient as PrismaClient;
 }
+
+export type TxPrismaClient = Omit<
+  PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
+  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+>;

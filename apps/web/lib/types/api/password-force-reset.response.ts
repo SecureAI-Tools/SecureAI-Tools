@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { User } from "@repo/database";
 
 export class PasswordForceResetResponse {
   forceReset!: boolean;

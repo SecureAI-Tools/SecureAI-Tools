@@ -5,12 +5,11 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import moment from "moment";
 
-import { prismaClient } from "lib/api/db";
+import { prismaClient, User } from "@repo/database";
 import { FrontendRoutes } from "lib/fe/routes";
 import { UserService } from "lib/api/services/user.service";
 import { TokenUser } from "lib/types/core/token-user";
 import { comparePasswords } from "lib/api/core/password.utils";
-import { User } from "@prisma/client";
 
 const jwtMaxAgeSeconds =
   parseInt(process.env.AUTH_TOKEN_VALIDITY_HOURS!) * 60 * 60;

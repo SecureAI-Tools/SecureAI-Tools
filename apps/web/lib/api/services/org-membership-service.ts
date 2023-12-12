@@ -1,7 +1,5 @@
-import { Organization, OrgMembership, Prisma, User } from "@prisma/client";
+import { Organization, OrgMembership, Prisma, User, TxPrismaClient, prismaClient } from "@repo/database";
 
-import { TxPrismaClient } from "lib/api/core/db";
-import { prismaClient } from "lib/api/db";
 import { AddUserRequest } from "lib/types/api/add-users.request";
 import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 import { OrgMembershipUpdateRequest } from "lib/types/api/org-membership-update.request";

@@ -1,4 +1,4 @@
-import { Citation } from "@prisma/client";
+import { Citation } from "@repo/database";
 import { DocumentChunkMetadata } from "lib/types/core/document-chunk-metadata";
 
 export class CitationResponse {

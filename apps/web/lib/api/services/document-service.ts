@@ -1,8 +1,6 @@
-import { Document, Prisma } from "@prisma/client";
+import { Document, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
 
-import { TxPrismaClient } from "lib/api/core/db";
 import { Id } from "lib/types/core/id";
-import { prismaClient } from "lib/api/db";
 import { DocumentResponse } from "lib/types/api/document.response";
 import { API } from "lib/api/core/api.utils";
 import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";

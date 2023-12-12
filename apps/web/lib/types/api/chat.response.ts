@@ -1,4 +1,4 @@
-import { Chat } from "@prisma/client";
+import { Chat } from "@repo/database";
 import { ChatType, toChatType } from "lib/types/core/chat-type";
 import { ModelType, toModelType } from "lib/types/core/model-type";
 

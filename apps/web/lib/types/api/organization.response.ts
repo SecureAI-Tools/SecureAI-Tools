@@ -1,4 +1,4 @@
-import { Organization } from "@prisma/client";
+import { Organization } from "@repo/database";
 import { ModelType, toModelType } from "lib/types/core/model-type";
 
 export class OrganizationResponse {

@@ -1,4 +1,4 @@
-import { ChatMessage } from "@prisma/client";
+import { ChatMessage } from "@repo/database";
 import { Message } from "ai";
 
 import {

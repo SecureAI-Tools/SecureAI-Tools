@@ -1,9 +1,7 @@
-import { DocumentCollection } from "@prisma/client";
+import { DocumentCollection, TxPrismaClient, prismaClient } from "@repo/database";
 import { customAlphabet } from "nanoid";
 
-import { TxPrismaClient } from "lib/api/core/db";
 import { Id } from "lib/types/core/id";
-import { prismaClient } from "lib/api/db";
 import { UserResponse } from "lib/types/api/user.response";
 import { OrganizationResponse } from "lib/types/api/organization.response";
 import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";

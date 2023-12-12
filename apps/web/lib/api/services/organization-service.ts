@@ -1,7 +1,5 @@
-import { Organization, Prisma } from "@prisma/client";
+import { Organization, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
 
-import { TxPrismaClient } from "lib/api/core/db";
-import { prismaClient } from "lib/api/db";
 import { OrganizationUpdateRequest } from "lib/types/api/organization-update.request";
 
 export class OrganizationService {

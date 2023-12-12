@@ -3,7 +3,7 @@
   "globalDependencies": ["**/.env.*local"],
   "pipeline": {
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "db:generate"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
@@ -12,7 +12,12 @@
     "type-check": {},
     "dev": {
       "cache": false,
-      "persistent": true
-    }
+      "persistent": true,
+      "dependsOn": ["db:generate"]
+    },
+    "db:generate": {
+      "cache": false
+    },
+    "db:migrate:deploy": {}
   }
 }

@@ -1,7 +1,7 @@
 import { StreamingTextResponse, LangChainStream, Message } from "ai";
 import { AIMessage, HumanMessage } from "langchain/schema";
 import { NextRequest } from "next/server";
-import { Chat } from "@prisma/client";
+import { Chat, TxPrismaClient, prismaClient } from "@repo/database";
 import { PromptTemplate } from "langchain/prompts";
 import { LLMChain } from "langchain/chains";
 import { Chroma } from "langchain/vectorstores/chroma";
@@ -22,8 +22,6 @@ import { DocumentCollectionResponse } from "lib/types/api/document-collection.re
 import { ChatType } from "lib/types/core/chat-type";
 import { ModelProviderService } from "lib/api/services/model-provider-service";
 import { CitationService } from "lib/api/services/citation-service";
-import { TxPrismaClient } from "lib/api/core/db";
-import { prismaClient } from "lib/api/db";
 import { DocumentChunkMetadata } from "lib/types/core/document-chunk-metadata";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import getLogger from "lib/api/core/logger";

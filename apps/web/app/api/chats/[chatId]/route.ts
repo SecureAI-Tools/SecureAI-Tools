@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@repo/database";
 
 import { isAuthenticated } from "lib/api/core/auth";
 import { Id } from "lib/types/core/id";

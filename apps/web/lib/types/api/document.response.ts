@@ -1,4 +1,4 @@
-import { Document } from "@prisma/client";
+import { Document } from "@repo/database";
 import {
   DocumentIndexingStatus,
   toDocumentIndexingStatus,

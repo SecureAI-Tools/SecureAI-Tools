@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@repo/database";
 
 import { ErrorResponse } from "lib/types/api/error.response";
 import { sendBadRequestError } from "lib/api/core/utils";

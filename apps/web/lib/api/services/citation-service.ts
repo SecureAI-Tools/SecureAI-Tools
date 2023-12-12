@@ -1,8 +1,6 @@
-import { Citation, Prisma } from "@prisma/client";
+import { Citation, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
 
-import { TxPrismaClient } from "lib/api/core/db";
 import { Id } from "lib/types/core/id";
-import { prismaClient } from "lib/api/db";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import { DocumentResponse } from "lib/types/api/document.response";
 import { API } from "lib/api/core/api.utils";

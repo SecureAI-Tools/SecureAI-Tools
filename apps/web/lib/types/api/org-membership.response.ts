@@ -1,4 +1,4 @@
-import { OrgMembership, User } from "@prisma/client";
+import { OrgMembership, User } from "@repo/database";
 import {
   OrgMembershipRole,
   toOrgMembershipRole,

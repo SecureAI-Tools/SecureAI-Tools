@@ -1,7 +1,5 @@
-import { Prisma, User } from "@prisma/client";
+import { Prisma, User, TxPrismaClient, prismaClient } from "@repo/database";
 
-import { prismaClient } from "lib/api/db";
-import { TxPrismaClient } from "lib/api/core/db";
 import { UserResponse } from "lib/types/api/user.response";
 import { Id } from "lib/types/core/id";
 import { hashPassword } from "lib/api/core/password.utils";

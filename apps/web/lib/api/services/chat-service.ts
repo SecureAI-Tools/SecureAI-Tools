@@ -1,9 +1,7 @@
-import { Chat, Organization, Prisma } from "@prisma/client";
+import { Chat, Organization, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
 
-import { TxPrismaClient } from "lib/api/core/db";
 import { Id } from "lib/types/core/id";
 import { ChatResponse } from "lib/types/api/chat.response";
-import { prismaClient } from "lib/api/db";
 import { API } from "lib/api/core/api.utils";
 import { UserResponse } from "lib/types/api/user.response";
 import { ChatType } from "lib/types/core/chat-type";
