@@ -7,9 +7,7 @@ import Image from "next/image";
 
 import { post } from "lib/fe/api";
 import {
-  documentCollectionDocumentsApiPath,
   organizationsIdOrSlugChatApiPath,
-  organizationsIdOrSlugDocumentCollectionApiPath,
   postChatMessagesApiPath,
 } from "lib/fe/api-paths";
 import useToasts from "lib/fe/hooks/use-toasts";
@@ -24,9 +22,12 @@ import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import { FilesUpload } from "lib/fe/components/files-upload";
 import { ChatType } from "lib/types/core/chat-type";
 import { DocumentResponse } from "lib/types/api/document.response";
-import { FetchError } from "lib/fe/types/fetch-error";
 import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
+import {
+  createDocumentCollection,
+  uploadDocument,
+} from "lib/fe/document-utils";
 
 export default function NewChat({ orgSlug }: { orgSlug: string }) {
   const router = useRouter();
@@ -47,7 +48,7 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
       let documentCollectionId: Id<DocumentCollectionResponse> | undefined =
         undefined;
       if (chatType === ChatType.CHAT_WITH_DOCS) {
-        const documentCollection = await createDocumentCollection(orgSlug);
+        const documentCollection = await createDocumentCollection(orgSlug, {});
         documentCollectionId = Id.from(documentCollection.id);
         await uploadDocuments(documentCollectionId, selectedFiles);
       }
@@ -193,17 +194,6 @@ const postChatMessage = async (
   ).response;
 };
 
-const createDocumentCollection = async (
-  orgSlug: string,
-): Promise<DocumentCollectionResponse> => {
-  return (
-    await post<DocumentCollectionCreateRequest, DocumentCollectionResponse>(
-      organizationsIdOrSlugDocumentCollectionApiPath(orgSlug),
-      {},
-    )
-  ).response;
-};
-
 const uploadDocuments = async (
   documentCollectionId: Id<DocumentCollectionCreateRequest>,
   files: File[],
@@ -213,30 +203,4 @@ const uploadDocuments = async (
   });
 
   return await Promise.all(promises);
-};
-
-const uploadDocument = async (
-  documentCollectionId: Id<DocumentCollectionCreateRequest>,
-  file: File,
-): Promise<DocumentResponse> => {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const res = await fetch(
-    documentCollectionDocumentsApiPath(documentCollectionId),
-    {
-      method: "POST",
-      body: formData,
-    },
-  );
-
-  if (!res.ok) {
-    throw new FetchError(
-      "An error occurred while fetching the data.",
-      res.status,
-      await res.json(),
-    );
-  }
-
-  return await res.json();
 };

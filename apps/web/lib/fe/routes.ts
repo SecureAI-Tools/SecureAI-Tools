@@ -1,4 +1,5 @@
 import { ChatResponse } from "lib/types/api/chat.response";
+import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { Id } from "lib/types/core/id";
 
 export namespace FrontendRoutes {
@@ -32,6 +33,15 @@ export namespace FrontendRoutes {
 
   export const getChatHistoryRoute = (orgSlug: string): string =>
     `${getOrgHomeRoute(orgSlug)}/chat-history`;
+
+  export const getDocumentCollectionsRoute = (orgSlug: string): string =>
+    `${getOrgHomeRoute(orgSlug)}/document-collections`;
+
+  export const getDocumentCollectionRoute = (
+    orgSlug: string,
+    documentCollectionId: Id<DocumentCollectionResponse>,
+  ): string =>
+    `${getOrgHomeRoute(orgSlug)}/document-collections/${documentCollectionId}`;
 
   export const getLogInWithEmailRoute = (email: string): string =>
     `${LOG_IN}&email=${encodeURIComponent(email)}`;

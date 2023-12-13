@@ -1,4 +1,8 @@
-import { DocumentCollection, TxPrismaClient, prismaClient } from "@repo/database";
+import {
+  DocumentCollection,
+  TxPrismaClient,
+  prismaClient,
+} from "@repo/database";
 import { customAlphabet } from "nanoid";
 
 import { Id } from "lib/types/core/id";
