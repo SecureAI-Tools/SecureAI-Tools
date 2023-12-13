@@ -20,3 +20,12 @@ services:
       - ./dev-data/vector-db:/chroma/chroma/
     ports:
       - 8000:8000
+
+  message-broker-dev:
+    image: rabbitmq:management
+    volumes:
+      - ./dev-data/message-broker:/var/lib/rabbitmq
+    hostname: "rabbit-host"
+    ports:
+      - 5672:5672
+      - 15672:15672

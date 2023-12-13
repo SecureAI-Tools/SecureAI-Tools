@@ -9,10 +9,12 @@
   "dependencies": {
     "@repo/core": "*",
     "@repo/database": "*",
+    "amqplib": "^0.10.3",
     "env-cmd": "^10.1.0"
   },
   "devDependencies": {
     "@repo/typescript-config": "*",
+    "@types/amqplib": "^0.10.4",
     "@types/node": "^20.9.4",
     "ts-node": "^10.9.1",
     "typescript": "^5.3.2"
