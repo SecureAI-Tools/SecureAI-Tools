@@ -18,6 +18,7 @@
     "db:generate": {
       "cache": false
     },
-    "db:migrate:deploy": {}
+    "db:migrate:deploy": {},
+    "db-seed:dev": {}
   }
 }
