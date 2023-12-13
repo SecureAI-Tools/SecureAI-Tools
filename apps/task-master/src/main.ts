@@ -1,45 +1,40 @@
 import { prismaClient } from "@repo/database";
-import { getLogger } from "@repo/core";
-import amqp, { Message } from "amqplib/callback_api";
+import { IndexingQueueMessage, getAMQPChannel, getLogger } from "@repo/core";
 
 const logger = getLogger("task-master");
 
 async function main() {
   logger.info("Starting task-master...");
 
-  const chats = await prismaClient.chat.findMany()
-  logger.info(`found ${chats.length} chats`);
-  logger.info("chats ", chats);
+  const amqpServerUrl = process.env.AMQP_SERVER_URL;
+  if (!amqpServerUrl) {
+    throw new Error("Invalid AMQP_SERVER_URL");
+  }
+  const queueName = process.env.AMQP_DOCS_INDEXING_QUEUE_NAME;
+  if (!queueName) {
+    throw new Error("Invalid AMQP_DOCS_INDEXING_QUEUE_NAME");
+  }
 
-  const rabbit_host: string = "amqp://localhost";
-  const rabbit_queue_name: string = "test-queue";
+  const channel = await getAMQPChannel(amqpServerUrl);
+  await channel.assertQueue(queueName);
 
-  amqp.connect(rabbit_host, (err: any, conn) => {
-    if (err) {
-      logger.error("Error creating connection ", err);
-      throw err;
-    }
-  
-    conn.createChannel((err, channel) => {
-      if (err) {
-        logger.error("Error creating channel ", err);
-        throw err;
-      }
-  
-      logger.info("consumer connected");
-      channel.assertQueue(rabbit_queue_name, { durable: true });
-      channel.consume(
-        rabbit_queue_name,
-        async (data: Message | null) => {
-          if (data) {
-            const msg = JSON.parse(data.content.toString());
-            logger.info("Received message: ", msg);
+  channel.consume(
+    queueName,
+    async (data) => {
+      if (data) {
+        const msg = JSON.parse(data.content.toString()) as IndexingQueueMessage;
+        logger.info("Received message: ", msg);
+        const document = await prismaClient.document.findUnique({
+          where: {
+            id: msg.documentId,
           }
-        },
-        { noAck: true }
-      );
-    });
-  });
+        });
+
+        logger.info("document = ", document);
+      }
+    },
+    { noAck: true }
+  );
 }
 
 main();

@@ -8,6 +8,7 @@ import {
   postDocumentCollectionDocumentsApiPath,
   postOrganizationsIdOrSlugDocumentCollectionApiPath,
 } from "lib/fe/api-paths";
+import { IndexingMode } from "lib/types/core/indexing-mode";
 
 export const createDocumentCollection = async (
   orgSlug: string,
@@ -24,9 +25,11 @@ export const createDocumentCollection = async (
 export const uploadDocument = async (
   documentCollectionId: Id<DocumentCollectionCreateRequest>,
   file: File,
+  indexingMode: IndexingMode,
 ): Promise<DocumentResponse> => {
   const formData = new FormData();
   formData.append("file", file);
+  formData.append("indexingMode", indexingMode);
 
   const res = await fetch(
     postDocumentCollectionDocumentsApiPath(documentCollectionId),

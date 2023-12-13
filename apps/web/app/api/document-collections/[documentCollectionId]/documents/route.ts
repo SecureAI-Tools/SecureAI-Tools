@@ -11,6 +11,9 @@ import { getDocumentObjectKey } from "lib/api/core/document.utils";
 import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";
 import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { DocumentCollectionService } from "lib/api/services/document-collection-service";
+import { IndexingMode } from "lib/types/core/indexing-mode";
+import { getAMQPChannel } from "@repo/core/src/amqp-client";
+import { IndexingQueueMessage } from "@repo/core/src/types/indexing-queue-message";
 import { API } from "lib/api/core/api.utils";
 
 const permissionService = new PermissionService();
@@ -47,6 +50,7 @@ export async function POST(
 
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
+  const indexingMode = formData.get("indexingMode") as IndexingMode | null ?? IndexingMode.OFFLINE;
   if (!file) {
     return NextResponseErrors.badRequest("file is required.");
   }
@@ -79,6 +83,26 @@ export async function POST(
     objectKey: documentObjectKey,
     collectionId: documentCollectionId,
   });
+
+  if (indexingMode === IndexingMode.OFFLINE) {
+    // Insert document into the queue so task-master can process it offline!
+    const msg: IndexingQueueMessage = {
+      documentId: documentId.toString(),
+    }
+    const amqpServerUrl = process.env.AMQP_SERVER_URL;
+    if (!amqpServerUrl) {
+      throw new Error("Invalid AMQP_SERVER_URL");
+    }
+    const queueName = process.env.AMQP_DOCS_INDEXING_QUEUE_NAME;
+    if (!queueName) {
+      throw new Error("Invalid AMQP_DOCS_INDEXING_QUEUE_NAME");
+    }
+
+    const channel = await getAMQPChannel(amqpServerUrl);
+    await channel.assertQueue(queueName);
+    await channel.sendToQueue(queueName, Buffer.from(JSON.stringify(msg)));
+  }
+
   return NextResponse.json(DocumentResponse.fromEntity(document));
 }
 

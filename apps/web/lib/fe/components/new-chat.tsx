@@ -20,6 +20,7 @@ import {
   uploadDocument,
 } from "lib/fe/document-utils";
 import { postChat, postChatMessage } from "lib/fe/chat-utils";
+import { IndexingMode } from "lib/types/core/indexing-mode";
 
 export default function NewChat({ orgSlug }: { orgSlug: string }) {
   const router = useRouter();
@@ -167,7 +168,7 @@ const uploadDocuments = async (
   files: File[],
 ): Promise<DocumentResponse[]> => {
   const promises = files.map((f) => {
-    return uploadDocument(documentCollectionId, f);
+    return uploadDocument(documentCollectionId, f, IndexingMode.ONLINE);
   });
 
   return await Promise.all(promises);
