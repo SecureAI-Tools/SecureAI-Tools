@@ -39,7 +39,7 @@ curl -sL https://github.com/SecureAI-Tools/SecureAI-Tools/releases/latest/downlo
 
 
 #### 3. [Optional] Edit `.env` file
-Customize the `.env` file created in the above step to your liking.
+Customize the `.env` file created in the above step to your liking. If you want to use OpenAI LLMs, then please follow the [steps outlined here](https://github.com/SecureAI-Tools/SecureAI-Tools/#use-with-openai-or-openai-compatible-apis).
 
 #### 4. [Optional] On Linux machine with Nvidia GPUs, enable GPU support
 To accelerate inference on Linux machines, you will need to enable GPUs. This is not strictly required as the inference service will run on CPU-only mode as well, but it will be slow on CPU. So if your machine has Nvidia GPU then this step is recommended.
@@ -82,3 +82,16 @@ A set of features on our todo list (in no particular order).
 * Mobile friendly UI
 * Specify AI model at chat-creation time
 * Prompt templates library
+
+## Guides
+
+### Use with OpenAI or OpenAI-compatible APIs
+SecureAI Tools can be used with OpenAI APIs and any other provider that provides OpenAI-compatible APIs. Here are the steps to enable that for your instance:
+
+1. Set the `MODEL_PROVIDER_CONFIGS` in `.env` file as shown below. If you're using other providers that don't require `apiKey` then you can specify any dummy `apiKey` value.
+
+   ```
+   MODEL_PROVIDER_CONFIGS='[{"type":"OPENAI","apiBaseUrl":"http://127.0.0.1:5000/v1","apiKey":"sk-..."}]'
+   ```
+
+2. Go to the organization settings page, select OpenAI model type, and provide the appropriate model name like `gpt3.5-turbo`
