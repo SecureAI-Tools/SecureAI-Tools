@@ -39,7 +39,7 @@ curl -sL https://github.com/SecureAI-Tools/SecureAI-Tools/releases/latest/downlo
 
 
 #### 3. [Optional] Edit `.env` file
-Customize the `.env` file created in the above step to your liking. If you want to use OpenAI LLMs, then please follow the steps outlined in the guides section below.
+Customize the `.env` file created in the above step to your liking. If you want to use OpenAI LLMs, then please follow the [steps outlined here](https://github.com/SecureAI-Tools/SecureAI-Tools/#use-with-openai-or-openai-compatible-apis).
 
 #### 4. [Optional] On Linux machine with Nvidia GPUs, enable GPU support
 To accelerate inference on Linux machines, you will need to enable GPUs. This is not strictly required as the inference service will run on CPU-only mode as well, but it will be slow on CPU. So if your machine has Nvidia GPU then this step is recommended.
