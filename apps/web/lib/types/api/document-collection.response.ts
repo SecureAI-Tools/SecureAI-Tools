@@ -4,6 +4,7 @@ import { ModelType, toModelType } from "lib/types/core/model-type";
 export class DocumentCollectionResponse {
   id!: string;
   name?: string;
+  description?: string;
   model!: string;
   modelType!: ModelType;
   ownerId!: string;
@@ -15,6 +16,7 @@ export class DocumentCollectionResponse {
     return {
       id: e.id,
       name: e.name ?? undefined,
+      description: e.description ?? undefined,
       model: e.model,
       modelType: e.modelType ? toModelType(e.modelType) : ModelType.OLLAMA,
       ownerId: e.ownerId,

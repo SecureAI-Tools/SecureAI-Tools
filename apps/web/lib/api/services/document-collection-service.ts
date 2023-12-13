@@ -1,4 +1,8 @@
-import { DocumentCollection, TxPrismaClient, prismaClient } from "@repo/database";
+import {
+  DocumentCollection,
+  TxPrismaClient,
+  prismaClient,
+} from "@repo/database";
 import { customAlphabet } from "nanoid";
 
 import { Id } from "lib/types/core/id";
@@ -9,6 +13,7 @@ import { ModelType } from "lib/types/core/model-type";
 
 export interface DocumentCollectionCreateInput {
   name?: string;
+  description?: string;
   ownerId: Id<UserResponse>;
   orgId: Id<OrganizationResponse>;
   model: string;
@@ -30,6 +35,7 @@ export class DocumentCollectionService {
       data: {
         id: Id.generate(DocumentCollectionResponse).toString(),
         name: i.name,
+        description: i.description,
         internalName: generateInternalName(),
         ownerId: i.ownerId.toString(),
         organizationId: i.orgId.toString(),

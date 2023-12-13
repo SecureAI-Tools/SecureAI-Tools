@@ -100,6 +100,8 @@ model DocumentCollection {
   name           String?
   // Internal name for vector db etc
   internalName   String       @unique
+  // User facing description
+  description    String?
   // The AI model used for indexing documents of this collection
   model          String
   // Enum controlled by ModelType
