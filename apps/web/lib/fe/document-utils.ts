@@ -6,7 +6,7 @@ import { DocumentCollectionResponse } from "lib/types/api/document-collection.re
 import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
 import {
   documentCollectionDocumentsApiPath,
-  organizationsIdOrSlugDocumentCollectionApiPath,
+  postOrganizationsIdOrSlugDocumentCollectionApiPath,
 } from "lib/fe/api-paths";
 
 export const createDocumentCollection = async (
@@ -15,7 +15,7 @@ export const createDocumentCollection = async (
 ): Promise<DocumentCollectionResponse> => {
   return (
     await post<DocumentCollectionCreateRequest, DocumentCollectionResponse>(
-      organizationsIdOrSlugDocumentCollectionApiPath(orgSlug),
+      postOrganizationsIdOrSlugDocumentCollectionApiPath(orgSlug),
       req,
     )
   ).response;

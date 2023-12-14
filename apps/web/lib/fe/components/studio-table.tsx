@@ -75,7 +75,7 @@ export const StudioTable = <T extends unknown>({
       </Table>
       <div className={tw("float-root")}>
         <div className={tw("float-right mt-3")}>
-          <div className={tw("flex flex-col items-center")}>
+          <div className={tw("flex flex-col items-center mb-8")}>
             <p className={tw("text-sm")}>
               Showing page
               <span className={tw("font-semibold")}> {page} </span>
