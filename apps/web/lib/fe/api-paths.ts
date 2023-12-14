@@ -128,10 +128,24 @@ export const modelsPullApiPath = (orgIdOrSlug: string): string => {
   return `/api/organizations/${orgIdOrSlug}/models/pull`;
 };
 
-export const organizationsIdOrSlugDocumentCollectionApiPath = (
+export const postOrganizationsIdOrSlugDocumentCollectionApiPath = (
   orgIdOrSlug: string,
 ): string => {
   return `/api/organizations/${orgIdOrSlug}/document-collections`;
+};
+
+export const getOrganizationsIdOrSlugDocumentCollectionApiPath = ({
+  orgIdOrSlug,
+  userId,
+  ordering,
+  pagination,
+}:{
+  orgIdOrSlug: string,
+  userId: Id<UserResponse>,
+  ordering: OrderingParams;
+  pagination: PaginationParams;
+}): string => {
+  return `/api/organizations/${orgIdOrSlug}/document-collections?userId=${userId}&orderBy=${ordering.orderBy}&order=${ordering.order}&page=${pagination.page}&pageSize=${pagination.pageSize}`;
 };
 
 export const getOrgMembershipsApiPath = (

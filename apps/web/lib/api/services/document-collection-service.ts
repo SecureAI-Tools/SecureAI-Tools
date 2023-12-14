@@ -1,5 +1,6 @@
 import {
   DocumentCollection,
+  Prisma,
   TxPrismaClient,
   prismaClient,
 } from "@repo/database";
@@ -10,6 +11,7 @@ import { UserResponse } from "lib/types/api/user.response";
 import { OrganizationResponse } from "lib/types/api/organization.response";
 import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { ModelType } from "lib/types/core/model-type";
+import { API } from "lib/api/core/api.utils";
 
 export interface DocumentCollectionCreateInput {
   name?: string;
@@ -61,6 +63,47 @@ export class DocumentCollectionService {
       where: {
         id: id.toString(),
       },
+    });
+  }
+
+  async getAll(params: {
+    where?: Prisma.DocumentCollectionWhereInput,
+    orderBy?: Prisma.DocumentCollectionOrderByWithRelationInput,
+    pagination?: API.PaginationParams,
+  }): Promise<DocumentCollection[]> {
+    return await prismaClient.$transaction(
+      async (prisma: TxPrismaClient): Promise<DocumentCollection[]> => {
+        return await this.getAllTxn({
+          prisma, ...params
+        });
+      },
+    );
+  }
+
+  async getAllTxn({
+    prisma,
+    where,
+    orderBy,
+    pagination,
+  }: {
+    prisma: TxPrismaClient,
+    where?: Prisma.DocumentCollectionWhereInput,
+    orderBy?: Prisma.DocumentCollectionOrderByWithRelationInput,
+    pagination?: API.PaginationParams,
+  }): Promise<DocumentCollection[]> {
+    return await prisma.documentCollection.findMany({
+      where: where,
+      orderBy: orderBy,
+      skip: pagination?.skip(),
+      take: pagination?.take(),
+    });
+  }
+
+  async count(where?: Prisma.DocumentCollectionWhereInput): Promise<number> {
+    return await prismaClient.$transaction(async (prisma: TxPrismaClient) => {
+      return await prisma.documentCollection.count({
+        where: where,
+      });
     });
   }
 }

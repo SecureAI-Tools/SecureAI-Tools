@@ -8,6 +8,7 @@ export const SECONDARY_COLOR = "#6366F1";
 export const TWIND_TEXT_COLOR = "gray-800";
 
 export const DEFAULT_CHAT_TITLE = "Untitled Chat";
+export const DEFAULT_DOCUMENT_COLLECTION_NAME = "Unnamed Collection";
 
 export const MAX_ADD_USERS_CSV_ROWS = 64;
 export const PAGINATION_STARTING_PAGE_NUMBER = 1;

@@ -37,6 +37,9 @@ export namespace FrontendRoutes {
   export const getDocumentCollectionsRoute = (orgSlug: string): string =>
     `${getOrgHomeRoute(orgSlug)}/document-collections`;
 
+  export const getNewDocumentCollectionsRoute = (orgSlug: string): string =>
+    `${getOrgHomeRoute(orgSlug)}/document-collections/new`;
+
   export const getDocumentCollectionRoute = (
     orgSlug: string,
     documentCollectionId: Id<DocumentCollectionResponse>,

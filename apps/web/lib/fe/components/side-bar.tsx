@@ -7,6 +7,7 @@ import {
   HiChatAlt2,
   HiPlus,
   HiOutlineCog,
+  HiFolder,
 } from "react-icons/hi";
 import { tw } from "twind";
 import { useState } from "react";
@@ -17,7 +18,7 @@ import { TokenUser } from "lib/types/core/token-user";
 import { clip } from "lib/core/string-utils";
 import { getInitials } from "lib/core/name-utils";
 
-type ActiveItem = "new-chat" | "chat-history";
+type ActiveItem = "new-chat" | "chat-history" | "document-collections";
 
 export function Sidebar({
   orgSlug,
@@ -66,6 +67,14 @@ export function Sidebar({
             active={activeItem === "chat-history"}
           >
             Chat History
+          </FlowbiteSidebar.Item>
+          <FlowbiteSidebar.Item
+            href={FrontendRoutes.getDocumentCollectionsRoute(orgSlug)}
+            icon={HiFolder}
+            className={tw("mt-2")}
+            active={activeItem === "document-collections"}
+          >
+            Document Collections
           </FlowbiteSidebar.Item>
         </FlowbiteSidebar.ItemGroup>
         <FlowbiteSidebar.ItemGroup

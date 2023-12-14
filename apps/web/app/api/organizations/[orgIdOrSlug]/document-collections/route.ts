@@ -11,6 +11,7 @@ import { DocumentCollectionResponse } from "lib/types/api/document-collection.re
 import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
 import { ModelType, toModelType } from "lib/types/core/model-type";
 import { removeTrailingSlash } from "lib/core/string-utils";
+import { API } from "lib/api/core/api.utils";
 
 const orgMembershipService = new OrgMembershipService();
 const orgService = new OrganizationService();
@@ -66,5 +67,62 @@ export async function POST(
 
   return NextResponse.json(
     DocumentCollectionResponse.fromEntity(documentCollection),
+  );
+}
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { orgIdOrSlug: string } },
+) {
+  const [authenticated, authUserId] = await isAuthenticated(req);
+  if (!authenticated) {
+    return NextResponseErrors.unauthorized();
+  }
+
+  if (params.orgIdOrSlug.length < 1) {
+    return NextResponseErrors.badRequest();
+  }
+
+  const { searchParams } = new URL(req.url);
+  const userIdParam = searchParams.get("userId");
+  if (authUserId?.toString() !== userIdParam) {
+    // TODO: In future, allow org admins to call this endpoint
+    return NextResponseErrors.forbidden();
+  }
+
+  const org = await orgService.get(params.orgIdOrSlug);
+  if (!org) {
+    return NextResponseErrors.notFound();
+  }
+
+  const hasPermissions = await orgMembershipService.isActiveMember(
+    authUserId!,
+    params.orgIdOrSlug,
+  );
+  if (!hasPermissions) {
+    return NextResponseErrors.forbidden();
+  }
+
+  // Get documents by ownerId and org.id
+  const where = {
+    ownerId: authUserId.toString(),
+    organizationId: org.id,
+  };
+  const documentCollections = await documentCollectionService.getAll({
+    where: where,
+    orderBy: API.searchParamsToOrderByInput(searchParams),
+    pagination: API.PaginationParams.from(searchParams),
+  });
+  const count = await documentCollectionService.count(where);
+
+  return NextResponse.json(
+    documentCollections.map(dc => DocumentCollectionResponse.fromEntity(dc)),
+    {
+      headers: API.createResponseHeaders({
+        pagination: {
+          totalCount: count,
+        },
+      }),
+    },
   );
 }

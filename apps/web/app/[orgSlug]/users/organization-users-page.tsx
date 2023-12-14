@@ -235,7 +235,6 @@ export const OrganizationUsersPage = ({
           {item.user?.email ?? ""}
         </div>
       </div>
-      <div className={tw("bg-red-200")}></div>
     </div>,
     <div>
       <div className={tw("flex items-center")}>
