@@ -11,6 +11,7 @@ import { getDocumentObjectKey } from "lib/api/core/document.utils";
 import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";
 import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { DocumentCollectionService } from "lib/api/services/document-collection-service";
+import { API } from "lib/api/core/api.utils";
 
 const permissionService = new PermissionService();
 const documentCollectionService = new DocumentCollectionService();
@@ -103,17 +104,25 @@ export async function GET(
     return resp;
   }
 
+  const { searchParams } = new URL(req.url);
+  const where = {
+    collectionId: documentCollectionId.toString(),
+  };
   const documents = await documentService.getAll({
-    where: {
-      collectionId: documentCollectionId.toString(),
-    },
-    // TODO: Support pagination and ordering params here if/when needed!
-    orderBy: {
-      createdAt: "asc",
-    },
+    where: where,
+    orderBy: API.searchParamsToOrderByInput(searchParams),
+    pagination: API.PaginationParams.from(searchParams),
   });
+  const count = await documentService.count(where);
 
   return NextResponse.json(
     documents.map((cd) => DocumentResponse.fromEntity(cd)),
+    {
+      headers: API.createResponseHeaders({
+        pagination: {
+          totalCount: count,
+        },
+      }),
+    },
   );
 }

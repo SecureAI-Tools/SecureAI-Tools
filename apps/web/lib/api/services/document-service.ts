@@ -71,6 +71,7 @@ export class DocumentService {
         prisma: tx,
         where,
         orderBy,
+        pagination,
       });
     });
   }
@@ -93,6 +94,14 @@ export class DocumentService {
       orderBy: orderBy,
       skip: pagination?.skip(),
       take: pagination?.take(),
+    });
+  }
+
+  async count(where: Prisma.DocumentWhereInput): Promise<number> {
+    return await prismaClient.$transaction(async (prisma: TxPrismaClient) => {
+      return await prisma.document.count({
+        where: where,
+      });
     });
   }
 

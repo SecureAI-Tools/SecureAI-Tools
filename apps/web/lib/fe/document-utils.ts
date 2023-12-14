@@ -5,7 +5,7 @@ import { DocumentResponse } from "lib/types/api/document.response";
 import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
 import {
-  documentCollectionDocumentsApiPath,
+  postDocumentCollectionDocumentsApiPath,
   postOrganizationsIdOrSlugDocumentCollectionApiPath,
 } from "lib/fe/api-paths";
 
@@ -29,7 +29,7 @@ export const uploadDocument = async (
   formData.append("file", file);
 
   const res = await fetch(
-    documentCollectionDocumentsApiPath(documentCollectionId),
+    postDocumentCollectionDocumentsApiPath(documentCollectionId),
     {
       method: "POST",
       body: formData,

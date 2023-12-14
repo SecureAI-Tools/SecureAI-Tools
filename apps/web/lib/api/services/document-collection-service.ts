@@ -67,14 +67,15 @@ export class DocumentCollectionService {
   }
 
   async getAll(params: {
-    where?: Prisma.DocumentCollectionWhereInput,
-    orderBy?: Prisma.DocumentCollectionOrderByWithRelationInput,
-    pagination?: API.PaginationParams,
+    where?: Prisma.DocumentCollectionWhereInput;
+    orderBy?: Prisma.DocumentCollectionOrderByWithRelationInput;
+    pagination?: API.PaginationParams;
   }): Promise<DocumentCollection[]> {
     return await prismaClient.$transaction(
       async (prisma: TxPrismaClient): Promise<DocumentCollection[]> => {
         return await this.getAllTxn({
-          prisma, ...params
+          prisma,
+          ...params,
         });
       },
     );
@@ -86,10 +87,10 @@ export class DocumentCollectionService {
     orderBy,
     pagination,
   }: {
-    prisma: TxPrismaClient,
-    where?: Prisma.DocumentCollectionWhereInput,
-    orderBy?: Prisma.DocumentCollectionOrderByWithRelationInput,
-    pagination?: API.PaginationParams,
+    prisma: TxPrismaClient;
+    where?: Prisma.DocumentCollectionWhereInput;
+    orderBy?: Prisma.DocumentCollectionOrderByWithRelationInput;
+    pagination?: API.PaginationParams;
   }): Promise<DocumentCollection[]> {
     return await prisma.documentCollection.findMany({
       where: where,
@@ -99,7 +100,7 @@ export class DocumentCollectionService {
     });
   }
 
-  async count(where?: Prisma.DocumentCollectionWhereInput): Promise<number> {
+  async count(where: Prisma.DocumentCollectionWhereInput): Promise<number> {
     return await prismaClient.$transaction(async (prisma: TxPrismaClient) => {
       return await prisma.documentCollection.count({
         where: where,

@@ -1,4 +1,10 @@
-import { Chat, Organization, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
+import {
+  Chat,
+  Organization,
+  Prisma,
+  TxPrismaClient,
+  prismaClient,
+} from "@repo/database";
 
 import { Id } from "lib/types/core/id";
 import { ChatResponse } from "lib/types/api/chat.response";
@@ -100,7 +106,7 @@ export class ChatService {
     });
   }
 
-  async count(where?: Prisma.ChatWhereInput): Promise<number> {
+  async count(where: Prisma.ChatWhereInput): Promise<number> {
     return await prismaClient.$transaction(async (prisma: TxPrismaClient) => {
       return await prisma.chat.count({
         where: {

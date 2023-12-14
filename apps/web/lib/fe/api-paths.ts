@@ -43,10 +43,28 @@ export const chatApiPath = (chatId: Id<ChatResponse>): string => {
   return `/api/chats/${chatId}`;
 };
 
-export const documentCollectionDocumentsApiPath = (
+export const getDocumentCollectionApiPath = (
+  documentCollectionId: Id<DocumentCollectionResponse>,
+): string => {
+  return `/api/document-collections/${documentCollectionId}`;
+};
+
+export const postDocumentCollectionDocumentsApiPath = (
   documentCollectionId: Id<DocumentCollectionResponse>,
 ): string => {
   return `/api/document-collections/${documentCollectionId}/documents`;
+};
+
+export const getDocumentCollectionDocumentsApiPath = ({
+  documentCollectionId,
+  ordering,
+  pagination,
+}: {
+  documentCollectionId: Id<DocumentCollectionResponse>;
+  ordering: OrderingParams;
+  pagination: PaginationParams;
+}): string => {
+  return `/api/document-collections/${documentCollectionId}/documents?orderBy=${ordering.orderBy}&order=${ordering.order}&page=${pagination.page}&pageSize=${pagination.pageSize}`;
 };
 
 export const documentCollectionDocumentApiPath = (
@@ -61,6 +79,12 @@ export const documentCollectionDocumentIndexApiPath = (
   documentId: Id<DocumentResponse>,
 ): string => {
   return `/api/document-collections/${documentCollectionId}/documents/${documentId}/index`;
+};
+
+export const getDocumentCollectionStatsApiPath = (
+  documentCollectionId: Id<DocumentCollectionResponse>,
+): string => {
+  return `/api/document-collections/${documentCollectionId}/stats`;
 };
 
 export const postChatMessagesApiPath = (chatId: Id<ChatResponse>): string => {
@@ -139,9 +163,9 @@ export const getOrganizationsIdOrSlugDocumentCollectionApiPath = ({
   userId,
   ordering,
   pagination,
-}:{
-  orgIdOrSlug: string,
-  userId: Id<UserResponse>,
+}: {
+  orgIdOrSlug: string;
+  userId: Id<UserResponse>;
   ordering: OrderingParams;
   pagination: PaginationParams;
 }): string => {
