@@ -16,7 +16,7 @@ import { ChatResponse } from "lib/types/api/chat.response";
 import { Id } from "lib/types/core/id";
 import {
   documentCollectionDocumentApiPath,
-  documentCollectionDocumentsApiPath,
+  getDocumentCollectionDocumentsApiPath,
   getChatMessageCitationsApiPath,
 } from "lib/fe/api-paths";
 import { createFetcher } from "lib/fe/api";
@@ -56,7 +56,18 @@ export function ChatWithDocs({
     data: collectionDocumentsResponse,
     error: fetchCollectionDocumentsError,
   } = useSWR(
-    documentCollectionDocumentsApiPath(documentCollectionId),
+    getDocumentCollectionDocumentsApiPath({
+      documentCollectionId: documentCollectionId,
+      pagination: {
+        // TODO: Allow viewing beyond first 1024 docs in a collection! Scaling problem for later
+        page: 1,
+        pageSize: 1024,
+      },
+      ordering: {
+        orderBy: "createdAt",
+        order: "desc",
+      },
+    }),
     createFetcher<DocumentResponse[]>(),
     {
       revalidateOnFocus: false,
@@ -182,8 +193,9 @@ export function ChatWithDocs({
                       // file.name is the URL path, and last part is document id
                       const parts = e.file.name.split("/");
                       const docId = parts[parts.length - 1];
-                      const currentPageIndex =
-                        documentsCurrentPageIndexMap.get(docId!);
+                      const currentPageIndex = documentsCurrentPageIndexMap.get(
+                        docId!,
+                      );
                       if (currentPageIndex !== undefined) {
                         jumpToPage(currentPageIndex);
                       }

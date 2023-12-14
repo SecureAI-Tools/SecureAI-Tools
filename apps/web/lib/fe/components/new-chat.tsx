@@ -5,20 +5,11 @@ import { useState } from "react";
 import { tw } from "twind";
 import Image from "next/image";
 
-import { post } from "lib/fe/api";
-import {
-  organizationsIdOrSlugChatApiPath,
-  postChatMessagesApiPath,
-} from "lib/fe/api-paths";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { FrontendRoutes } from "lib/fe/routes";
 import ChatInput from "lib/fe/components/chat-input";
 import { StudioToasts } from "lib/fe/components/studio-toasts";
-import { ChatCreateRequest } from "lib/types/api/chat-create.request";
-import { ChatResponse } from "lib/types/api/chat.response";
 import { Id } from "lib/types/core/id";
-import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.request";
-import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import { FilesUpload } from "lib/fe/components/files-upload";
 import { ChatType } from "lib/types/core/chat-type";
 import { DocumentResponse } from "lib/types/api/document.response";
@@ -28,6 +19,7 @@ import {
   createDocumentCollection,
   uploadDocument,
 } from "lib/fe/document-utils";
+import { postChat, postChatMessage } from "lib/fe/chat-utils";
 
 export default function NewChat({ orgSlug }: { orgSlug: string }) {
   const router = useRouter();
@@ -169,30 +161,6 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
     </>
   );
 }
-
-const postChat = async (
-  orgIdOrSlug: string,
-  req: ChatCreateRequest,
-): Promise<ChatResponse> => {
-  return (
-    await post<ChatCreateRequest, ChatResponse>(
-      organizationsIdOrSlugChatApiPath(orgIdOrSlug),
-      req,
-    )
-  ).response;
-};
-
-const postChatMessage = async (
-  chatId: Id<ChatResponse>,
-  req: ChatMessageCreateRequest,
-): Promise<ChatMessageResponse> => {
-  return (
-    await post<ChatMessageCreateRequest, ChatMessageResponse>(
-      postChatMessagesApiPath(chatId),
-      req,
-    )
-  ).response;
-};
 
 const uploadDocuments = async (
   documentCollectionId: Id<DocumentCollectionCreateRequest>,

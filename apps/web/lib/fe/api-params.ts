@@ -14,7 +14,7 @@ export interface OrderingParams {
 
 export interface PaginationParams {
   page: number;
-  pageSize: IntRange<1, 513>;
+  pageSize: number;
 }
 
 export const DEFAULT_ORDERING: OrderingParams = {
