@@ -1,4 +1,4 @@
-import { ModelType } from "lib/types/core/model-type";
+import { ModelType } from "..";
 
 export interface ModelProviderConfig {
   type: ModelType;

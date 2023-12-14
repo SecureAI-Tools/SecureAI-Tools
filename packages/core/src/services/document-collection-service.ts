@@ -6,12 +6,13 @@ import {
 } from "@repo/database";
 import { customAlphabet } from "nanoid";
 
-import { Id } from "lib/types/core/id";
-import { UserResponse } from "lib/types/api/user.response";
-import { OrganizationResponse } from "lib/types/api/organization.response";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
-import { ModelType } from "lib/types/core/model-type";
-import { API } from "lib/api/core/api.utils";
+import { UserResponse } from "../types/user.response";
+import { DocumentCollectionResponse } from "../types/document-collection.response";
+import { Id } from "../types/id";
+import { ModelType } from "../types/model-type";
+import { OrganizationResponse } from "../types/organization.response";
+import { API } from "../utils/api.utils";
+
 
 export interface DocumentCollectionCreateInput {
   name?: string;
