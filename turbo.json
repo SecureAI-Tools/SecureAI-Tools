@@ -19,6 +19,7 @@
       "cache": false
     },
     "db:migrate:deploy": {},
+    "db-seed:build": {},
     "db-seed:dev": {}
   }
 }
