@@ -5,7 +5,6 @@ import { useSession } from "next-auth/react";
 import useSWR from "swr";
 
 import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
-import { Id } from "lib/types/core/id";
 import { Sidebar } from "lib/fe/components/side-bar";
 import { Chat } from "lib/fe/components/chat";
 import { chatApiPath, getChatMessagesApiPath } from "lib/fe/api-paths";
@@ -16,6 +15,8 @@ import { renderErrors } from "lib/fe/components/generic-error";
 import { Spinner } from "flowbite-react";
 import { ChatType } from "lib/types/core/chat-type";
 import { ChatWithDocs } from "lib/fe/components/chat-with-docs";
+
+import { Id } from "@repo/core/src/types/id";
 
 const ChatPage = ({
   orgSlug,

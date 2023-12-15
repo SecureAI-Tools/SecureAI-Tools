@@ -1,13 +1,15 @@
 import { ChatResponse } from "lib/types/api/chat.response";
-import { OrganizationResponse } from "lib/types/api/organization.response";
-import { UserResponse } from "lib/types/api/user.response";
-import { Id } from "lib/types/core/id";
 import { OrderingParams, PaginationParams } from "lib/fe/api-params";
-import { isEmpty } from "lib/core/string-utils";
 import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
-import { DocumentResponse } from "lib/types/api/document.response";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
+
+import { UserResponse } from "@repo/core/src/types/user.response";
+import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
+import { DocumentResponse } from "@repo/core/src/types/document.response";
+import { Id } from "@repo/core/src/types/id";
+import { OrganizationResponse } from "@repo/core/src/types/organization.response";
+import { isEmpty } from "@repo/core/src/utils/string-utils";
+
 
 export const userApiPath = (userId: Id<UserResponse>): string => {
   return `/api/users/${userId}`;

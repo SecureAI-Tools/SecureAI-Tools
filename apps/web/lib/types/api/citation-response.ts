@@ -1,5 +1,5 @@
 import { Citation } from "@repo/database";
-import { DocumentChunkMetadata } from "lib/types/core/document-chunk-metadata";
+import { DocumentChunkMetadata } from "@repo/core/src/types/document-chunk-metadata";
 
 export class CitationResponse {
   id!: string;

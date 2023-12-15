@@ -1,7 +1,6 @@
 import { mkdirSync, readFileSync, statSync, writeFileSync } from "fs";
 import path from "path";
-
-import { ObjectStorageService } from "lib/api/services/object-storage-service";
+import { ObjectStorageService } from "./object-storage-service";
 
 export class LocalObjectStorageService implements ObjectStorageService {
   async get(key: string): Promise<Buffer> {

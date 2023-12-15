@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { isAuthenticated } from "lib/api/core/auth";
-import { Id } from "lib/types/core/id";
-import { UserResponse } from "lib/types/api/user.response";
 import { UserService } from "lib/api/services/user.service";
-import { NextResponseErrors } from "lib/api/core/utils";
 import { UserUpdateRequest } from "lib/types/api/user-update-request";
+
+import { Id } from "@repo/core/src/types/id";
+import { UserResponse } from "@repo/core/src/types/user.response";
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
 
 const userService = new UserService();
 

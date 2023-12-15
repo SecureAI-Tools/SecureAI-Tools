@@ -9,17 +9,19 @@ import useToasts from "lib/fe/hooks/use-toasts";
 import { FrontendRoutes } from "lib/fe/routes";
 import ChatInput from "lib/fe/components/chat-input";
 import { StudioToasts } from "lib/fe/components/studio-toasts";
-import { Id } from "lib/types/core/id";
 import { FilesUpload } from "lib/fe/components/files-upload";
 import { ChatType } from "lib/types/core/chat-type";
-import { DocumentResponse } from "lib/types/api/document.response";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
 import {
   createDocumentCollection,
   uploadDocument,
 } from "lib/fe/document-utils";
 import { postChat, postChatMessage } from "lib/fe/chat-utils";
+import { IndexingMode } from "lib/types/core/indexing-mode";
+
+import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
+import { DocumentResponse } from "@repo/core/src/types/document.response";
+import { Id } from "@repo/core/src/types/id";
 
 export default function NewChat({ orgSlug }: { orgSlug: string }) {
   const router = useRouter();
@@ -167,7 +169,7 @@ const uploadDocuments = async (
   files: File[],
 ): Promise<DocumentResponse[]> => {
   const promises = files.map((f) => {
-    return uploadDocument(documentCollectionId, f);
+    return uploadDocument(documentCollectionId, f, IndexingMode.ONLINE);
   });
 
   return await Promise.all(promises);

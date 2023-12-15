@@ -12,19 +12,20 @@ import { ChatMessageService } from "lib/api/services/chat-message-service";
 import { ChatMessageRole } from "lib/types/core/chat-message-role";
 import { ChatMessagesRequest } from "lib/types/api/chat-messages.request";
 import { isAuthenticated } from "lib/api/core/auth";
-import { Id } from "lib/types/core/id";
 import { PermissionService } from "lib/api/services/permission-service";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { ChatService } from "lib/api/services/chat-service";
-import { NextResponseErrors } from "lib/api/core/utils";
-import { DocumentCollectionService } from "lib/api/services/document-collection-service";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { ChatType } from "lib/types/core/chat-type";
-import { ModelProviderService } from "lib/api/services/model-provider-service";
 import { CitationService } from "lib/api/services/citation-service";
-import { DocumentChunkMetadata } from "lib/types/core/document-chunk-metadata";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import { getWebLogger } from "lib/api/core/logger";
+
+import { DocumentCollectionService } from "@repo/core/src/services/document-collection-service";
+import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
+import { Id } from "@repo/core/src/types/id";
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
+import { ModelProviderService } from "@repo/core/src/services/model-provider-service";
+import { DocumentChunkMetadata } from "@repo/core/src/types/document-chunk-metadata";
 
 const chatMessageService = new ChatMessageService();
 const documentCollectionService = new DocumentCollectionService();

@@ -1,10 +1,10 @@
 import path from "path";
 import sanitize from "sanitize-filename";
 
-import { OrganizationResponse } from "lib/types/api/organization.response";
-import { Id } from "lib/types/core/id";
-import { DocumentResponse } from "lib/types/api/document.response";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
+import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
+import { DocumentResponse } from "@repo/core/src/types/document.response";
+import { Id } from "@repo/core/src/types/id";
+import { OrganizationResponse } from "@repo/core/src/types/organization.response";
 
 export function getDocumentObjectKey({
   orgId,

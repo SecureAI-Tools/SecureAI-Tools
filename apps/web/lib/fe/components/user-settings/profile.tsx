@@ -6,11 +6,12 @@ import { useEffect, useState } from "react";
 import { userApiPath } from "lib/fe/api-paths";
 import { patch, ResponseWithHeaders } from "lib/fe/api";
 import { TokenUser } from "lib/types/core/token-user";
-import { Id } from "lib/types/core/id";
 import { StudioToasts } from "lib/fe/components/studio-toasts";
 import useToasts from "lib/fe/hooks/use-toasts";
-import { UserResponse } from "lib/types/api/user.response";
 import { UserUpdateRequest } from "lib/types/api/user-update-request";
+
+import { Id } from "@repo/core/src/types/id";
+import { UserResponse } from "@repo/core/src/types/user.response";
 
 const UserProfileSettings = () => {
   const {

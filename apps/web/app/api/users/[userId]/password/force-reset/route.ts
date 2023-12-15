@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { isAuthenticated } from "lib/api/core/auth";
-import { NextResponseErrors } from "lib/api/core/utils";
 import { UserService } from "lib/api/services/user.service";
 import { PasswordForceResetResponse } from "lib/types/api/password-force-reset.response";
+
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
 
 const userService = new UserService();
 

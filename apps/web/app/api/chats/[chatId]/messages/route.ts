@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { API } from "lib/api/core/api.utils";
 import { ChatMessageService } from "lib/api/services/chat-message-service";
 import { toChatMessageRole } from "lib/types/core/chat-message-role";
 import { isAuthenticated } from "lib/api/core/auth";
-import { Id } from "lib/types/core/id";
 import { PermissionService } from "lib/api/services/permission-service";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
-import { NextResponseErrors } from "lib/api/core/utils";
 import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.request";
+
+import { Id } from "@repo/core/src/types/id";
+import { API } from "@repo/core/src/utils/api.utils";
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
+
 
 const chatMessageService = new ChatMessageService();
 const permissionService = new PermissionService();

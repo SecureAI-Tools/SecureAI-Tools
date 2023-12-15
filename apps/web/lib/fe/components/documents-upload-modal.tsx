@@ -3,9 +3,10 @@ import { Button, Modal, Progress, Spinner } from "flowbite-react";
 import { HiOutlineExclamation } from "react-icons/hi";
 import { tw } from "twind";
 
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
-import { Id } from "lib/types/core/id";
 import { uploadDocument } from "lib/fe/document-utils";
+import { IndexingMode } from "lib/types/core/indexing-mode";
+import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
+import { Id } from "@repo/core/src/types/id";
 
 type UploadState = "in-progress" | "succeeded" | "failed";
 
@@ -26,7 +27,7 @@ export const DocumentsUploadModal = ({
     try {
       for (let i = startIndex; i < files.length; i++) {
         const file = files[i]!;
-        await uploadDocument(collectionId, file);
+        await uploadDocument(collectionId, file, IndexingMode.OFFLINE);
         setUploadedCount(i + 1);
       }
       setUploadState("succeeded");

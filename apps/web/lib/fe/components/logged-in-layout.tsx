@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { FrontendRoutes } from "lib/fe/routes";
 import styles from "lib/../styles/Home.module.css";
 import { Layout } from "lib/fe/components/layout";
-import { PUBLIC_FACING_NAME } from "lib/core/constants";
+import { PUBLIC_FACING_NAME } from "@repo/core/constants";
 
 // TODO: Remove this once everything has moved to using apps dir routing!
 const LoggedInLayout = ({

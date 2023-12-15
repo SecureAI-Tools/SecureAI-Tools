@@ -1,5 +1,5 @@
 import { DocumentCollection } from "@repo/database";
-import { ModelType, toModelType } from "lib/types/core/model-type";
+import { ModelType, toModelType } from "./model-type";
 
 export class DocumentCollectionResponse {
   id!: string;

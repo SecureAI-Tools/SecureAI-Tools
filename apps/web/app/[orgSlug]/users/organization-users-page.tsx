@@ -14,15 +14,9 @@ import {
   orgMembershipApiPath,
 } from "lib/fe/api-paths";
 import { FE } from "lib/fe/route-utils";
-import { OrganizationResponse } from "lib/types/api/organization.response";
-import { Id } from "lib/types/core/id";
 import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 import { RenderCellsFn, StudioTable } from "lib/fe/components/studio-table";
 import { FrontendRoutes } from "lib/fe/routes";
-import {
-  PAGINATION_DEFAULT_PAGE_SIZE,
-  PAGINATION_STARTING_PAGE_NUMBER,
-} from "lib/core/constants";
 import { numberOfPages } from "lib/core/pagination-utils";
 import useDebounce from "lib/fe/hooks/use-debounce";
 import useTableState, {
@@ -33,13 +27,17 @@ import { TokenUser } from "lib/types/core/token-user";
 import { ActionMenu } from "lib/fe/components/action-menu";
 import { OrgMembershipUpdateRequest } from "lib/types/api/org-membership-update.request";
 import { StudioToasts } from "lib/fe/components/studio-toasts";
-import { UserResponse } from "lib/types/api/user.response";
 import { isAdmin } from "lib/fe/permission-utils";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { OrgMembershipRole } from "lib/types/core/org-membership-role";
 import { OrgMembershipStatus } from "lib/types/core/org-membership-status";
 import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
 import { PageTitle } from "lib/fe/components/page-title";
+
+import { PAGINATION_DEFAULT_PAGE_SIZE, PAGINATION_STARTING_PAGE_NUMBER } from "@repo/core/constants";
+import { Id } from "@repo/core/src/types/id";
+import { OrganizationResponse } from "@repo/core/src/types/organization.response";
+import { UserResponse } from "@repo/core/src/types/user.response";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;
 const orgSlugParam = "orgSlug";

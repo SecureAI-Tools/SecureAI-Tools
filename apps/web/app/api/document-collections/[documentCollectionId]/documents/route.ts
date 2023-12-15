@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { isAuthenticated } from "lib/api/core/auth";
-import { Id } from "lib/types/core/id";
 import { PermissionService } from "lib/api/services/permission-service";
-import { NextResponseErrors } from "lib/api/core/utils";
-import { DocumentResponse } from "lib/types/api/document.response";
-import { DocumentService } from "lib/api/services/document-service";
-import { LocalObjectStorageService } from "lib/api/services/local-object-storage-service";
 import { getDocumentObjectKey } from "lib/api/core/document.utils";
-import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
-import { DocumentCollectionService } from "lib/api/services/document-collection-service";
-import { API } from "lib/api/core/api.utils";
+import { IndexingMode } from "lib/types/core/indexing-mode";
+
+import { DocumentCollectionService } from "@repo/core/src/services/document-collection-service";
+import { DocumentService } from "@repo/core/src/services/document-service";
+import { LocalObjectStorageService } from "@repo/core/src/services/local-object-storage-service";
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
+import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
+import { DocumentIndexingStatus } from "@repo/core/src/types/document-indexing-status";
+import { DocumentResponse } from "@repo/core/src/types/document.response";
+import { IndexingQueueMessage } from "@repo/core/src/types/indexing-queue-message";
+import { Id } from "@repo/core/src/types/id";
+import { API } from "@repo/core/src/utils/api.utils";
+import { getAMQPChannel } from "@repo/core/src/amqp-client";
 
 const permissionService = new PermissionService();
 const documentCollectionService = new DocumentCollectionService();
@@ -47,6 +51,7 @@ export async function POST(
 
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
+  const indexingMode = formData.get("indexingMode") as IndexingMode | null ?? IndexingMode.OFFLINE;
   if (!file) {
     return NextResponseErrors.badRequest("file is required.");
   }
@@ -79,6 +84,26 @@ export async function POST(
     objectKey: documentObjectKey,
     collectionId: documentCollectionId,
   });
+
+  if (indexingMode === IndexingMode.OFFLINE) {
+    // Insert document into the queue so task-master can process it offline!
+    const msg: IndexingQueueMessage = {
+      documentId: documentId.toString(),
+    }
+    const amqpServerUrl = process.env.AMQP_SERVER_URL;
+    if (!amqpServerUrl) {
+      throw new Error("Invalid AMQP_SERVER_URL");
+    }
+    const queueName = process.env.AMQP_DOCS_INDEXING_QUEUE_NAME;
+    if (!queueName) {
+      throw new Error("Invalid AMQP_DOCS_INDEXING_QUEUE_NAME");
+    }
+
+    const channel = await getAMQPChannel(amqpServerUrl);
+    await channel.assertQueue(queueName);
+    await channel.sendToQueue(queueName, Buffer.from(JSON.stringify(msg)));
+  }
+
   return NextResponse.json(DocumentResponse.fromEntity(document));
 }
 

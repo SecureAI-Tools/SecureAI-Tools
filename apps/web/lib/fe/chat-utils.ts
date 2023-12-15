@@ -5,9 +5,10 @@ import {
   organizationsIdOrSlugChatApiPath,
   postChatMessagesApiPath,
 } from "lib/fe/api-paths";
-import { Id } from "lib/types/core/id";
 import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.request";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
+
+import { Id } from "@repo/core/src/types/id";
 
 export const postChat = async (
   orgIdOrSlug: string,

@@ -4,9 +4,10 @@ import { isAuthenticated } from "lib/api/core/auth";
 import { ChatService } from "lib/api/services/chat-service";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { OrgMembershipStatus } from "lib/types/core/org-membership-status";
-import { API } from "lib/api/core/api.utils";
 import { ChatResponse } from "lib/types/api/chat.response";
-import { NextResponseErrors } from "lib/api/core/utils";
+
+import { API } from "@repo/core/src/utils/api.utils";
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
 
 const chatService = new ChatService();
 const orgMembershipService = new OrgMembershipService();

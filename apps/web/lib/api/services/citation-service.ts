@@ -1,9 +1,9 @@
-import { Citation, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
-
-import { Id } from "lib/types/core/id";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
-import { DocumentResponse } from "lib/types/api/document.response";
-import { API } from "lib/api/core/api.utils";
+
+import { Citation, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
+import { Id } from "@repo/core/src/types/id";
+import { DocumentResponse } from "@repo/core/src/types/document.response";
+import { API } from "@repo/core/src/utils/api.utils";
 
 export interface CitationCreateInput {
   documentChunkId: string;

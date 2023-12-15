@@ -6,12 +6,13 @@ import { Spinner } from "flowbite-react";
 import { useEffect, useState } from "react";
 
 import { patch, ResponseWithHeaders } from "lib/fe/api";
-import { DEFAULT_CHAT_TITLE } from "lib/core/constants";
 import { ChatUpdateRequest } from "lib/types/api/chat-update.request";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { chatApiPath } from "lib/fe/api-paths";
-import { Id } from "lib/types/core/id";
-import { ModelType, modelTypeToReadableName } from "lib/types/core/model-type";
+
+import { DEFAULT_CHAT_TITLE } from "@repo/core/constants";
+import { Id } from "@repo/core/src/types/id";
+import { ModelType, modelTypeToReadableName } from "@repo/core/src/types/model-type";
 
 const DefaultChatTitle = () => (
   <div className={tw("italic text-gray-600")}>{DEFAULT_CHAT_TITLE}</div>

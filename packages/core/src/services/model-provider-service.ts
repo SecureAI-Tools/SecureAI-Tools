@@ -1,16 +1,17 @@
-import { ModelType, toModelType } from "lib/types/core/model-type";
 import { BaseChatModel } from "langchain/dist/chat_models/base";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { ChatOllama } from "langchain/chat_models/ollama";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { OllamaEmbeddings } from "langchain/embeddings/ollama";
-
 import { Embeddings } from "langchain/dist/embeddings/base";
-import { ModelProviderConfig } from "lib/types/core/model-provider-config";
-import { removeTrailingSlash } from "lib/core/string-utils";
-import { getWebLogger } from "lib/api/core/logger";
 
-const logger = getWebLogger();
+import { getLogger } from "../logger";
+import { removeTrailingSlash } from "../utils/string-utils";
+import { ModelProviderConfig } from "../types/model-provider-config";
+import { toModelType, ModelType } from "../types/model-type";
+
+
+const logger = getLogger("model-provider-service");
 
 export class ModelProviderService {
   // Instantiates a new LangChain chat-model for given type.

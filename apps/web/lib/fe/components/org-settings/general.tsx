@@ -11,10 +11,8 @@ import {
   organizationsIdOrSlugApiPath,
 } from "lib/fe/api-paths";
 import { createFetcher, get, patch, ResponseWithHeaders } from "lib/fe/api";
-import { OrganizationResponse } from "lib/types/api/organization.response";
 import { TokenUser } from "lib/types/core/token-user";
 import { renderErrors } from "lib/fe/components/generic-error";
-import { Id } from "lib/types/core/id";
 import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 import { FrontendRoutes } from "lib/fe/routes";
 import useDebounce from "lib/fe/hooks/use-debounce";
@@ -22,9 +20,12 @@ import { FetchError } from "lib/fe/types/fetch-error";
 import { slugFrom } from "lib/core/slug-utils";
 import { OrganizationUpdateRequest } from "lib/types/api/organization-update.request";
 import { StudioToasts } from "lib/fe/components/studio-toasts";
-import { isEmpty } from "lib/core/string-utils";
 import { isAdmin } from "lib/fe/permission-utils";
 import useToasts from "lib/fe/hooks/use-toasts";
+
+import { Id } from "@repo/core/src/types/id";
+import { OrganizationResponse } from "@repo/core/src/types/organization.response";
+import { isEmpty } from "@repo/core/src/utils/string-utils";
 
 type SlugAvailability = "available" | "unavailable" | "unknown" | "loading";
 

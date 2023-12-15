@@ -1,8 +1,5 @@
 import { Document } from "@repo/database";
-import {
-  DocumentIndexingStatus,
-  toDocumentIndexingStatus,
-} from "lib/types/core/document-indexing-status";
+import { DocumentIndexingStatus, toDocumentIndexingStatus } from "./document-indexing-status";
 
 export class DocumentResponse {
   id!: string;

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { isAuthenticated } from "lib/api/core/auth";
-import { NextResponseErrors } from "lib/api/core/utils";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
-import { isEmpty } from "lib/core/string-utils";
 import { ModelsResponse } from "lib/types/api/models.response";
+
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
+import { isEmpty } from "@repo/core/src/utils/string-utils";
 
 const orgMembershipService = new OrgMembershipService();
 

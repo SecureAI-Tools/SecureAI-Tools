@@ -13,9 +13,7 @@ import {
   organizationsIdOrSlugModelsApiPath,
 } from "lib/fe/api-paths";
 import { createFetcher, get, patch, ResponseWithHeaders } from "lib/fe/api";
-import { OrganizationResponse } from "lib/types/api/organization.response";
 import { TokenUser } from "lib/types/core/token-user";
-import { Id } from "lib/types/core/id";
 import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 import { OrganizationUpdateRequest } from "lib/types/api/organization-update.request";
 import { StudioToasts } from "lib/fe/components/studio-toasts";
@@ -26,11 +24,10 @@ import { ModelDownloadModal } from "lib/fe/components/org-settings/model-downloa
 import { renderErrors } from "lib/fe/components/generic-error";
 import { Link } from "lib/fe/components/link";
 import { ModelProviderResponse } from "lib/types/api/mode-provider.response";
-import {
-  ModelType,
-  modelTypeToReadableName,
-  toModelType,
-} from "lib/types/core/model-type";
+
+import { Id } from "@repo/core/src/types/id";
+import { ModelType, toModelType, modelTypeToReadableName } from "@repo/core/src/types/model-type";
+import { OrganizationResponse } from "@repo/core/src/types/organization.response";
 
 const OrgAISettings = ({
   orgSlug,

@@ -13,12 +13,8 @@ import {
   organizationsIdOrSlugApiPath,
   postOrgMembershipsApiPath,
 } from "lib/fe/api-paths";
-import { OrganizationResponse } from "lib/types/api/organization.response";
-import { Id } from "lib/types/core/id";
 import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 import { FilesUpload } from "lib/fe/components/files-upload";
-import { MAX_ADD_USERS_CSV_ROWS } from "lib/core/constants";
-import { isEmpty } from "lib/core/string-utils";
 import { AddUsersRequest } from "lib/types/api/add-users.request";
 import { FrontendRoutes } from "lib/fe/routes";
 import { SuccessModal } from "lib/fe/components/success-modal";
@@ -27,6 +23,11 @@ import {
   toOrgMembershipRole,
 } from "lib/types/core/org-membership-role";
 import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
+
+import { MAX_ADD_USERS_CSV_ROWS } from "@repo/core/constants";
+import { Id } from "@repo/core/src/types/id";
+import { OrganizationResponse } from "@repo/core/src/types/organization.response";
+import { isEmpty } from "@repo/core/src/utils/string-utils";
 
 const getOrganization = async (slug: string): Promise<OrganizationResponse> => {
   // TODO(TECH-DEBT): Use SWR here instead of direct get()

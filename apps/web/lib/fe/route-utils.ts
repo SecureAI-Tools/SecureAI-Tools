@@ -1,8 +1,7 @@
 import { NextRouter } from "next/router";
 import { ReadonlyURLSearchParams } from "next/navigation";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-
-import { getFirst } from "lib/core/string-utils";
+import { getFirst } from "@repo/core/src/utils/string-utils";
 
 export namespace FE {
   export const hasQueryParam = (router: NextRouter, key: string) =>

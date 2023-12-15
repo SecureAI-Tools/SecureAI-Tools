@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { isAuthenticated } from "lib/api/core/auth";
-import { NextResponseErrors } from "lib/api/core/utils";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { ChatService } from "lib/api/services/chat-service";
 import { ChatCreateRequest } from "lib/types/api/chat-create.request";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { PermissionService } from "lib/api/services/permission-service";
-import { Id } from "lib/types/core/id";
+
+import { Id } from "@repo/core/src/types/id";
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
 
 const chatService = new ChatService();
 const orgMembershipService = new OrgMembershipService();

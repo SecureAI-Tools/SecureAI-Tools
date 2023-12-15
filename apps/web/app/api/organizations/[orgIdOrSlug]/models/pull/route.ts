@@ -2,8 +2,9 @@ import { NextRequest } from "next/server";
 
 import { isAuthenticated } from "lib/api/core/auth";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
-import { NextResponseErrors } from "lib/api/core/utils";
 import { ModelPullRequest } from "lib/types/api/model-pull.request";
+
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
 
 const orgMembershipService = new OrgMembershipService();
 

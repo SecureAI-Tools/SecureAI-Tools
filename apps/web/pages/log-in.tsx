@@ -11,11 +11,11 @@ import { HiOutlineExclamation } from "react-icons/hi";
 import Navigation from "lib/fe/components/navigation";
 import { Layout } from "lib/fe/components/layout";
 import { FrontendRoutes } from "lib/fe/routes";
-import { getFirst } from "lib/core/string-utils";
 import { LogInErrorCodes } from "lib/core/auth";
 import { FE } from "lib/fe/route-utils";
 import { StudioToasts } from "lib/fe/components/studio-toasts";
 import useToasts from "lib/fe/hooks/use-toasts";
+import { getFirst } from "@repo/core/src/utils/string-utils";
 
 const LogInPage: NextPage = () => {
   const router = useRouter();

@@ -1,6 +1,7 @@
-import { Chat } from "@repo/database";
 import { ChatType, toChatType } from "lib/types/core/chat-type";
-import { ModelType, toModelType } from "lib/types/core/model-type";
+
+import { ModelType, toModelType } from "@repo/core/src/types/model-type";
+import { Chat } from "@repo/database";
 
 export class ChatResponse {
   id!: string;

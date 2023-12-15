@@ -1,8 +1,8 @@
 import { NextApiResponse } from "next/types";
 import { StatusCodes } from "http-status-codes";
 
-import { ErrorResponse } from "lib/types/api/error.response";
 import { NextResponse } from "next/server";
+import { ErrorResponse } from "../types/error.response";
 
 export async function sleep(ms: number): Promise<unknown> {
   return new Promise((resolve) => {

@@ -1,19 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { ErrorResponse } from "lib/types/api/error.response";
-import { API } from "lib/api/core/api.utils";
 import { isAuthenticated } from "lib/api/core/auth";
-import {
-  sendUnsupportedMethodError,
-  sendBadRequestError,
-  sendNotFoundError,
-  sendForbiddenError,
-} from "lib/api/core/utils";
 import { withLogging } from "lib/api/core/with-logging";
-import { Id } from "lib/types/core/id";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { OrgMembershipUpdateRequest } from "lib/types/api/org-membership-update.request";
 import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
+
+import { ErrorResponse } from "@repo/core/src/types/error.response";
+import { Id } from "@repo/core/src/types/id";
+import { API } from "@repo/core/src/utils/api.utils";
+import { sendUnsupportedMethodError, sendBadRequestError, sendNotFoundError, sendForbiddenError } from "@repo/core/src/utils/utils";
 
 const orgMembershipService = new OrgMembershipService();
 

@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { isAuthenticated } from "lib/api/core/auth";
 import { ModelProviderResponse } from "lib/types/api/mode-provider.response";
-import { NextResponseErrors } from "lib/api/core/utils";
-import { ModelProviderService } from "lib/api/services/model-provider-service";
-import { ModelType } from "lib/types/core/model-type";
 import { getWebLogger } from "lib/api/core/logger";
+
+import { ModelProviderService } from "@repo/core/src/services/model-provider-service";
+import { ModelType } from "@repo/core/src/types/model-type";
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
 
 const logger = getWebLogger();
 const modelProviderService = new ModelProviderService();
