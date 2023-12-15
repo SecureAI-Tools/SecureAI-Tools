@@ -14,11 +14,32 @@ services:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
     ports:
       - 28669:28669
-    command: sh -c "cd /app && sh apps/web/tools/db-migrate-and-seed.sh ${DATABASE_FILE} && node apps/web/server.js"
+    command: sh -c "cd /app && node apps/web/server.js"
+    depends_on:
+      db:
+        condition: service_started
+      inference:
+        condition: service_started
+      vector-db:
+        condition: service_started
+      db-migrate-and-seed:
+        condition: service_completed_successfully
+        restart: false
+
+  # Performs DB schema migrations and seeds db with initial data if needed.
+  db-migrate-and-seed:
+    image: public.ecr.aws/d8f2p0h3/secure-ai-tools:latest
+    platform: linux/amd64
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    command: sh -c "cd /app && sh apps/web/tools/db-migrate-and-seed.sh ${DATABASE_FILE}"
+    deploy:
+      restart_policy:
+        condition: none
     depends_on:
       - db
-      - inference
-      - vector-db
 
   db:
     image: postgres:latest
