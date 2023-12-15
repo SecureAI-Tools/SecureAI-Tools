@@ -25,7 +25,6 @@ import {
   getDocumentCollectionApiPath,
   getDocumentCollectionDocumentsApiPath,
   getDocumentCollectionStatsApiPath,
-  getOrganizationsIdOrSlugDocumentCollectionApiPath,
 } from "lib/fe/api-paths";
 import { Id } from "lib/types/core/id";
 import { createFetcher, get } from "lib/fe/api";
@@ -38,6 +37,7 @@ import { DocumentResponse } from "lib/types/api/document.response";
 import { DocumentCollectionStatsResponse } from "lib/types/api/document-collection-stats.response";
 import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";
 import ChatCreationModal from "./chat-creation-modal";
+import { EmptyState } from "lib/fe/components/empty-state";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;
 const pollingIntervalMS = 10000;
@@ -54,7 +54,6 @@ const DocumentCollectionDetailsPage = ({
   orgSlug: string;
   documentCollectionId: string;
 }) => {
-  const [isTableLoading, setIsTableLoading] = useState<boolean>(false);
   const [processingStats, setProcessingStats] = useState<ProcessingStats>();
   const [showChatCreationModal, setShowChatCreationModal] =
     useState<boolean>(false);
@@ -97,7 +96,11 @@ const DocumentCollectionDetailsPage = ({
   );
 
   const shouldFetchDocuments = sessionStatus === "authenticated" && session;
-  const { data: documentsResponse, error: documentsFetchError } = useSWR(
+  const {
+    data: documentsResponse,
+    error: documentsFetchError,
+    isLoading: isDocumentsResponseLoading,
+  } = useSWR(
     shouldFetchDocuments
       ? getDocumentCollectionDocumentsApiPath({
           documentCollectionId: documentCollectionId,
@@ -252,13 +255,18 @@ const DocumentCollectionDetailsPage = ({
     processingStats.stats.indexedDocumentCount !==
       processingStats.stats.totalDocumentCount;
 
+  const shouldRenderEmptyState =
+    !isDocumentsResponseLoading &&
+    tableState.pagination.currentPage === 1 &&
+    documentsResponse?.response.length === 0;
+
   return (
     <AppsLoggedInLayout>
       <div className={tw("flex flex-row")}>
         <Sidebar orgSlug={orgSlug} />
         <div
           className={tw(
-            "items-center justify-center w-full p-8 max-h-screen overflow-scroll",
+            "flex flex-col w-full p-8 max-h-screen overflow-scroll",
           )}
         >
           <div className={tw("flex flex-col")}>
@@ -307,25 +315,36 @@ const DocumentCollectionDetailsPage = ({
             </div>
           </div>
 
-          <div className={tw("mt-6")}>
-            <div className={tw("flex flex-row items-center")}>
-              <div className={tw("grow text-lg font-medium")}>Documents</div>
-              <div>{renderDocumentCollectionIndexingStatus()}</div>
-            </div>
-            <div className={tw("mt-4")}>
-              <StudioTable
-                loading={isTableLoading}
-                data={documentsResponse?.response}
-                columns={["Document", "Status", "Added Date"]}
-                renderCells={renderCells}
-                page={tableState.pagination.currentPage}
-                totalPages={numberOfPages(
-                  documentsResponse?.headers.pagination?.totalCount ?? 0,
-                  pageSize,
-                )}
-                onPageChange={onPageChange}
+          <div className={tw("mt-6 grow")}>
+            {shouldRenderEmptyState ? (
+              <EmptyState
+                title="No documents in this collection yet!"
+                subTitle="You don't have any documents in this collections. Start by adding documents to this collection."
+                // TODO: Add CTA when we have the ability to upload documents into a collection (after it is created)!
+                cta={null}
               />
-            </div>
+            ) : (
+              <div className={tw("mt-4")}>
+                <div className={tw("flex flex-row items-center pr-2 pb-2")}>
+                  <div className={tw("grow text-lg font-medium")}>
+                    Documents
+                  </div>
+                  <div>{renderDocumentCollectionIndexingStatus()}</div>
+                </div>
+                <StudioTable
+                  loading={isDocumentsResponseLoading}
+                  data={documentsResponse?.response}
+                  columns={["Document", "Status", "Added Date"]}
+                  renderCells={renderCells}
+                  page={tableState.pagination.currentPage}
+                  totalPages={numberOfPages(
+                    documentsResponse?.headers.pagination?.totalCount ?? 0,
+                    pageSize,
+                  )}
+                  onPageChange={onPageChange}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
