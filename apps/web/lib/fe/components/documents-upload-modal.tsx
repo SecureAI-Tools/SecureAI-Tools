@@ -3,10 +3,9 @@ import { Button, Modal, Progress, Spinner } from "flowbite-react";
 import { HiOutlineExclamation } from "react-icons/hi";
 import { tw } from "twind";
 
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
-import { Id } from "lib/types/core/id";
 import { uploadDocument } from "lib/fe/document-utils";
 import { IndexingMode } from "lib/types/core/indexing-mode";
+import { Id, DocumentCollectionResponse } from "@repo/core";
 
 type UploadState = "in-progress" | "succeeded" | "failed";
 

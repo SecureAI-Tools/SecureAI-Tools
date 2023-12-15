@@ -6,7 +6,6 @@ import { Progress, Spinner, Tooltip } from "flowbite-react";
 import { HiOutlineClipboard, HiOutlineClipboardCheck } from "react-icons/hi";
 import clipboardCopy from "clipboard-copy";
 
-import { Id } from "lib/types/core/id";
 import ChatInput from "lib/fe/components/chat-input";
 import { ChatResponse } from "lib/types/api/chat.response";
 import {
@@ -23,18 +22,16 @@ import {
   ChatMessageResponse,
   chatMessageResponseToMessage,
 } from "lib/types/api/chat-message.response";
-import { DEFAULT_CHAT_TITLE } from "lib/core/constants";
 import { ChatTitle } from "lib/fe/components/chat-title";
 import { Analytics } from "lib/fe/analytics";
 import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.request";
 import { ChatType } from "lib/types/core/chat-type";
-import { DocumentResponse } from "lib/types/api/document.response";
-import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";
-import { StreamChunkResponse } from "lib/types/api/stream-chunk.response";
-import { isEmpty } from "lib/core/string-utils";
 import { CitationResponse } from "lib/types/api/citation-response";
 import { Link } from "lib/fe/components/link";
 import { ChatMessageRole } from "lib/types/core/chat-message-role";
+import { DocumentResponse, Id, DocumentIndexingStatus, StreamChunkResponse } from "@repo/core";
+import { DEFAULT_CHAT_TITLE } from "@repo/core/constants";
+import { isEmpty } from "@repo/core/src/utils/string-utils";
 
 const MessageEntry = ({
   message,

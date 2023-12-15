@@ -2,12 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@repo/database";
 
 import { isAuthenticated } from "lib/api/core/auth";
-import { Id } from "lib/types/core/id";
 import { PermissionService } from "lib/api/services/permission-service";
 import { ChatService } from "lib/api/services/chat-service";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { ChatUpdateRequest } from "lib/types/api/chat-update.request";
-import { NextResponseErrors } from "lib/api/core/utils";
+import { NextResponseErrors, Id } from "@repo/core";
 
 const permissionService = new PermissionService();
 const chatService = new ChatService();

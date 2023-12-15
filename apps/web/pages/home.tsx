@@ -12,9 +12,9 @@ import LoggedInLayout from "lib/fe/components/logged-in-layout";
 import { FrontendRoutes } from "lib/fe/routes";
 import { isAuthenticatedWithRedirect } from "lib/ssr/auth";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
-import { OrganizationResponse } from "lib/types/api/organization.response";
 import { PageTitle } from "lib/fe/components/page-title";
 import { OrgMembershipStatus } from "lib/types/core/org-membership-status";
+import { OrganizationResponse } from "@repo/core";
 
 interface Props {
   organizations: OrganizationResponse[];

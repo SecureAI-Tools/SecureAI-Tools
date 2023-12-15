@@ -1,9 +1,8 @@
 import { Prisma, User, TxPrismaClient, prismaClient } from "@repo/database";
+import { UserResponse } from "@repo/core";
+import { Id } from "@repo/core";
 
-import { UserResponse } from "lib/types/api/user.response";
-import { Id } from "lib/types/core/id";
 import { hashPassword } from "lib/api/core/password.utils";
-import { UserUpdateRequest } from "lib/types/api/user-update-request";
 
 export class UserCreateInput {
   email!: string;

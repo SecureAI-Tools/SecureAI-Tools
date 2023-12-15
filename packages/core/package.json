@@ -7,7 +7,7 @@
   "types": "src/index.ts",
   "dependencies": {
     "amqplib": "^0.10.3",
-    "langchain": "^0.0.206",
+    "langchain": "^0.0.200",
     "winston": "^3.10.0",
     "winston-daily-rotate-file": "^4.7.1"
   },

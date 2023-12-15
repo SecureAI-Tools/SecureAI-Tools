@@ -14,30 +14,24 @@ import { Sidebar } from "lib/fe/components/side-bar";
 import { PageTitle } from "lib/fe/components/page-title";
 import { RenderCellsFn, StudioTable } from "lib/fe/components/studio-table";
 import useTableState, { PAGE_PARAM } from "lib/fe/hooks/use-table-state";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { numberOfPages } from "lib/core/pagination-utils";
-import {
-  DEFAULT_DOCUMENT_COLLECTION_NAME,
-  PAGINATION_DEFAULT_PAGE_SIZE,
-} from "lib/core/constants";
 import {
   documentCollectionDocumentApiPath,
   getDocumentCollectionApiPath,
   getDocumentCollectionDocumentsApiPath,
   getDocumentCollectionStatsApiPath,
 } from "lib/fe/api-paths";
-import { Id } from "lib/types/core/id";
 import { createFetcher, get } from "lib/fe/api";
 import { renderErrors } from "lib/fe/components/generic-error";
 import { formatDateTime } from "lib/core/date-format";
 import { Link } from "lib/fe/components/link";
 import { FE } from "lib/fe/route-utils";
-import { isEmpty } from "lib/core/string-utils";
-import { DocumentResponse } from "lib/types/api/document.response";
 import { DocumentCollectionStatsResponse } from "lib/types/api/document-collection-stats.response";
-import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";
 import ChatCreationModal from "./chat-creation-modal";
 import { EmptyState } from "lib/fe/components/empty-state";
+
+import { Id, DocumentCollectionResponse, DocumentIndexingStatus, DocumentResponse, isEmpty } from "@repo/core";
+import { PAGINATION_DEFAULT_PAGE_SIZE, DEFAULT_DOCUMENT_COLLECTION_NAME } from "@repo/core/constants";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;
 const pollingIntervalMS = 10000;

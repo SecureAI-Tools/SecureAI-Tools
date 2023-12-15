@@ -1,9 +1,9 @@
-import { BaseChatModel } from "langchain/chat_models/base";
+import { BaseChatModel } from "langchain/dist/chat_models/base";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { ChatOllama } from "langchain/chat_models/ollama";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { OllamaEmbeddings } from "langchain/embeddings/ollama";
-import { Embeddings } from "langchain/embeddings/base";
+import { Embeddings } from "langchain/dist/embeddings/base";
 
 import { getLogger } from "../logger";
 import { ModelProviderConfig, ModelType, toModelType } from "..";

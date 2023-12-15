@@ -5,11 +5,11 @@ import {
   TxPrismaClient,
   prismaClient,
 } from "@repo/database";
+import { Id } from "@repo/core";
+import { API } from "@repo/core";
+import { UserResponse } from "@repo/core";
 
-import { Id } from "lib/types/core/id";
 import { ChatResponse } from "lib/types/api/chat.response";
-import { API } from "lib/api/core/api.utils";
-import { UserResponse } from "lib/types/api/user.response";
 import { ChatType } from "lib/types/core/chat-type";
 
 export interface ChatCreateInput {

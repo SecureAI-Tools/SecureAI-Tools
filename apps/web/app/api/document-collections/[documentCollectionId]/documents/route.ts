@@ -1,20 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { isAuthenticated } from "lib/api/core/auth";
-import { Id } from "lib/types/core/id";
 import { PermissionService } from "lib/api/services/permission-service";
-import { NextResponseErrors } from "lib/api/core/utils";
-import { DocumentResponse } from "lib/types/api/document.response";
-import { DocumentService } from "lib/api/services/document-service";
-import { LocalObjectStorageService } from "lib/api/services/local-object-storage-service";
 import { getDocumentObjectKey } from "lib/api/core/document.utils";
-import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
-import { DocumentCollectionService } from "lib/api/services/document-collection-service";
 import { IndexingMode } from "lib/types/core/indexing-mode";
-import { getAMQPChannel } from "@repo/core/src/amqp-client";
-import { IndexingQueueMessage } from "@repo/core/src/types/indexing-queue-message";
-import { API } from "lib/api/core/api.utils";
+
+import { 
+  API,
+  DocumentCollectionResponse, 
+  DocumentCollectionService, 
+  DocumentIndexingStatus, 
+  DocumentResponse, 
+  DocumentService, 
+  Id, 
+  IndexingQueueMessage, 
+  LocalObjectStorageService, 
+  NextResponseErrors, 
+  getAMQPChannel
+} from "@repo/core";
 
 const permissionService = new PermissionService();
 const documentCollectionService = new DocumentCollectionService();

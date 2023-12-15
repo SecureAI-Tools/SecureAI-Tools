@@ -13,19 +13,17 @@ import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/page-navigation/lib/styles/index.css";
 
 import { ChatResponse } from "lib/types/api/chat.response";
-import { Id } from "lib/types/core/id";
 import {
   documentCollectionDocumentApiPath,
   getDocumentCollectionDocumentsApiPath,
   getChatMessageCitationsApiPath,
 } from "lib/fe/api-paths";
 import { createFetcher } from "lib/fe/api";
-import { DocumentResponse } from "lib/types/api/document.response";
 import { renderErrors } from "lib/fe/components/generic-error";
 import { Chat } from "lib/fe/components/chat";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { CitationResponse } from "lib/types/api/citation-response";
+import { Id, DocumentCollectionResponse, DocumentResponse } from "@repo/core";
 
 export function ChatWithDocs({
   chat,

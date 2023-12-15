@@ -1,7 +1,6 @@
 "use client";
 
 import { Button, Card, Modal, Spinner } from "flowbite-react";
-import { DEFAULT_CHAT_TITLE } from "lib/core/constants";
 import { ChatResponse } from "lib/types/api/chat.response";
 import useSWR, { useSWRConfig } from "swr";
 import { tw } from "twind";
@@ -18,12 +17,12 @@ import { useState } from "react";
 import { createFetcher, delete_ } from "lib/fe/api";
 import { chatApiPath, chatsApiPath } from "lib/fe/api-paths";
 import { TokenUser } from "lib/types/core/token-user";
-import { clip } from "lib/core/string-utils";
-import { Id } from "lib/types/core/id";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { StudioToasts } from "lib/fe/components/studio-toasts";
 import { FrontendRoutes } from "lib/fe/routes";
 import { ChatType } from "lib/types/core/chat-type";
+import { clip, Id } from "@repo/core";
+import { DEFAULT_CHAT_TITLE } from "@repo/core/constants";
 
 export default function ChatHistory({ orgSlug }: { orgSlug: string }) {
   const { data: session, status } = useSession();

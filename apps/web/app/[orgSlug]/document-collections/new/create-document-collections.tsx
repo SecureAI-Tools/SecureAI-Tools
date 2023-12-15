@@ -14,11 +14,10 @@ import useToasts from "lib/fe/hooks/use-toasts";
 import { Button, Label, TextInput, Textarea } from "flowbite-react";
 import { FilesUpload } from "lib/fe/components/files-upload";
 import { createDocumentCollection } from "lib/fe/document-utils";
-import { isEmpty } from "lib/core/string-utils";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
-import { Id } from "lib/types/core/id";
 import { DocumentsUploadModal } from "lib/fe/components/documents-upload-modal";
 import { Sidebar } from "lib/fe/components/side-bar";
+import { Id, DocumentCollectionResponse } from "@repo/core";
+import { isEmpty } from "lodash";
 
 const CreateDocumentCollections = ({ orgSlug }: { orgSlug: string }) => {
   const [name, setName] = useState("");

@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { isAuthenticated } from "lib/api/core/auth";
-import { Id } from "lib/types/core/id";
 import { PasswordUpdateRequest } from "lib/types/api/password-update.request";
-import { UserResponse } from "lib/types/api/user.response";
 import { UserService } from "lib/api/services/user.service";
 import { comparePasswords } from "lib/api/core/password.utils";
-import { NextResponseErrors } from "lib/api/core/utils";
+import { NextResponseErrors, Id, UserResponse } from "@repo/core";
 
 const userService = new UserService();
 

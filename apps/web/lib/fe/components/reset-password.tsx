@@ -7,17 +7,15 @@ import { HiOutlineExclamation } from "react-icons/hi";
 import { StatusCodes } from "http-status-codes";
 import { useSession } from "next-auth/react";
 
-import { isEmpty } from "lib/core/string-utils";
 import { StudioToasts } from "lib/fe/components/studio-toasts";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { PasswordUpdateRequest } from "lib/types/api/password-update.request";
 import { ResponseWithHeaders, patch } from "lib/fe/api";
-import { UserResponse } from "lib/types/api/user.response";
 import { userPasswordApiPath } from "lib/fe/api-paths";
-import { Id } from "lib/types/core/id";
 import { TokenUser } from "lib/types/core/token-user";
 import { FetchError } from "lib/fe/types/fetch-error";
 import { PageTitle } from "./page-title";
+import { Id, UserResponse, isEmpty } from "@repo/core";
 
 export const ResetPassword = ({
   onResetPasswordSuccess,

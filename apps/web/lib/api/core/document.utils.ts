@@ -1,10 +1,11 @@
+import { OrganizationResponse } from "@repo/core";
+import { Id } from "@repo/core";
+import { DocumentResponse } from "@repo/core";
+import { DocumentCollectionResponse } from "@repo/core";
+
 import path from "path";
 import sanitize from "sanitize-filename";
 
-import { OrganizationResponse } from "lib/types/api/organization.response";
-import { Id } from "lib/types/core/id";
-import { DocumentResponse } from "lib/types/api/document.response";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 
 export function getDocumentObjectKey({
   orgId,

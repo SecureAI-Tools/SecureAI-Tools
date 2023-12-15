@@ -1,7 +1,6 @@
 import { tw } from "twind";
 import Head from "next/head";
-
-import { PUBLIC_FACING_NAME, TWITTER_HANDLE } from "lib/core/constants";
+import { PUBLIC_FACING_NAME, TWITTER_HANDLE } from "@repo/core/constants";
 
 // Layout for pages NextJS router. Do not use in new app router!
 export const Layout = ({

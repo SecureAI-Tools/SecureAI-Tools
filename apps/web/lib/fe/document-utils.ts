@@ -1,14 +1,12 @@
-import { Id } from "lib/types/core/id";
 import { post } from "lib/fe/api";
 import { FetchError } from "lib/fe/types/fetch-error";
-import { DocumentResponse } from "lib/types/api/document.response";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
 import {
   postDocumentCollectionDocumentsApiPath,
   postOrganizationsIdOrSlugDocumentCollectionApiPath,
 } from "lib/fe/api-paths";
 import { IndexingMode } from "lib/types/core/indexing-mode";
+import { DocumentCollectionResponse, Id, DocumentResponse } from "@repo/core";
 
 export const createDocumentCollection = async (
   orgSlug: string,

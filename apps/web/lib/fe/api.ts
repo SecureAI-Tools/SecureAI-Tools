@@ -1,9 +1,9 @@
 import { Fetcher } from "swr";
 
 import { parseInteger } from "lib/core/number-utils";
-import { ResponseHeaders } from "lib/types/api/response-headers";
 import { FetchError } from "./types/fetch-error";
-import { HEADER_PAGINATION_TOTAL_COUNT } from "lib/core/constants";
+import { ResponseHeaders } from "@repo/core";
+import { HEADER_PAGINATION_TOTAL_COUNT } from "@repo/core/constants";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 

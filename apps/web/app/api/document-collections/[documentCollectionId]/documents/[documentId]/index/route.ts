@@ -1,3 +1,16 @@
+import { NextResponseErrors } from "@repo/core";
+import { DocumentService } from "@repo/core";
+import { DocumentResponse } from "@repo/core";
+import { LocalObjectStorageService } from "@repo/core";
+import { DocumentCollectionResponse } from "@repo/core";
+import { DocumentCollectionService } from "@repo/core";
+import { isEmpty, removeTrailingSlash } from "@repo/core";
+import { DocumentIndexingStatus } from "@repo/core";
+import { StreamChunkResponse } from "@repo/core";
+import { ModelProviderService } from "@repo/core";
+import { DocumentChunkMetadata } from "@repo/core";
+import { Id } from "@repo/core";
+
 import { NextRequest, NextResponse } from "next/server";
 import { ChromaClient } from "chromadb";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
@@ -5,19 +18,7 @@ import { Document as LangchainDocument } from "langchain/dist/document";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 import { isAuthenticated } from "lib/api/core/auth";
-import { Id } from "lib/types/core/id";
 import { PermissionService } from "lib/api/services/permission-service";
-import { NextResponseErrors } from "lib/api/core/utils";
-import { DocumentService } from "lib/api/services/document-service";
-import { DocumentResponse } from "lib/types/api/document.response";
-import { LocalObjectStorageService } from "lib/api/services/local-object-storage-service";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
-import { DocumentCollectionService } from "lib/api/services/document-collection-service";
-import { isEmpty, removeTrailingSlash } from "lib/core/string-utils";
-import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";
-import { StreamChunkResponse } from "lib/types/api/stream-chunk.response";
-import { ModelProviderService } from "lib/api/services/model-provider-service";
-import { DocumentChunkMetadata } from "lib/types/core/document-chunk-metadata";
 import { getWebLogger } from "lib/api/core/logger";
 
 const logger = getWebLogger();

@@ -1,4 +1,4 @@
-import { ModelType } from "lib/types/core/model-type";
+import { ModelType } from "@repo/core";
 
 export class ModelProviderResponse {
   type!: ModelType;

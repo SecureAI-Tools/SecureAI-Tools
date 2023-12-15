@@ -2,16 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { ChromaClient } from "chromadb";
 
 import { isAuthenticated } from "lib/api/core/auth";
-import { Id } from "lib/types/core/id";
-import { NextResponseErrors } from "lib/api/core/utils";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
-import { DocumentCollectionService } from "lib/api/services/document-collection-service";
 import { OrganizationService } from "lib/api/services/organization-service";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
-import { ModelType, toModelType } from "lib/types/core/model-type";
-import { removeTrailingSlash } from "lib/core/string-utils";
-import { API } from "lib/api/core/api.utils";
+
+import { 
+  DocumentCollectionService, 
+  removeTrailingSlash, 
+  NextResponseErrors, 
+  Id, 
+  toModelType, 
+  ModelType, 
+  DocumentCollectionResponse, 
+  API } from "@repo/core";
+
 
 const orgMembershipService = new OrgMembershipService();
 const orgService = new OrganizationService();

@@ -9,11 +9,8 @@ import useToasts from "lib/fe/hooks/use-toasts";
 import { FrontendRoutes } from "lib/fe/routes";
 import ChatInput from "lib/fe/components/chat-input";
 import { StudioToasts } from "lib/fe/components/studio-toasts";
-import { Id } from "lib/types/core/id";
 import { FilesUpload } from "lib/fe/components/files-upload";
 import { ChatType } from "lib/types/core/chat-type";
-import { DocumentResponse } from "lib/types/api/document.response";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
 import {
   createDocumentCollection,
@@ -21,6 +18,8 @@ import {
 } from "lib/fe/document-utils";
 import { postChat, postChatMessage } from "lib/fe/chat-utils";
 import { IndexingMode } from "lib/types/core/indexing-mode";
+
+import { Id, DocumentCollectionResponse, DocumentResponse } from "@repo/core";
 
 export default function NewChat({ orgSlug }: { orgSlug: string }) {
   const router = useRouter();

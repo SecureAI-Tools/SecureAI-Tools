@@ -1,6 +1,5 @@
+import { Id, DocumentCollectionResponse } from "@repo/core";
 import { ChatResponse } from "lib/types/api/chat.response";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
-import { Id } from "lib/types/core/id";
 
 export namespace FrontendRoutes {
   export const INDEX = "/";

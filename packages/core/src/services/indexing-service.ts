@@ -15,6 +15,7 @@ import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 import { ChromaClient } from "chromadb";
 import { DocumentCollectionResponse } from "../types/document-collection.response";
+import { StreamChunkResponse } from "../types/stream-chunk.response";
 
 const documentService = new DocumentService();
 const documentCollectionService = new DocumentCollectionService;
@@ -165,4 +166,3 @@ function toDocumentChunkMetadata(
 function toDocumentChunkId(documentId: string, i: number): string {
   return `${documentId}:${i}`;
 }
-

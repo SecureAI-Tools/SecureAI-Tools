@@ -1,12 +1,15 @@
 import { NextRequest } from "next/server";
 
 import { isAuthenticated } from "lib/api/core/auth";
-import { Id } from "lib/types/core/id";
 import { PermissionService } from "lib/api/services/permission-service";
-import { NextResponseErrors } from "lib/api/core/utils";
-import { DocumentService } from "lib/api/services/document-service";
-import { LocalObjectStorageService } from "lib/api/services/local-object-storage-service";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
+
+import { 
+  DocumentService, 
+  LocalObjectStorageService, 
+  NextResponseErrors, 
+  Id, 
+  DocumentCollectionResponse } from "@repo/core";
+
 
 const permissionService = new PermissionService();
 const documentService = new DocumentService();

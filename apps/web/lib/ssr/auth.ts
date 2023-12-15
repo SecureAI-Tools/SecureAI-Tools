@@ -5,11 +5,10 @@ import {
   GetServerSidePropsResult,
 } from "next";
 
-import { Id } from "lib/types/core/id";
-import { UserResponse } from "lib/types/api/user.response";
 import { ParsedUrlQuery } from "querystring";
 import { FrontendRoutes } from "lib/fe/routes";
 import { TokenUser } from "lib/types/core/token-user";
+import { Id, UserResponse } from "@repo/core";
 
 export async function isAuthenticated<P>(
   context: GetServerSidePropsContext<ParsedUrlQuery, PreviewData>,
