@@ -6,8 +6,12 @@ import { withLogging } from "lib/api/core/with-logging";
 import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { AddUsersRequest } from "lib/types/api/add-users.request";
+
 import { groupBy } from "lodash";
-import { ErrorResponse, sendUnsupportedMethodError, API, sendBadRequestError, sendNotFoundError, sendForbiddenError, isEmpty } from "@repo/core";
+import { ErrorResponse } from "@repo/core/src/types/error.response";
+import { API } from "@repo/core/src/utils/api.utils";
+import { sendUnsupportedMethodError, sendBadRequestError, sendNotFoundError, sendForbiddenError } from "@repo/core/src/utils/utils";
+import { isEmpty } from "@repo/core/src/utils/string-utils";
 
 const orgMembershipService = new OrgMembershipService();
 

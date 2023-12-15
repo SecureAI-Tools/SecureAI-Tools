@@ -3,7 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "lib/api/core/auth";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { ModelsResponse } from "lib/types/api/models.response";
-import { NextResponseErrors, isEmpty } from "@repo/core";
+
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
+import { isEmpty } from "@repo/core/src/utils/string-utils";
 
 const orgMembershipService = new OrgMembershipService();
 

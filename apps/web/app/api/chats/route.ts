@@ -5,7 +5,9 @@ import { ChatService } from "lib/api/services/chat-service";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { OrgMembershipStatus } from "lib/types/core/org-membership-status";
 import { ChatResponse } from "lib/types/api/chat.response";
-import { NextResponseErrors, API } from "@repo/core";
+
+import { API } from "@repo/core/src/utils/api.utils";
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
 
 const chatService = new ChatService();
 const orgMembershipService = new OrgMembershipService();

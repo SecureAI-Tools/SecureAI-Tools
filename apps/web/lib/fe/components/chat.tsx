@@ -29,9 +29,13 @@ import { ChatType } from "lib/types/core/chat-type";
 import { CitationResponse } from "lib/types/api/citation-response";
 import { Link } from "lib/fe/components/link";
 import { ChatMessageRole } from "lib/types/core/chat-message-role";
-import { DocumentResponse, Id, DocumentIndexingStatus, StreamChunkResponse } from "@repo/core";
+
 import { DEFAULT_CHAT_TITLE } from "@repo/core/constants";
 import { isEmpty } from "@repo/core/src/utils/string-utils";
+import { DocumentIndexingStatus } from "@repo/core/src/types/document-indexing-status";
+import { DocumentResponse } from "@repo/core/src/types/document.response";
+import { Id } from "@repo/core/src/types/id";
+import { StreamChunkResponse } from "@repo/core/src/types/stream-chunk.response";
 
 const MessageEntry = ({
   message,

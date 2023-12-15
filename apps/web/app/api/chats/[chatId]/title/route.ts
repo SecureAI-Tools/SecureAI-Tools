@@ -8,7 +8,10 @@ import { PermissionService } from "lib/api/services/permission-service";
 import { ChatTitleRequest } from "lib/types/api/chat-title.request";
 import { ChatService } from "lib/api/services/chat-service";
 import { ChatResponse } from "lib/types/api/chat.response";
-import { Id, ModelProviderService, NextResponseErrors } from "@repo/core";
+
+import { ModelProviderService } from "@repo/core/src/services/model-provider-service";
+import { Id } from "@repo/core/src/types/id";
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
 
 const permissionService = new PermissionService();
 const chatService = new ChatService();

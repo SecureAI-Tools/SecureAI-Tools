@@ -5,19 +5,17 @@ import { PermissionService } from "lib/api/services/permission-service";
 import { getDocumentObjectKey } from "lib/api/core/document.utils";
 import { IndexingMode } from "lib/types/core/indexing-mode";
 
-import { 
-  API,
-  DocumentCollectionResponse, 
-  DocumentCollectionService, 
-  DocumentIndexingStatus, 
-  DocumentResponse, 
-  DocumentService, 
-  Id, 
-  IndexingQueueMessage, 
-  LocalObjectStorageService, 
-  NextResponseErrors, 
-  getAMQPChannel
-} from "@repo/core";
+import { DocumentCollectionService } from "@repo/core/src/services/document-collection-service";
+import { DocumentService } from "@repo/core/src/services/document-service";
+import { LocalObjectStorageService } from "@repo/core/src/services/local-object-storage-service";
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
+import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
+import { DocumentIndexingStatus } from "@repo/core/src/types/document-indexing-status";
+import { DocumentResponse } from "@repo/core/src/types/document.response";
+import { IndexingQueueMessage } from "@repo/core/src/types/indexing-queue-message";
+import { Id } from "@repo/core/src/types/id";
+import { API } from "@repo/core/src/utils/api.utils";
+import { getAMQPChannel } from "@repo/core/src/amqp-client";
 
 const permissionService = new PermissionService();
 const documentCollectionService = new DocumentCollectionService();

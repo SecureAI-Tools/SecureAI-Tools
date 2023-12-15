@@ -10,7 +10,9 @@ import { postChat, postChatMessage } from "lib/fe/chat-utils";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { StudioToasts } from "lib/fe/components/studio-toasts";
 
-import { Id, DocumentCollectionResponse, isEmpty } from "@repo/core";
+import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
+import { Id } from "@repo/core/src/types/id";
+import { isEmpty } from "@repo/core/src/utils/string-utils";
 
 const ChatCreationModal = ({
   show,

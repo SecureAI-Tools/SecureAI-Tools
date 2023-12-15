@@ -1,14 +1,14 @@
-import { ErrorResponse } from "@repo/core";
-import { Id } from "@repo/core";
-import { sendUnauthorizedError } from "@repo/core";
-import { UserResponse } from "@repo/core";
-
 import { getToken } from "next-auth/jwt";
 import { NextApiResponse, NextApiRequest } from "next";
 import { NextRequest } from "next/server";
 
 import { TokenUser } from "lib/types/core/token-user";
 import { UserService } from "lib/api/services/user.service";
+
+import { ErrorResponse } from "@repo/core/src/types/error.response";
+import { Id } from "@repo/core/src/types/id";
+import { UserResponse } from "@repo/core/src/types/user.response";
+import { sendUnauthorizedError } from "@repo/core/src/utils/utils";
 
 const userService = new UserService();
 

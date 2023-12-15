@@ -6,8 +6,9 @@ import { OllamaEmbeddings } from "langchain/embeddings/ollama";
 import { Embeddings } from "langchain/dist/embeddings/base";
 
 import { getLogger } from "../logger";
-import { ModelProviderConfig, ModelType, toModelType } from "..";
 import { removeTrailingSlash } from "../utils/string-utils";
+import { ModelProviderConfig } from "../types/model-provider-config";
+import { toModelType, ModelType } from "../types/model-type";
 
 
 const logger = getLogger("model-provider-service");

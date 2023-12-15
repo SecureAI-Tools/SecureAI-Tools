@@ -23,8 +23,11 @@ import {
   toOrgMembershipRole,
 } from "lib/types/core/org-membership-role";
 import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
-import { Id, OrganizationResponse, isEmpty } from "@repo/core";
+
 import { MAX_ADD_USERS_CSV_ROWS } from "@repo/core/constants";
+import { Id } from "@repo/core/src/types/id";
+import { OrganizationResponse } from "@repo/core/src/types/organization.response";
+import { isEmpty } from "@repo/core/src/utils/string-utils";
 
 const getOrganization = async (slug: string): Promise<OrganizationResponse> => {
   // TODO(TECH-DEBT): Use SWR here instead of direct get()

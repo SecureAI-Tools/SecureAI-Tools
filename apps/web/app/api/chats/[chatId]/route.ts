@@ -6,7 +6,9 @@ import { PermissionService } from "lib/api/services/permission-service";
 import { ChatService } from "lib/api/services/chat-service";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { ChatUpdateRequest } from "lib/types/api/chat-update.request";
-import { NextResponseErrors, Id } from "@repo/core";
+
+import { Id } from "@repo/core/src/types/id";
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
 
 const permissionService = new PermissionService();
 const chatService = new ChatService();

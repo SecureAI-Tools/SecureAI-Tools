@@ -5,7 +5,11 @@ import { withLogging } from "lib/api/core/with-logging";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { OrgMembershipUpdateRequest } from "lib/types/api/org-membership-update.request";
 import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
-import { ErrorResponse, sendUnsupportedMethodError, API, sendBadRequestError, Id, sendNotFoundError, sendForbiddenError } from "@repo/core";
+
+import { ErrorResponse } from "@repo/core/src/types/error.response";
+import { Id } from "@repo/core/src/types/id";
+import { API } from "@repo/core/src/utils/api.utils";
+import { sendUnsupportedMethodError, sendBadRequestError, sendNotFoundError, sendForbiddenError } from "@repo/core/src/utils/utils";
 
 const orgMembershipService = new OrgMembershipService();
 

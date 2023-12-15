@@ -8,7 +8,13 @@ import { CitationService } from "lib/api/services/citation-service";
 import { CitationResponse } from "lib/types/api/citation-response";
 import { ChatService } from "lib/api/services/chat-service";
 import { ChatType } from "lib/types/core/chat-type";
-import { DocumentCollectionService, removeTrailingSlash, NextResponseErrors, Id, DocumentCollectionResponse, DocumentChunkMetadata } from "@repo/core";
+
+import { DocumentCollectionService } from "@repo/core/src/services/document-collection-service";
+import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
+import { Id } from "@repo/core/src/types/id";
+import { removeTrailingSlash } from "@repo/core/src/utils/string-utils";
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
+import { DocumentChunkMetadata } from "@repo/core/src/types/document-chunk-metadata";
 
 const chatService = new ChatService();
 const documentCollectionService = new DocumentCollectionService();

@@ -1,9 +1,3 @@
-import { UserResponse } from "@repo/core";
-import { Id } from "@repo/core";
-import { NextResponseErrors } from "@repo/core";
-import { DocumentCollectionResponse } from "@repo/core";
-import { DocumentCollectionService } from "@repo/core";
-
 import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
 
@@ -11,6 +5,12 @@ import { ChatResponse } from "lib/types/api/chat.response";
 import { ChatService } from "lib/api/services/chat-service";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { OrgMembershipStatus } from "lib/types/core/org-membership-status";
+
+import { DocumentCollectionService } from "@repo/core/src/services/document-collection-service";
+import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
+import { Id } from "@repo/core/src/types/id";
+import { UserResponse } from "@repo/core/src/types/user.response";
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
 
 export class PermissionService {
   private chatService = new ChatService();

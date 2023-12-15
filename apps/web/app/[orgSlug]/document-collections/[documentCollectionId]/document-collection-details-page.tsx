@@ -32,8 +32,10 @@ import { EmptyState } from "lib/fe/components/empty-state";
 
 import { PAGINATION_DEFAULT_PAGE_SIZE, DEFAULT_DOCUMENT_COLLECTION_NAME } from "@repo/core/constants";
 import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
-import { Id, DocumentResponse, DocumentIndexingStatus } from "@repo/core";
-import { isEmpty } from "lodash";
+import { isEmpty } from "@repo/core/src/utils/string-utils";
+import { DocumentIndexingStatus } from "@repo/core/src/types/document-indexing-status";
+import { DocumentResponse } from "@repo/core/src/types/document.response";
+import { Id } from "@repo/core/src/types/id";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;
 const pollingIntervalMS = 10000;

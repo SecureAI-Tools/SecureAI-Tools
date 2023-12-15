@@ -8,7 +8,9 @@ import {
 import { ParsedUrlQuery } from "querystring";
 import { FrontendRoutes } from "lib/fe/routes";
 import { TokenUser } from "lib/types/core/token-user";
-import { Id, UserResponse } from "@repo/core";
+
+import { Id } from "@repo/core/src/types/id";
+import { UserResponse } from "@repo/core/src/types/user.response";
 
 export async function isAuthenticated<P>(
   context: GetServerSidePropsContext<ParsedUrlQuery, PreviewData>,

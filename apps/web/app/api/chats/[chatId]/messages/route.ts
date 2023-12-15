@@ -7,7 +7,11 @@ import { PermissionService } from "lib/api/services/permission-service";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.request";
-import { NextResponseErrors, Id, API } from "@repo/core";
+
+import { Id } from "@repo/core/src/types/id";
+import { API } from "@repo/core/src/utils/api.utils";
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
+
 
 const chatMessageService = new ChatMessageService();
 const permissionService = new PermissionService();

@@ -6,15 +6,13 @@ import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { OrganizationService } from "lib/api/services/organization-service";
 import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
 
-import { 
-  DocumentCollectionService, 
-  removeTrailingSlash, 
-  NextResponseErrors, 
-  Id, 
-  toModelType, 
-  ModelType, 
-  DocumentCollectionResponse, 
-  API } from "@repo/core";
+import { DocumentCollectionService } from "@repo/core/src/services/document-collection-service";
+import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
+import { Id } from "@repo/core/src/types/id";
+import { toModelType, ModelType } from "@repo/core/src/types/model-type";
+import { API } from "@repo/core/src/utils/api.utils";
+import { removeTrailingSlash } from "@repo/core/src/utils/string-utils";
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
 
 
 const orgMembershipService = new OrgMembershipService();

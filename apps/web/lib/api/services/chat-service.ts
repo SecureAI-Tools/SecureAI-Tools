@@ -1,3 +1,9 @@
+import { ChatResponse } from "lib/types/api/chat.response";
+import { ChatType } from "lib/types/core/chat-type";
+
+import { Id } from "@repo/core/src/types/id";
+import { UserResponse } from "@repo/core/src/types/user.response";
+import { API } from "@repo/core/src/utils/api.utils";
 import {
   Chat,
   Organization,
@@ -5,12 +11,6 @@ import {
   TxPrismaClient,
   prismaClient,
 } from "@repo/database";
-import { Id } from "@repo/core";
-import { API } from "@repo/core";
-import { UserResponse } from "@repo/core";
-
-import { ChatResponse } from "lib/types/api/chat.response";
-import { ChatType } from "lib/types/core/chat-type";
 
 export interface ChatCreateInput {
   title: string | undefined;

@@ -1,15 +1,14 @@
+import { ChatMessageResponse } from "lib/types/api/chat-message.response";
+import { ChatMessageRole } from "lib/types/core/chat-message-role";
+
+import { Id } from "@repo/core/src/types/id";
+import { API } from "@repo/core/src/utils/api.utils";
 import {
   ChatMessage,
   Prisma,
   TxPrismaClient,
   prismaClient,
 } from "@repo/database";
-import { API } from "@repo/core";
-import { Id } from "@repo/core";
-
-import { ChatMessageResponse } from "lib/types/api/chat-message.response";
-import { ChatMessageRole } from "lib/types/core/chat-message-role";
-
 
 export interface ChatMessageCreateInput {
   content: string;

@@ -22,9 +22,9 @@ import { StudioToasts } from "lib/fe/components/studio-toasts";
 import { FrontendRoutes } from "lib/fe/routes";
 import { ChatType } from "lib/types/core/chat-type";
 
-import { clip } from "@repo/core";
 import { DEFAULT_CHAT_TITLE } from "@repo/core/constants";
 import { Id } from "@repo/core/src/types/id";
+import { clip } from "@repo/core/src/utils/string-utils";
 
 export default function ChatHistory({ orgSlug }: { orgSlug: string }) {
   const { data: session, status } = useSession();

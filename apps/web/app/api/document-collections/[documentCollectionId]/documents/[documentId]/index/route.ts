@@ -1,16 +1,3 @@
-import { NextResponseErrors } from "@repo/core";
-import { DocumentService } from "@repo/core";
-import { DocumentResponse } from "@repo/core";
-import { LocalObjectStorageService } from "@repo/core";
-import { DocumentCollectionResponse } from "@repo/core";
-import { DocumentCollectionService } from "@repo/core";
-import { isEmpty, removeTrailingSlash } from "@repo/core";
-import { DocumentIndexingStatus } from "@repo/core";
-import { StreamChunkResponse } from "@repo/core";
-import { ModelProviderService } from "@repo/core";
-import { DocumentChunkMetadata } from "@repo/core";
-import { Id } from "@repo/core";
-
 import { NextRequest, NextResponse } from "next/server";
 import { ChromaClient } from "chromadb";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
@@ -20,6 +7,19 @@ import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
 import { getWebLogger } from "lib/api/core/logger";
+
+import { DocumentCollectionService } from "@repo/core/src/services/document-collection-service";
+import { DocumentService } from "@repo/core/src/services/document-service";
+import { LocalObjectStorageService } from "@repo/core/src/services/local-object-storage-service";
+import { ModelProviderService } from "@repo/core/src/services/model-provider-service";
+import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
+import { StreamChunkResponse } from "@repo/core/src/types/stream-chunk.response";
+import { DocumentIndexingStatus } from "@repo/core/src/types/document-indexing-status";
+import { DocumentResponse } from "@repo/core/src/types/document.response";
+import { DocumentChunkMetadata } from "@repo/core/src/types/document-chunk-metadata";
+import { Id } from "@repo/core/src/types/id";
+import { isEmpty, removeTrailingSlash } from "@repo/core/src/utils/string-utils";
+import { NextResponseErrors } from "@repo/core/src/utils/utils";
 
 const logger = getWebLogger();
 
