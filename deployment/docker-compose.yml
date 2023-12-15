@@ -26,6 +26,29 @@ services:
         condition: service_completed_successfully
         restart: false
 
+  task-master:
+    image: public.ecr.aws/d8f2p0h3/secure-ai-tools:latest
+    platform: linux/amd64
+    volumes:
+      - ./web:/app/volume
+    env_file:
+      - .env
+    environment:
+      - INFERENCE_SERVER=http://inference:11434/
+      - VECTOR_DB_SERVER=http://vector-db:8000
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    command: sh -c "cd /app && node apps/task-master/dist/main.js"
+    depends_on:
+      db:
+        condition: service_started
+      inference:
+        condition: service_started
+      vector-db:
+        condition: service_started
+      db-migrate-and-seed:
+        condition: service_completed_successfully
+        restart: false
+
   # Performs DB schema migrations and seeds db with initial data if needed.
   db-migrate-and-seed:
     image: public.ecr.aws/d8f2p0h3/secure-ai-tools:latest
