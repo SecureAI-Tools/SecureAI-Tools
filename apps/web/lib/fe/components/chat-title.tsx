@@ -9,8 +9,10 @@ import { patch, ResponseWithHeaders } from "lib/fe/api";
 import { ChatUpdateRequest } from "lib/types/api/chat-update.request";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { chatApiPath } from "lib/fe/api-paths";
+
 import { DEFAULT_CHAT_TITLE } from "@repo/core/constants";
-import { Id, ModelType, modelTypeToReadableName } from "@repo/core";
+import { Id } from "@repo/core/src/types/id";
+import { ModelType, modelTypeToReadableName } from "@repo/core/src/types/model-type";
 
 const DefaultChatTitle = () => (
   <div className={tw("italic text-gray-600")}>{DEFAULT_CHAT_TITLE}</div>

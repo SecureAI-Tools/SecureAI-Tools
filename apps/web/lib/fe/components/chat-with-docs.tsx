@@ -23,7 +23,10 @@ import { renderErrors } from "lib/fe/components/generic-error";
 import { Chat } from "lib/fe/components/chat";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import { CitationResponse } from "lib/types/api/citation-response";
-import { Id, DocumentCollectionResponse, DocumentResponse } from "@repo/core";
+
+import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
+import { DocumentResponse } from "@repo/core/src/types/document.response";
+import { Id } from "@repo/core/src/types/id";
 
 export function ChatWithDocs({
   chat,

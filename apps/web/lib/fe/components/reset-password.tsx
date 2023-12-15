@@ -15,7 +15,10 @@ import { userPasswordApiPath } from "lib/fe/api-paths";
 import { TokenUser } from "lib/types/core/token-user";
 import { FetchError } from "lib/fe/types/fetch-error";
 import { PageTitle } from "./page-title";
-import { Id, UserResponse, isEmpty } from "@repo/core";
+
+import { Id } from "@repo/core/src/types/id";
+import { UserResponse } from "@repo/core/src/types/user.response";
+import { isEmpty } from "@repo/core/src/utils/string-utils";
 
 export const ResetPassword = ({
   onResetPasswordSuccess,

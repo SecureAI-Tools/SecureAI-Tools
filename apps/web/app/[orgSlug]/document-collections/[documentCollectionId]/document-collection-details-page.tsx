@@ -30,8 +30,10 @@ import { DocumentCollectionStatsResponse } from "lib/types/api/document-collecti
 import ChatCreationModal from "./chat-creation-modal";
 import { EmptyState } from "lib/fe/components/empty-state";
 
-import { Id, DocumentCollectionResponse, DocumentIndexingStatus, DocumentResponse, isEmpty } from "@repo/core";
 import { PAGINATION_DEFAULT_PAGE_SIZE, DEFAULT_DOCUMENT_COLLECTION_NAME } from "@repo/core/constants";
+import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
+import { Id, DocumentResponse, DocumentIndexingStatus } from "@repo/core";
+import { isEmpty } from "lodash";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;
 const pollingIntervalMS = 10000;

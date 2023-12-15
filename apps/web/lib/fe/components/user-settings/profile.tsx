@@ -9,7 +9,9 @@ import { TokenUser } from "lib/types/core/token-user";
 import { StudioToasts } from "lib/fe/components/studio-toasts";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { UserUpdateRequest } from "lib/types/api/user-update-request";
-import { Id, UserResponse } from "@repo/core";
+
+import { Id } from "@repo/core/src/types/id";
+import { UserResponse } from "@repo/core/src/types/user.response";
 
 const UserProfileSettings = () => {
   const {

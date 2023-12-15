@@ -2,8 +2,9 @@ import { Fetcher } from "swr";
 
 import { parseInteger } from "lib/core/number-utils";
 import { FetchError } from "./types/fetch-error";
-import { ResponseHeaders } from "@repo/core";
+
 import { HEADER_PAGINATION_TOTAL_COUNT } from "@repo/core/constants";
+import { ResponseHeaders } from "@repo/core/src/types/response-headers";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 

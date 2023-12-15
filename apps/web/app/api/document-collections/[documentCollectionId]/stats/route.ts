@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { isAuthenticated } from "lib/api/core/auth";
-import { Id } from "lib/types/core/id";
 import { PermissionService } from "lib/api/services/permission-service";
-import { NextResponseErrors } from "lib/api/core/utils";
-import { DocumentService } from "lib/api/services/document-service";
-import { DocumentIndexingStatus } from "lib/types/core/document-indexing-status";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
 import { DocumentCollectionStatsResponse } from "lib/types/api/document-collection-stats.response";
+
+import { DocumentService, NextResponseErrors, Id, DocumentCollectionResponse, DocumentIndexingStatus } from "@repo/core";
 
 const permissionService = new PermissionService();
 const documentService = new DocumentService();

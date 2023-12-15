@@ -2,7 +2,14 @@ import { ChatResponse } from "lib/types/api/chat.response";
 import { OrderingParams, PaginationParams } from "lib/fe/api-params";
 import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
-import { DocumentCollectionResponse, DocumentResponse, Id, OrganizationResponse, UserResponse, isEmpty } from "@repo/core";
+
+import { UserResponse } from "@repo/core/src/types/user.response";
+import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
+import { DocumentResponse } from "@repo/core/src/types/document.response";
+import { Id } from "@repo/core/src/types/id";
+import { OrganizationResponse } from "@repo/core/src/types/organization.response";
+import { isEmpty } from "@repo/core/src/utils/string-utils";
+
 
 export const userApiPath = (userId: Id<UserResponse>): string => {
   return `/api/users/${userId}`;

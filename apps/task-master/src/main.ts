@@ -1,5 +1,6 @@
 import { prismaClient } from "@repo/database";
-import { IndexingQueueMessage, getAMQPChannel, getLogger } from "@repo/core";
+import { getAMQPChannel, getLogger } from "@repo/core";
+import { IndexingQueueMessage } from "@repo/core/src/types/indexing-queue-message";
 
 const logger = getLogger("task-master");
 

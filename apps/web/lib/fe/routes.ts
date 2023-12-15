@@ -1,4 +1,5 @@
-import { Id, DocumentCollectionResponse } from "@repo/core";
+import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
+import { Id } from "@repo/core/src/types/id";
 import { ChatResponse } from "lib/types/api/chat.response";
 
 export namespace FrontendRoutes {

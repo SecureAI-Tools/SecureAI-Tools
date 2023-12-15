@@ -3,15 +3,14 @@ import { tw } from "twind";
 import { Button, Modal } from "flowbite-react";
 
 import ChatInput from "lib/fe/components/chat-input";
-import { DocumentCollectionResponse } from "lib/types/api/document-collection.response";
-import { Id } from "lib/types/core/id";
-import { isEmpty } from "lib/core/string-utils";
 import { ChatType } from "lib/types/core/chat-type";
 import { useRouter } from "next/navigation";
 import { FrontendRoutes } from "lib/fe/routes";
 import { postChat, postChatMessage } from "lib/fe/chat-utils";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { StudioToasts } from "lib/fe/components/studio-toasts";
+
+import { Id, DocumentCollectionResponse, isEmpty } from "@repo/core";
 
 const ChatCreationModal = ({
   show,

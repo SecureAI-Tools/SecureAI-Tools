@@ -22,8 +22,10 @@ import { OrganizationUpdateRequest } from "lib/types/api/organization-update.req
 import { StudioToasts } from "lib/fe/components/studio-toasts";
 import { isAdmin } from "lib/fe/permission-utils";
 import useToasts from "lib/fe/hooks/use-toasts";
-import { OrganizationResponse, Id } from "@repo/core";
+
 import { isEmpty } from "@repo/core";
+import { Id } from "@repo/core/src/types/id";
+import { OrganizationResponse } from "@repo/core/src/types/organization.response";
 
 type SlugAvailability = "available" | "unavailable" | "unknown" | "loading";
 
