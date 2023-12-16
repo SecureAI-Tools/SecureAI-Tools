@@ -22,9 +22,9 @@ async function main() {
   const channel = await getAMQPChannel(amqpServerUrl);
   await channel.assertQueue(queueName);
 
-  // This consumes all messages at once in parallel. This can overwhelm the LLM.
-  // TODO: Optimize this so it only consumes max N messages at a time. We may need to do
-  // prefetch with ack: https://amqp-node.github.io/amqplib/channel_api.html#channel_prefetch
+  // We are consuming one message at a time for now.
+  channel.prefetch(1);
+
   channel.consume(
     queueName,
     async (data) => {
@@ -35,9 +35,10 @@ async function main() {
         for await (const chunk of asyncGenerator) {
           logger.info(`[doc = ${msg.documentId}] chunk`, chunk);
         }
+        channel.ack(data)
       }
     },
-    { noAck: true }
+    { noAck: false }
   );
 }
 
