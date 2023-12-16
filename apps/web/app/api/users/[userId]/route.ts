@@ -4,9 +4,8 @@ import { isAuthenticated } from "lib/api/core/auth";
 import { UserService } from "lib/api/services/user.service";
 import { UserUpdateRequest } from "lib/types/api/user-update-request";
 
-import { Id } from "@repo/core/src/types/id";
-import { UserResponse } from "@repo/core/src/types/user.response";
-import { NextResponseErrors } from "@repo/core/src/utils/utils";
+import { Id, UserResponse } from "@repo/core";
+import { NextResponseErrors } from "@repo/backend";
 
 const userService = new UserService();
 

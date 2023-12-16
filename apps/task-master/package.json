@@ -2,11 +2,13 @@
   "name": "task-master",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "env-cmd -f .env.development ts-node ./src/main.ts"
   },
   "dependencies": {
+    "@repo/backend": "*",
     "@repo/core": "*",
     "@repo/database": "*",
     "env-cmd": "^10.1.0"

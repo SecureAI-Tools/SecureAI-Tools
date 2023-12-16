@@ -8,10 +8,8 @@ import { ChatResponse } from "lib/types/api/chat.response";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.request";
 
-import { Id } from "@repo/core/src/types/id";
-import { API } from "@repo/core/src/utils/api.utils";
-import { NextResponseErrors } from "@repo/core/src/utils/utils";
-
+import { Id } from "@repo/core";
+import { NextResponseErrors, API } from "@repo/backend";
 
 const chatMessageService = new ChatMessageService();
 const permissionService = new PermissionService();

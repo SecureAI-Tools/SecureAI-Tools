@@ -7,8 +7,8 @@ import { ChatCreateRequest } from "lib/types/api/chat-create.request";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { PermissionService } from "lib/api/services/permission-service";
 
-import { Id } from "@repo/core/src/types/id";
-import { NextResponseErrors } from "@repo/core/src/utils/utils";
+import { Id } from "@repo/core";
+import { NextResponseErrors } from "@repo/backend";
 
 const chatService = new ChatService();
 const orgMembershipService = new OrgMembershipService();

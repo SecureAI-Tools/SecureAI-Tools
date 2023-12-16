@@ -7,7 +7,7 @@ import {
   OrgMembershipStatus,
   toOrgMembershipStatus,
 } from "../core/org-membership-status";
-import { UserResponse } from "@repo/core/src/types/user.response";
+import { UserResponse } from "@repo/core";
 
 export class OrgMembershipResponse {
   id!: string;

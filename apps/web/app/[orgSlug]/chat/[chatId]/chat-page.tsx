@@ -16,7 +16,7 @@ import { Spinner } from "flowbite-react";
 import { ChatType } from "lib/types/core/chat-type";
 import { ChatWithDocs } from "lib/fe/components/chat-with-docs";
 
-import { Id } from "@repo/core/src/types/id";
+import { Id } from "@repo/core";
 
 const ChatPage = ({
   orgSlug,

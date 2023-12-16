@@ -23,9 +23,7 @@ import { StudioToasts } from "lib/fe/components/studio-toasts";
 import { isAdmin } from "lib/fe/permission-utils";
 import useToasts from "lib/fe/hooks/use-toasts";
 
-import { Id } from "@repo/core/src/types/id";
-import { OrganizationResponse } from "@repo/core/src/types/organization.response";
-import { isEmpty } from "@repo/core/src/utils/string-utils";
+import { OrganizationResponse, Id, isEmpty } from "@repo/core";
 
 type SlugAvailability = "available" | "unavailable" | "unknown" | "loading";
 

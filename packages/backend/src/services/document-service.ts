@@ -1,9 +1,6 @@
 import { Document, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
-import { DocumentCollectionResponse } from "../types/document-collection.response";
-import { DocumentIndexingStatus } from "../types/document-indexing-status";
-import { DocumentResponse } from "../types/document.response";
-import { Id } from "../types/id";
 import { API } from "../utils/api.utils";
+import { Id, DocumentResponse, DocumentIndexingStatus, DocumentCollectionResponse } from "@repo/core";
 
 
 export interface DocumentCreateInput {

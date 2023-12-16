@@ -25,9 +25,7 @@ import { renderErrors } from "lib/fe/components/generic-error";
 import { Link } from "lib/fe/components/link";
 import { ModelProviderResponse } from "lib/types/api/mode-provider.response";
 
-import { Id } from "@repo/core/src/types/id";
-import { ModelType, toModelType, modelTypeToReadableName } from "@repo/core/src/types/model-type";
-import { OrganizationResponse } from "@repo/core/src/types/organization.response";
+import { ModelType, OrganizationResponse, Id, toModelType, modelTypeToReadableName } from "@repo/core";
 
 const OrgAISettings = ({
   orgSlug,

@@ -1,3 +1,3 @@
-import { getLogger } from "@repo/core/src/logger";
+import { getLogger } from "@repo/backend";
 
 export const getWebLogger = () => getLogger("web")

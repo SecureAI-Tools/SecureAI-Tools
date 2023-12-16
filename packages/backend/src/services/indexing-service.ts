@@ -1,21 +1,15 @@
-import { Document as LangchainDocument } from "langchain/dist/document";
+import { Document as LangchainDocument } from "langchain/document";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { ChromaClient } from "chromadb";
 
-import { DocumentResponse } from "../types/document.response";
-import { Id } from "../types/id";
 import { getLogger } from "../logger";
 import { LocalObjectStorageService } from "./local-object-storage-service";
 import { ModelProviderService } from "./model-provider-service";
-import { DocumentChunkMetadata } from "../types/document-chunk-metadata";
-import { isEmpty, removeTrailingSlash } from "../utils/string-utils";
-import { DocumentIndexingStatus } from "../types/document-indexing-status";
 import { DocumentService } from "./document-service";
 import { DocumentCollectionService } from "./document-collection-service";
 
-import { DocumentCollectionResponse } from "../types/document-collection.response";
-import { StreamChunkResponse } from "../types/stream-chunk.response";
+import { DocumentChunkMetadata, DocumentCollectionResponse, DocumentIndexingStatus, DocumentResponse, Id, StreamChunkResponse, isEmpty, removeTrailingSlash } from "@repo/core";
 
 const logger = getLogger("model-provider-service");
 

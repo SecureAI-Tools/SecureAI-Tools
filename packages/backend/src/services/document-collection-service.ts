@@ -6,13 +6,8 @@ import {
 } from "@repo/database";
 import { customAlphabet } from "nanoid";
 
-import { UserResponse } from "../types/user.response";
-import { DocumentCollectionResponse } from "../types/document-collection.response";
-import { Id } from "../types/id";
-import { ModelType } from "../types/model-type";
-import { OrganizationResponse } from "../types/organization.response";
 import { API } from "../utils/api.utils";
-
+import { Id, OrganizationResponse, ModelType, DocumentCollectionResponse, UserResponse } from "@repo/core";
 
 export interface DocumentCollectionCreateInput {
   name?: string;

@@ -4,11 +4,8 @@ import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
 import { DocumentCollectionStatsResponse } from "lib/types/api/document-collection-stats.response";
 
-import { DocumentService } from "@repo/core/src/services/document-service";
-import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
-import { DocumentIndexingStatus } from "@repo/core/src/types/document-indexing-status";
-import { Id } from "@repo/core/src/types/id";
-import { NextResponseErrors } from "@repo/core/src/utils/utils";
+import { Id, DocumentCollectionResponse, DocumentIndexingStatus } from "@repo/core";
+import { DocumentService, NextResponseErrors } from "@repo/backend";
 
 const permissionService = new PermissionService();
 const documentService = new DocumentService();

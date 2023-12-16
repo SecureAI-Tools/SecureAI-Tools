@@ -4,7 +4,7 @@ import { isAuthenticated } from "lib/api/core/auth";
 import { UserService } from "lib/api/services/user.service";
 import { PasswordForceResetResponse } from "lib/types/api/password-force-reset.response";
 
-import { NextResponseErrors } from "@repo/core/src/utils/utils";
+import { NextResponseErrors } from "@repo/backend";
 
 const userService = new UserService();
 

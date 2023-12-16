@@ -54,3 +54,5 @@ chroma.log
 dev-data
 
 .turbo
+
+dist/

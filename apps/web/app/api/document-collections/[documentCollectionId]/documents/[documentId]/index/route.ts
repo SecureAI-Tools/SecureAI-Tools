@@ -3,13 +3,8 @@ import { NextRequest } from "next/server";
 import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
 
-import { DocumentCollectionService } from "@repo/core/src/services/document-collection-service";
-import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
-import { StreamChunkResponse } from "@repo/core/src/types/stream-chunk.response";
-import { DocumentResponse } from "@repo/core/src/types/document.response";
-import { Id } from "@repo/core/src/types/id";
-import { NextResponseErrors } from "@repo/core/src/utils/utils";
-import { IndexingService } from "@repo/core/src/services/indexing-service";
+import { Id, DocumentCollectionResponse, DocumentResponse, StreamChunkResponse } from "@repo/core";
+import { DocumentCollectionService, IndexingService, NextResponseErrors } from "@repo/backend";
 
 const permissionService = new PermissionService();
 const documentCollectionService = new DocumentCollectionService();

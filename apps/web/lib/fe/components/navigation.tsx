@@ -7,7 +7,8 @@ import Link from "next/link";
 import { Button } from "flowbite-react";
 
 import { FrontendRoutes } from "lib/fe/routes";
-import { TWIND_TEXT_COLOR, PUBLIC_FACING_NAME } from "@repo/core/constants";
+
+import { TWIND_TEXT_COLOR, PUBLIC_FACING_NAME } from "@repo/core";
 
 interface IMenuButton {
   toggleMenu: React.MouseEventHandler<HTMLButtonElement>;

@@ -1,3 +1,5 @@
+# Builds an omnibus image containing both apps: web and task-master
+#
 # Dockerfile based on Turborepo docs
 # https://github.com/vercel/turbo/blob/main/examples/with-docker/apps/web/Dockerfile
 # https://turbo.build/repo/docs/handbook/deploying-with-docker
@@ -13,7 +15,7 @@ RUN apk update
 WORKDIR /app
 RUN yarn global add turbo
 COPY . .
-RUN turbo prune web --docker
+RUN turbo prune --scope=web --scope=task-master --docker
 
 
 # Add lockfile and package.json's of isolated subworkspace
@@ -32,7 +34,7 @@ RUN yarn install --frozen-lockfile
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 
-RUN yarn turbo build --filter=web...
+RUN yarn turbo build --filter=web... --filter=task-master...
 RUN yarn turbo db-seed:build
 
 # Production image, copy all the files and run next
@@ -62,6 +64,13 @@ COPY --from=installer /app/packages/database/prisma/ ./packages/database/prisma/
 COPY --from=installer /app/apps/web/tools/db-seed.mjs ./apps/web/tools/
 COPY --from=installer /app/apps/web/tools/db-migrate-and-seed.sh ./apps/web/tools/
 COPY --from=installer /app/apps/web/tools/migrate-to-postgres-db.load ./apps/web/tools/
+
+# Copy task-master app
+COPY --from=installer /app/apps/task-master/package.json ./apps/task-master/
+COPY --from=installer /app/apps/task-master/dist/ ./apps/task-master/dist/
+COPY --from=installer /app/packages/backend/dist/ ./packages/backend/dist/
+COPY --from=installer /app/packages/core/dist/ ./packages/core/dist/
+COPY --from=installer /app/packages/database/dist/ ./packages/database/dist/
 
 EXPOSE 28669
 

@@ -19,9 +19,7 @@ import {
 import { postChat, postChatMessage } from "lib/fe/chat-utils";
 import { IndexingMode } from "lib/types/core/indexing-mode";
 
-import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
-import { DocumentResponse } from "@repo/core/src/types/document.response";
-import { Id } from "@repo/core/src/types/id";
+import { Id, DocumentCollectionResponse, DocumentResponse } from "@repo/core";
 
 export default function NewChat({ orgSlug }: { orgSlug: string }) {
   const router = useRouter();
