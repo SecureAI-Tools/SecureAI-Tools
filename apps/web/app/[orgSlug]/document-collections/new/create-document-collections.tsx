@@ -165,7 +165,7 @@ const CreateDocumentCollections = ({ orgSlug }: { orgSlug: string }) => {
             <DocumentsUploadModal
               files={selectedFiles}
               collectionId={documentCollectionId}
-              onSuccessContinue={() => {
+              onSuccess={() => {
                 setIsSubmitting(false);
                 router.push(
                   `${FrontendRoutes.getDocumentCollectionRoute(
