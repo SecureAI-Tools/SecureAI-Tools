@@ -9,9 +9,8 @@ import { ChatTitleRequest } from "lib/types/api/chat-title.request";
 import { ChatService } from "lib/api/services/chat-service";
 import { ChatResponse } from "lib/types/api/chat.response";
 
-import { ModelProviderService } from "@repo/core/src/services/model-provider-service";
-import { Id } from "@repo/core/src/types/id";
-import { NextResponseErrors } from "@repo/core/src/utils/utils";
+import { ModelProviderService, NextResponseErrors } from "@repo/backend";
+import { Id } from "@repo/core";
 
 const permissionService = new PermissionService();
 const chatService = new ChatService();

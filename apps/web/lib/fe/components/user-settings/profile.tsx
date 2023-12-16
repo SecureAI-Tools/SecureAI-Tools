@@ -10,8 +10,7 @@ import { StudioToasts } from "lib/fe/components/studio-toasts";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { UserUpdateRequest } from "lib/types/api/user-update-request";
 
-import { Id } from "@repo/core/src/types/id";
-import { UserResponse } from "@repo/core/src/types/user.response";
+import { Id, UserResponse } from "@repo/core";
 
 const UserProfileSettings = () => {
   const {

@@ -2,7 +2,8 @@ import { useState, Dispatch, SetStateAction, useEffect } from "react";
 import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 
 import { parseInteger } from "lib/core/number-utils";
-import { PAGINATION_STARTING_PAGE_NUMBER } from "@repo/core/constants";
+
+import { PAGINATION_STARTING_PAGE_NUMBER } from "@repo/core";
 
 export default function useTableState(): [
   TableState,

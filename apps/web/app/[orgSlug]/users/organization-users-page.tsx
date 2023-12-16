@@ -34,10 +34,7 @@ import { OrgMembershipStatus } from "lib/types/core/org-membership-status";
 import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
 import { PageTitle } from "lib/fe/components/page-title";
 
-import { PAGINATION_DEFAULT_PAGE_SIZE, PAGINATION_STARTING_PAGE_NUMBER } from "@repo/core/constants";
-import { Id } from "@repo/core/src/types/id";
-import { OrganizationResponse } from "@repo/core/src/types/organization.response";
-import { UserResponse } from "@repo/core/src/types/user.response";
+import { Id, OrganizationResponse, PAGINATION_DEFAULT_PAGE_SIZE, PAGINATION_STARTING_PAGE_NUMBER, UserResponse } from "@repo/core";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;
 const orgSlugParam = "orgSlug";

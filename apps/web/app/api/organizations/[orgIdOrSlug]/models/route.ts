@@ -4,8 +4,8 @@ import { isAuthenticated } from "lib/api/core/auth";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { ModelsResponse } from "lib/types/api/models.response";
 
-import { NextResponseErrors } from "@repo/core/src/utils/utils";
-import { isEmpty } from "@repo/core/src/utils/string-utils";
+import { NextResponseErrors } from "@repo/backend";
+import { isEmpty } from "@repo/core";
 
 const orgMembershipService = new OrgMembershipService();
 

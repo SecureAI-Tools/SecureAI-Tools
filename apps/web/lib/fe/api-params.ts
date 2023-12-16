@@ -1,5 +1,4 @@
-import { PAGINATION_DEFAULT_PAGE_SIZE, PAGINATION_STARTING_PAGE_NUMBER } from "@repo/core/constants";
-import { IntRange } from "lib/types/core/numbers";
+import { PAGINATION_STARTING_PAGE_NUMBER, PAGINATION_DEFAULT_PAGE_SIZE } from "@repo/core";
 
 export type OrderBy = "createdAt" | "updatedAt";
 export type OrderDirection = "asc" | "desc";

@@ -7,9 +7,8 @@ import { OrganizationService } from "lib/api/services/organization-service";
 import { UserService } from "lib/api/services/user.service";
 
 import { Organization, OrgMembership, Prisma, User, TxPrismaClient, prismaClient } from "@repo/database";
-import { Id } from "@repo/core/src/types/id";
-import { UserResponse } from "@repo/core/src/types/user.response";
-import { API } from "@repo/core/src/utils/api.utils";
+import { API } from "@repo/backend";
+import { Id, UserResponse } from "@repo/core";
 
 export interface AddUserResult {
   // Created or updated membership

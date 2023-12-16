@@ -20,12 +20,8 @@ import { CitationService } from "lib/api/services/citation-service";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import { getWebLogger } from "lib/api/core/logger";
 
-import { DocumentCollectionService } from "@repo/core/src/services/document-collection-service";
-import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
-import { Id } from "@repo/core/src/types/id";
-import { NextResponseErrors } from "@repo/core/src/utils/utils";
-import { ModelProviderService } from "@repo/core/src/services/model-provider-service";
-import { DocumentChunkMetadata } from "@repo/core/src/types/document-chunk-metadata";
+import { Id, DocumentCollectionResponse, DocumentChunkMetadata } from "@repo/core";
+import { DocumentCollectionService, ModelProviderService, NextResponseErrors } from "@repo/backend";
 
 const chatMessageService = new ChatMessageService();
 const documentCollectionService = new DocumentCollectionService();

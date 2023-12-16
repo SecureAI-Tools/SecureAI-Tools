@@ -13,7 +13,7 @@ import { createFetcher } from "lib/fe/api";
 import { PasswordForceResetResponse } from "lib/types/api/password-force-reset.response";
 import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
 
-import { Id } from "@repo/core/src/types/id";
+import { Id } from "@repo/core";
 
 // Intermediate page after successful log-in. This allows us to force password-reset.
 export default function PostLogInPage() {

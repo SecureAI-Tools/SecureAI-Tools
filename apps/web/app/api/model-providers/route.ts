@@ -4,9 +4,8 @@ import { isAuthenticated } from "lib/api/core/auth";
 import { ModelProviderResponse } from "lib/types/api/mode-provider.response";
 import { getWebLogger } from "lib/api/core/logger";
 
-import { ModelProviderService } from "@repo/core/src/services/model-provider-service";
-import { ModelType } from "@repo/core/src/types/model-type";
-import { NextResponseErrors } from "@repo/core/src/utils/utils";
+import { ModelType } from "@repo/core";
+import { ModelProviderService, NextResponseErrors } from "@repo/backend";
 
 const logger = getWebLogger();
 const modelProviderService = new ModelProviderService();

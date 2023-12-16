@@ -5,9 +5,8 @@ import { PasswordUpdateRequest } from "lib/types/api/password-update.request";
 import { UserService } from "lib/api/services/user.service";
 import { comparePasswords } from "lib/api/core/password.utils";
 
-import { Id } from "@repo/core/src/types/id";
-import { UserResponse } from "@repo/core/src/types/user.response";
-import { NextResponseErrors } from "@repo/core/src/utils/utils";
+import { Id, UserResponse } from "@repo/core";
+import { NextResponseErrors } from "@repo/backend";
 
 const userService = new UserService();
 

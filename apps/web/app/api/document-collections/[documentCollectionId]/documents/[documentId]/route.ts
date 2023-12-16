@@ -3,11 +3,8 @@ import { NextRequest } from "next/server";
 import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
 
-import { DocumentService } from "@repo/core/src/services/document-service";
-import { LocalObjectStorageService } from "@repo/core/src/services/local-object-storage-service";
-import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
-import { Id } from "@repo/core/src/types/id";
-import { NextResponseErrors } from "@repo/core/src/utils/utils";
+import { Id, DocumentCollectionResponse } from "@repo/core";
+import { DocumentService, LocalObjectStorageService, NextResponseErrors } from "@repo/backend";
 
 
 const permissionService = new PermissionService();

@@ -2,7 +2,7 @@ import { NextApiResponse } from "next/types";
 import { StatusCodes } from "http-status-codes";
 
 import { NextResponse } from "next/server";
-import { ErrorResponse } from "../types/error.response";
+import { ErrorResponse } from "@repo/core";
 
 export async function sleep(ms: number): Promise<unknown> {
   return new Promise((resolve) => {

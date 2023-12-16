@@ -6,11 +6,8 @@ import { ChatService } from "lib/api/services/chat-service";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { OrgMembershipStatus } from "lib/types/core/org-membership-status";
 
-import { DocumentCollectionService } from "@repo/core/src/services/document-collection-service";
-import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
-import { Id } from "@repo/core/src/types/id";
-import { UserResponse } from "@repo/core/src/types/user.response";
-import { NextResponseErrors } from "@repo/core/src/utils/utils";
+import { Id, UserResponse, DocumentCollectionResponse } from "@repo/core";
+import { DocumentCollectionService, NextResponseErrors } from "@repo/backend";
 
 export class PermissionService {
   private chatService = new ChatService();

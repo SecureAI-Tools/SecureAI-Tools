@@ -12,6 +12,7 @@ services:
       - INFERENCE_SERVER=http://inference:11434/
       - VECTOR_DB_SERVER=http://vector-db:8000
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - AMQP_SERVER_URL=amqp://message-broker:5672
     ports:
       - 28669:28669
     command: sh -c "cd /app && node apps/web/server.js"
@@ -21,6 +22,8 @@ services:
       inference:
         condition: service_started
       vector-db:
+        condition: service_started
+      message-broker:
         condition: service_started
       db-migrate-and-seed:
         condition: service_completed_successfully
@@ -37,13 +40,16 @@ services:
       - INFERENCE_SERVER=http://inference:11434/
       - VECTOR_DB_SERVER=http://vector-db:8000
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-    command: sh -c "cd /app && node apps/task-master/dist/main.js"
+      - AMQP_SERVER_URL=amqp://message-broker:5672
+    command: sh -c "cd /app/apps/task-master/ && node --experimental-specifier-resolution=node dist/main.js"
     depends_on:
       db:
         condition: service_started
       inference:
         condition: service_started
       vector-db:
+        condition: service_started
+      message-broker:
         condition: service_started
       db-migrate-and-seed:
         condition: service_completed_successfully
@@ -78,6 +84,11 @@ services:
     volumes:
       # Default configuration for persist_directory is "/chroma/chroma/"
       - ./vector-db:/chroma/chroma/
+
+  message-broker:
+    image: rabbitmq:management
+    volumes:
+      - ./message-broker:/var/lib/rabbitmq
 
   inference:
     image: ollama/ollama:latest

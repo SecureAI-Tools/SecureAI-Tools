@@ -25,10 +25,7 @@ import { Link } from "lib/fe/components/link";
 import { FE } from "lib/fe/route-utils";
 import { EmptyState } from "lib/fe/components/empty-state";
 
-import { PAGINATION_DEFAULT_PAGE_SIZE, DEFAULT_DOCUMENT_COLLECTION_NAME } from "@repo/core/constants";
-import { Id } from "@repo/core/src/types/id";
-import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
-import { isEmpty } from "@repo/core/src/utils/string-utils";
+import { PAGINATION_DEFAULT_PAGE_SIZE, Id, DocumentCollectionResponse, DEFAULT_DOCUMENT_COLLECTION_NAME, isEmpty } from "@repo/core";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;
 

@@ -1,5 +1,5 @@
 {
-  "name": "@repo/core",
+  "name": "@repo/backend",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -12,10 +12,16 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@repo/database": "*"
+    "@repo/core": "*",
+    "@repo/database": "*",
+    "amqplib": "^0.10.3",
+    "langchain": "^0.0.200",
+    "winston": "^3.10.0",
+    "winston-daily-rotate-file": "^4.7.1"
   },
   "devDependencies": {
     "@repo/typescript-config": "*",
+    "@types/amqplib": "^0.10.4",
     "typescript": "^5.3.2"
   }
 }

@@ -68,6 +68,7 @@ COPY --from=installer /app/apps/web/tools/migrate-to-postgres-db.load ./apps/web
 # Copy task-master app
 COPY --from=installer /app/apps/task-master/package.json ./apps/task-master/
 COPY --from=installer /app/apps/task-master/dist/ ./apps/task-master/dist/
+COPY --from=installer /app/packages/backend/dist/ ./packages/backend/dist/
 COPY --from=installer /app/packages/core/dist/ ./packages/core/dist/
 COPY --from=installer /app/packages/database/dist/ ./packages/database/dist/
 

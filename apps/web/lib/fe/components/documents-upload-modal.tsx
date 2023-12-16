@@ -5,8 +5,9 @@ import { tw } from "twind";
 
 import { uploadDocument } from "lib/fe/document-utils";
 import { IndexingMode } from "lib/types/core/indexing-mode";
-import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
-import { Id } from "@repo/core/src/types/id";
+
+import { Id, DocumentCollectionResponse } from "@repo/core";
+
 
 type UploadState = "in-progress" | "succeeded" | "failed";
 

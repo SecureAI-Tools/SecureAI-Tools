@@ -4,7 +4,7 @@ import { isAuthenticated } from "lib/api/core/auth";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { ModelPullRequest } from "lib/types/api/model-pull.request";
 
-import { NextResponseErrors } from "@repo/core/src/utils/utils";
+import { NextResponseErrors } from "@repo/backend";
 
 const orgMembershipService = new OrgMembershipService();
 

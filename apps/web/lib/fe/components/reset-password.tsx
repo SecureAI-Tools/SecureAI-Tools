@@ -16,9 +16,7 @@ import { TokenUser } from "lib/types/core/token-user";
 import { FetchError } from "lib/fe/types/fetch-error";
 import { PageTitle } from "./page-title";
 
-import { Id } from "@repo/core/src/types/id";
-import { UserResponse } from "@repo/core/src/types/user.response";
-import { isEmpty } from "@repo/core/src/utils/string-utils";
+import { Id, UserResponse, isEmpty } from "@repo/core";
 
 export const ResetPassword = ({
   onResetPasswordSuccess,

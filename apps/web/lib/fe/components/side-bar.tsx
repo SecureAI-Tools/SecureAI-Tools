@@ -16,7 +16,8 @@ import { useSession } from "next-auth/react";
 import { FrontendRoutes } from "lib/fe/routes";
 import { TokenUser } from "lib/types/core/token-user";
 import { getInitials } from "lib/core/name-utils";
-import { clip } from "@repo/core/src/utils/string-utils";
+
+import { clip } from "@repo/core";
 
 type ActiveItem = "new-chat" | "chat-history" | "document-collections";
 

@@ -1,8 +1,5 @@
-import { getAMQPChannel } from "@repo/core/src/amqp-client";
-import { getLogger } from "@repo/core/src/logger";
-import { IndexingQueueMessage } from "@repo/core/src/types/indexing-queue-message";
-import { IndexingService } from "@repo/core/src/services/indexing-service";
-import { Id } from "@repo/core/src/types/id";
+import { Id, IndexingQueueMessage } from "@repo/core";
+import { IndexingService, getAMQPChannel, getLogger } from "@repo/backend";
 
 const logger = getLogger("task-master");
 const indexingService = new IndexingService();

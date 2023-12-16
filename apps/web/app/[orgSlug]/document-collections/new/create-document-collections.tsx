@@ -17,9 +17,7 @@ import { createDocumentCollection } from "lib/fe/document-utils";
 import { DocumentsUploadModal } from "lib/fe/components/documents-upload-modal";
 import { Sidebar } from "lib/fe/components/side-bar";
 
-import { DocumentCollectionResponse } from "@repo/core/src/types/document-collection.response";
-import { Id } from "@repo/core/src/types/id";
-import { isEmpty } from "@repo/core/src/utils/string-utils";
+import { Id, DocumentCollectionResponse, isEmpty } from "@repo/core";
 
 const CreateDocumentCollections = ({ orgSlug }: { orgSlug: string }) => {
   const [name, setName] = useState("");

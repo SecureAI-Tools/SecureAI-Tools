@@ -15,7 +15,8 @@ import { LogInErrorCodes } from "lib/core/auth";
 import { FE } from "lib/fe/route-utils";
 import { StudioToasts } from "lib/fe/components/studio-toasts";
 import useToasts from "lib/fe/hooks/use-toasts";
-import { getFirst } from "@repo/core/src/utils/string-utils";
+
+import { getFirst } from "@repo/core";
 
 const LogInPage: NextPage = () => {
   const router = useRouter();
