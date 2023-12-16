@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "dev": "env-cmd -f .env.development ts-node ./src/main.ts"
+    "dev": "yarn build && env-cmd -f .env.development node --experimental-specifier-resolution=node dist/main.js"
   },
   "dependencies": {
     "@repo/backend": "*",
