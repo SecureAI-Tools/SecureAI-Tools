@@ -59,6 +59,8 @@ services:
   db-migrate-and-seed:
     image: public.ecr.aws/d8f2p0h3/secure-ai-tools:latest
     platform: linux/amd64
+    volumes:
+      - ./web:/app/volume
     env_file:
       - .env
     environment:
