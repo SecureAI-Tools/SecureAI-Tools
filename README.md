@@ -21,6 +21,9 @@ Private and secure AI tools for everyone's productivity.
 #### Chat with documents demo: Locally running Mistral (M2 MacBook)
 [![Chat with documents demo: Locally running Mistral](https://img.youtube.com/vi/UvRHL6f_w74/0.jpg)](https://www.youtube.com/watch?v=UvRHL6f_w74)
 
+#### Document collections demo
+[![Document Collections demo](https://img.youtube.com/vi/PwvfVx8VCoY/0.jpg)](https://www.youtube.com/watch?v=PwvfVx8VCoY)
+
 ## Install
 
 ### Docker Compose [Recommended]
@@ -77,6 +80,8 @@ A set of features on our todo list (in no particular order).
 
 * ✅ Chat with documents
 * ✅ Support for OpenAI, Claude etc APIs
+* ✅ Reusable document collections
+* ✅ Offline document processing
 * Support for markdown rendering
 * Chat sharing
 * Mobile friendly UI
