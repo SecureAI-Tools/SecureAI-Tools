@@ -74,6 +74,14 @@ docker compose up -d
 1. Set up the AI model by going to http://localhost:28669/-/settings?tab=ai
 1. Navigate to http://localhost:28669/- and start using AI tools
 
+## Hardware requirements
+
+### Running AI model (LLM) locally
+* RAM: As much as the AI model requires. Most models have a variant that works well on 8 GB RAM
+* GPU: GPU is recommended but not required. It also runs in CPU-only mode but will be slower on Linux, Windows, and Mac-Intel. On M1/M2/M3 Macs, the inference speed is really good.
+
+### Using remote OpenAI-compatible APIs
+SecureAI Tools allows using [remote OpenAI-compatible APIs](https://github.com/SecureAI-Tools/SecureAI-Tools?tab=readme-ov-file#use-with-openai-or-openai-compatible-apis). If you only use a remote OpenAI-compatible API server for LLM inference, then the hardware requirements are much lower. You only need enough resources to be able to run a few docker containers: a small web server, postgresql-server, rabbit-mq.
 
 ## Features wishlist
 A set of features on our todo list (in no particular order).
