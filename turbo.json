@@ -18,8 +18,14 @@
     "db:generate": {
       "cache": false
     },
-    "db:migrate:deploy": {},
-    "db-seed:build": {},
-    "db-seed:dev": {}
+    "db:migrate:deploy": {
+      "cache": false
+    },
+    "db-seed:build": {
+      "cache": false
+    },
+    "db-seed:dev": {
+      "cache": false
+    }
   }
 }
