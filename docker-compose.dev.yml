@@ -1,6 +1,13 @@
 # Dependencies for development environment
 version: "3.8"
 
+#
+# WARNING: Do not use this docker compose file in production. It is meant to for development only!
+#
+# Please use the released version of docker-compose.yml file:
+# https://github.com/SecureAI-Tools/SecureAI-Tools/releases/latest/download/docker-compose.yml
+#
+
 services:
   db-dev:
     image: postgres:latest
