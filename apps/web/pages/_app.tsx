@@ -24,7 +24,7 @@ setup({
   darkMode: "class",
 });
 
-function StudioApp({ Component, session, pageProps }: Props) {
+function App({ Component, session, pageProps }: Props) {
   /* Track page views */
   useEffect(() => {
     Analytics.page({});
@@ -37,4 +37,4 @@ function StudioApp({ Component, session, pageProps }: Props) {
   );
 }
 
-export default StudioApp;
+export default App;

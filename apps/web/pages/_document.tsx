@@ -6,7 +6,7 @@ import Document, {
   DocumentContext,
 } from "next/document";
 
-class StudioAppDocument extends Document {
+class AppDocument extends Document {
   static async getInitialProps(ctx: DocumentContext) {
     const initialProps = await Document.getInitialProps(ctx);
 
@@ -26,4 +26,4 @@ class StudioAppDocument extends Document {
   }
 }
 
-export default StudioAppDocument;
+export default AppDocument;
