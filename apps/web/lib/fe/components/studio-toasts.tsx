@@ -7,7 +7,7 @@ import {
 } from "react-icons/hi";
 import { IconType } from "react-icons";
 import { tw } from "twind";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 type ToastType = "success" | "failure" | "info" | "warning";
 
@@ -33,6 +33,15 @@ export const StudioToast = ({
   onDismiss,
 }: StudioToastProps) => {
   const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    if (isVisible) {
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        setIsVisible(false);
+      }, 5000);
+    }
+  }, [isVisible]);
 
   if (!isVisible) {
     return null;
