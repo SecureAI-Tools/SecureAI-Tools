@@ -156,22 +156,28 @@ export class ChatService {
 
   async delete(id: Id<ChatResponse>): Promise<Chat | null> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
-      return await tx.chat.delete({
+      return await tx.chat.update({
         where: {
           id: id.toString(),
         },
+        data: {
+          deletedAt: new Date(),
+        }
       });
     });
   }
 
   async deleteMany(ids: Id<ChatResponse>[]): Promise<Prisma.BatchPayload> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
-      return await tx.chat.deleteMany({
+      return await tx.chat.updateMany({
         where: {
           id: {
             in: ids.map((id) => id.toString()),
           },
         },
+        data: {
+          deletedAt: new Date(),
+        }
       });
     });
   }

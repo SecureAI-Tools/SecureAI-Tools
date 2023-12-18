@@ -16,46 +16,11 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 function newPrismaClient(): PrismaClient {
-  const client = new PrismaClient({
+  return new PrismaClient({
     log: ["warn", "error"].concat(
       process.env.NODE_ENV === "development" ? ["query", "info"] : [],
     ) as Prisma.LogLevel[],
   });
-
-  const extendedClient = client.$extends({
-    name: "secure-ai-tools-soft-delete",
-    query: {
-      chat: {
-        async delete({ model, operation, args, query }) {
-          if (model !== "Chat" || operation !== "delete") {
-            return;
-          }
-
-          return client.chat.update({
-            data: {
-              deletedAt: new Date(),
-            },
-            where: args.where,
-          });
-        },
-
-        async deleteMany({ model, operation, args, query }) {
-          if (model !== "Chat" || operation !== "deleteMany") {
-            return;
-          }
-
-          return client.chat.updateMany({
-            data: {
-              deletedAt: new Date(),
-            },
-            where: args.where,
-          });
-        },
-      },
-    },
-  });
-
-  return extendedClient as PrismaClient;
 }
 
 export type TxPrismaClient = Omit<
