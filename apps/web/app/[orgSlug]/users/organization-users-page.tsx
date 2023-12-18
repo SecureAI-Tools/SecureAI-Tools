@@ -15,7 +15,7 @@ import {
 } from "lib/fe/api-paths";
 import { FE } from "lib/fe/route-utils";
 import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
-import { RenderCellsFn, StudioTable } from "lib/fe/components/studio-table";
+import { RenderCellsFn, Table } from "lib/fe/components/table";
 import { FrontendRoutes } from "lib/fe/routes";
 import { numberOfPages } from "lib/core/pagination-utils";
 import useDebounce from "lib/fe/hooks/use-debounce";
@@ -362,7 +362,7 @@ export const OrganizationUsersPage = ({
               className={tw("mb-2")}
             />
           </div>
-          <StudioTable
+          <Table
             loading={isTableLoading}
             data={orgMemberships}
             columns={["Name", "Status", "Actions"]}

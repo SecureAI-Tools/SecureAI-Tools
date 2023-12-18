@@ -16,7 +16,7 @@ import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
 import { Sidebar } from "lib/fe/components/side-bar";
 import { PageTitle } from "lib/fe/components/page-title";
 import { FrontendRoutes } from "lib/fe/routes";
-import { RenderCellsFn, StudioTable } from "lib/fe/components/studio-table";
+import { RenderCellsFn, Table } from "lib/fe/components/table";
 import useTableState, { PAGE_PARAM } from "lib/fe/hooks/use-table-state";
 import { numberOfPages } from "lib/core/pagination-utils";
 import { getDocumentCollectionApiPath, getOrganizationsIdOrSlugDocumentCollectionApiPath } from "lib/fe/api-paths";
@@ -210,7 +210,7 @@ const DocumentCollectionListPage = ({ orgSlug }: { orgSlug: string }) => {
                 }
               />
             ) : (
-              <StudioTable
+              <Table
                 loading={isDocumentCollectionsResponseLoading}
                 data={documentCollectionsResponse?.response}
                 columns={["Document Collection", "Created Date", "Actions"]}

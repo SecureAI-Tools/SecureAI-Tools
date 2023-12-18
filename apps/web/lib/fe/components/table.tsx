@@ -1,4 +1,4 @@
-import { Pagination, Spinner, Table } from "flowbite-react";
+import { Pagination, Spinner, Table as FlowbiteTable } from "flowbite-react";
 import { tw } from "twind";
 
 export type RenderCellsFn<T extends unknown> = ({
@@ -8,7 +8,7 @@ export type RenderCellsFn<T extends unknown> = ({
 }) => React.ReactNode[];
 export type OnPageChangeFn = (page: number) => void;
 
-export const StudioTable = <T extends unknown>({
+export const Table = <T extends unknown>({
   data,
   columns,
   loading,
@@ -31,48 +31,48 @@ export const StudioTable = <T extends unknown>({
   onPageChange: OnPageChangeFn;
 }) => {
   const renderSpinner = () => (
-    <Table.Row>
-      <Table.Cell colSpan={columns.length}>
+    <FlowbiteTable.Row>
+      <FlowbiteTable.Cell colSpan={columns.length}>
         <div className={tw("flex items-center justify-center")}>
           <div>
             <Spinner size="xl" />
           </div>
         </div>
-      </Table.Cell>
-    </Table.Row>
+      </FlowbiteTable.Cell>
+    </FlowbiteTable.Row>
   );
 
   const renderRows = () =>
     data?.map((row, rowIdx) => (
-      <Table.Row
+      <FlowbiteTable.Row
         className={tw("bg-white dark:border-gray-700 dark:bg-gray-800")}
         key={`${page}.${rowIdx}`}
       >
         {...renderCells({ item: row }).map((cell, cellIdx) => (
-          <Table.Cell
+          <FlowbiteTable.Cell
             className={tw("px-6 py-4")}
             key={`${page}.${rowIdx}.${cellIdx}`}
           >
             {cell}
-          </Table.Cell>
+          </FlowbiteTable.Cell>
         ))}
-      </Table.Row>
+      </FlowbiteTable.Row>
     ));
 
   return (
     <>
-      <Table hoverable>
-        <Table.Head className={tw("bg-gray-50")}>
+      <FlowbiteTable hoverable>
+        <FlowbiteTable.Head className={tw("bg-gray-50")}>
           {columns.map((col, idx) => (
-            <Table.HeadCell key={`${col}.${idx}`} className={tw("px-6 py-4")}>
+            <FlowbiteTable.HeadCell key={`${col}.${idx}`} className={tw("px-6 py-4")}>
               {col}
-            </Table.HeadCell>
+            </FlowbiteTable.HeadCell>
           ))}
-        </Table.Head>
-        <Table.Body className={tw("divide-y")}>
+        </FlowbiteTable.Head>
+        <FlowbiteTable.Body className={tw("divide-y")}>
           {loading ? renderSpinner() : renderRows()}
-        </Table.Body>
-      </Table>
+        </FlowbiteTable.Body>
+      </FlowbiteTable>
       <div className={tw("float-root")}>
         <div className={tw("float-right mt-3")}>
           <div className={tw("flex flex-col items-center mb-8")}>
