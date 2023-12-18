@@ -19,7 +19,7 @@ import useDebounce from "lib/fe/hooks/use-debounce";
 import { FetchError } from "lib/fe/types/fetch-error";
 import { slugFrom } from "lib/core/slug-utils";
 import { OrganizationUpdateRequest } from "lib/types/api/organization-update.request";
-import { StudioToasts } from "lib/fe/components/studio-toasts";
+import { Toasts } from "lib/fe/components/toasts";
 import { isAdmin } from "lib/fe/permission-utils";
 import useToasts from "lib/fe/hooks/use-toasts";
 
@@ -112,7 +112,7 @@ const OrgGeneralSettings = ({ orgSlug }: { orgSlug: string }) => {
 
   return (
     <div className={tw("px-4")}>
-      <StudioToasts toasts={toasts} />
+      <Toasts toasts={toasts} />
       <form
         className={tw("flex max-w-md flex-col gap-4")}
         onSubmit={(e) => {

@@ -26,7 +26,7 @@ import useTableState, {
 import { TokenUser } from "lib/types/core/token-user";
 import { ActionMenu } from "lib/fe/components/action-menu";
 import { OrgMembershipUpdateRequest } from "lib/types/api/org-membership-update.request";
-import { StudioToasts } from "lib/fe/components/studio-toasts";
+import { Toasts } from "lib/fe/components/toasts";
 import { isAdmin } from "lib/fe/permission-utils";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { OrgMembershipRole } from "lib/types/core/org-membership-role";
@@ -330,7 +330,7 @@ export const OrganizationUsersPage = ({
   return (
     <AppsLoggedInLayout>
       <div className={tw("items-center justify-center w-full p-8")}>
-        <StudioToasts toasts={toasts} />
+        <Toasts toasts={toasts} />
         <div className={tw("flow-root w-full align-middle")}>
           <div className={tw("float-left h-full align-middle")}>
             <PageTitle

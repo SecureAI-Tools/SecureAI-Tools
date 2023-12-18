@@ -8,7 +8,7 @@ import Image from "next/image";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { FrontendRoutes } from "lib/fe/routes";
 import ChatInput from "lib/fe/components/chat-input";
-import { StudioToasts } from "lib/fe/components/studio-toasts";
+import { Toasts } from "lib/fe/components/toasts";
 import { FilesUpload } from "lib/fe/components/files-upload";
 import { ChatType } from "lib/types/core/chat-type";
 import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
@@ -85,7 +85,7 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
 
   return (
     <>
-      <StudioToasts toasts={toasts} />
+      <Toasts toasts={toasts} />
       <div className={tw("flex flex-col w-full h-screen")}>
         <div className={tw("flex flex-col grow items-center justify-center")}>
           <div className={tw("flex flex-col items-center")}>

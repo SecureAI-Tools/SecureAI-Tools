@@ -13,7 +13,7 @@ import { Layout } from "lib/fe/components/layout";
 import { FrontendRoutes } from "lib/fe/routes";
 import { LogInErrorCodes } from "lib/core/auth";
 import { FE } from "lib/fe/route-utils";
-import { StudioToasts } from "lib/fe/components/studio-toasts";
+import { Toasts } from "lib/fe/components/toasts";
 import useToasts from "lib/fe/hooks/use-toasts";
 
 import { getFirst } from "@repo/core";
@@ -57,7 +57,7 @@ const LogInPage: NextPage = () => {
     <Layout>
       <Navigation />
 
-      <StudioToasts toasts={toasts} />
+      <Toasts toasts={toasts} />
 
       <div className={tw("max-w-xl mx-auto mt-32 py-16 px-14 sm:px-6 lg:px-8")}>
         <div className={tw("flex flex-cols")}>

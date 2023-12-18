@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
 import { FrontendRoutes } from "lib/fe/routes";
 import { PageTitle } from "lib/fe/components/page-title";
-import { StudioToasts } from "lib/fe/components/studio-toasts";
+import { Toasts } from "lib/fe/components/toasts";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { Button, Label, TextInput, Textarea } from "flowbite-react";
 import { FilesUpload } from "lib/fe/components/files-upload";
@@ -67,7 +67,7 @@ const CreateDocumentCollections = ({ orgSlug }: { orgSlug: string }) => {
       <div className={tw("flex flex-row")}>
         <Sidebar orgSlug={orgSlug} />
         <div className={tw("p-8 w-full")}>
-          <StudioToasts toasts={toasts} />
+          <Toasts toasts={toasts} />
           <div className={tw("w-full")}>
             <div className={tw("flex flex-row items-center")}>
               <Link

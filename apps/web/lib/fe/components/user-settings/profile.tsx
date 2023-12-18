@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { userApiPath } from "lib/fe/api-paths";
 import { patch, ResponseWithHeaders } from "lib/fe/api";
 import { TokenUser } from "lib/types/core/token-user";
-import { StudioToasts } from "lib/fe/components/studio-toasts";
+import { Toasts } from "lib/fe/components/toasts";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { UserUpdateRequest } from "lib/types/api/user-update-request";
 
@@ -37,7 +37,7 @@ const UserProfileSettings = () => {
 
   return (
     <div className={tw("px-4")}>
-      <StudioToasts toasts={toasts} />
+      <Toasts toasts={toasts} />
       <form
         className={tw("flex max-w-md flex-col gap-4")}
         onSubmit={(e) => {

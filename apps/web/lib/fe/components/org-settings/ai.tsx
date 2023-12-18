@@ -16,7 +16,7 @@ import { createFetcher, get, patch, ResponseWithHeaders } from "lib/fe/api";
 import { TokenUser } from "lib/types/core/token-user";
 import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 import { OrganizationUpdateRequest } from "lib/types/api/organization-update.request";
-import { StudioToasts } from "lib/fe/components/studio-toasts";
+import { Toasts } from "lib/fe/components/toasts";
 import { isAdmin } from "lib/fe/permission-utils";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { ModelsResponse } from "lib/types/api/models.response";
@@ -160,7 +160,7 @@ const OrgAISettings = ({
 
   return (
     <div className={tw("px-4")}>
-      <StudioToasts toasts={toasts} />
+      <Toasts toasts={toasts} />
       <form
         className={tw("flex max-w-md flex-col gap-4")}
         onSubmit={(e) => {

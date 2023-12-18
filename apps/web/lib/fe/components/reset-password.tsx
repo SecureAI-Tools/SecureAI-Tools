@@ -7,7 +7,7 @@ import { HiOutlineExclamation } from "react-icons/hi";
 import { StatusCodes } from "http-status-codes";
 import { useSession } from "next-auth/react";
 
-import { StudioToasts } from "lib/fe/components/studio-toasts";
+import { Toasts } from "lib/fe/components/toasts";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { PasswordUpdateRequest } from "lib/types/api/password-update.request";
 import { ResponseWithHeaders, patch } from "lib/fe/api";
@@ -40,7 +40,7 @@ export const ResetPassword = ({
 
   return (
     <div className={tw("p-8")}>
-      <StudioToasts toasts={toasts} />
+      <Toasts toasts={toasts} />
       <div className={tw("flex flex-col")}>
         <div>
           <PageTitle title={"Change password"} />

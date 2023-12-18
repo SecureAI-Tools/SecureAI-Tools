@@ -18,7 +18,7 @@ import { createFetcher, delete_ } from "lib/fe/api";
 import { chatApiPath, chatsApiPath } from "lib/fe/api-paths";
 import { TokenUser } from "lib/types/core/token-user";
 import useToasts from "lib/fe/hooks/use-toasts";
-import { StudioToasts } from "lib/fe/components/studio-toasts";
+import { Toasts } from "lib/fe/components/toasts";
 import { FrontendRoutes } from "lib/fe/routes";
 import { ChatType } from "lib/types/core/chat-type";
 
@@ -79,7 +79,7 @@ export default function ChatHistory({ orgSlug }: { orgSlug: string }) {
 
   return (
     <div>
-      <StudioToasts toasts={toasts} />
+      <Toasts toasts={toasts} />
       <div>
         {chatsResponse ? (
           chatsResponse.response.length > 0 ? (

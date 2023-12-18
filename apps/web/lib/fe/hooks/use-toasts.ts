@@ -1,15 +1,15 @@
 import { useState } from "react";
 
-import { StudioToastProps } from "lib/fe/components/studio-toasts";
+import { ToastProps } from "lib/fe/components/toasts";
 
-export type AddToastFn = (toast: StudioToastProps) => void;
+export type AddToastFn = (toast: ToastProps) => void;
 
 export default function useToasts(
-  initialToasts: StudioToastProps[] = [],
-): [StudioToastProps[], AddToastFn] {
-  const [toasts, setToasts] = useState<StudioToastProps[]>(initialToasts);
+  initialToasts: ToastProps[] = [],
+): [ToastProps[], AddToastFn] {
+  const [toasts, setToasts] = useState<ToastProps[]>(initialToasts);
 
-  const addToastFn: AddToastFn = (toast: StudioToastProps) => {
+  const addToastFn: AddToastFn = (toast: ToastProps) => {
     setToasts((list) => [...list, toast]);
   };
 

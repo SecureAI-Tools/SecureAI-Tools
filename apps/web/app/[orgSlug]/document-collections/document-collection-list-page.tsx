@@ -29,7 +29,7 @@ import { FE } from "lib/fe/route-utils";
 import { EmptyState } from "lib/fe/components/empty-state";
 import { ActionMenu } from "lib/fe/components/action-menu";
 import useToasts from "lib/fe/hooks/use-toasts";
-import { StudioToasts } from "lib/fe/components/studio-toasts";
+import { Toasts } from "lib/fe/components/toasts";
 
 import { PAGINATION_DEFAULT_PAGE_SIZE, Id, DocumentCollectionResponse, DEFAULT_DOCUMENT_COLLECTION_NAME, isEmpty } from "@repo/core";
 
@@ -169,7 +169,7 @@ const DocumentCollectionListPage = ({ orgSlug }: { orgSlug: string }) => {
 
   return (
     <AppsLoggedInLayout>
-      <StudioToasts toasts={toasts} />
+      <Toasts toasts={toasts} />
       <div className={tw("flex flex-row")}>
         <Sidebar orgSlug={orgSlug} activeItem="document-collections" />
         <div

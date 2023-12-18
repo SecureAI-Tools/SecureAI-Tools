@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { FrontendRoutes } from "lib/fe/routes";
 import { postChat, postChatMessage } from "lib/fe/chat-utils";
 import useToasts from "lib/fe/hooks/use-toasts";
-import { StudioToasts } from "lib/fe/components/studio-toasts";
+import { Toasts } from "lib/fe/components/toasts";
 
 import { Id, DocumentCollectionResponse, isEmpty } from "@repo/core";
 
@@ -62,7 +62,7 @@ const ChatCreationModal = ({
 
   return (
     <>
-      <StudioToasts toasts={toasts} />
+      <Toasts toasts={toasts} />
       <Modal
         show={show}
         size="2xl"

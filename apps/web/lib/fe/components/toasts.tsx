@@ -1,4 +1,4 @@
-import { Toast } from "flowbite-react";
+import { Toast as FlowbiteToast } from "flowbite-react";
 import {
   HiOutlineCheck,
   HiOutlineExclamation,
@@ -11,27 +11,27 @@ import React, { useEffect, useState } from "react";
 
 type ToastType = "success" | "failure" | "info" | "warning";
 
-export interface StudioToastProps {
+export interface ToastProps {
   children: React.ReactNode;
   onDismiss?: () => void;
   type: ToastType;
 }
 
-export const StudioToasts = ({ toasts }: { toasts: StudioToastProps[] }) => {
+export const Toasts = ({ toasts }: { toasts: ToastProps[] }) => {
   return (
     <div className={tw("fixed top-5 right-5 z-50")}>
       {toasts.map((toast, idx) => (
-        <StudioToast key={idx} {...toast} />
+        <Toast key={idx} {...toast} />
       ))}
     </div>
   );
 };
 
-export const StudioToast = ({
+export const Toast = ({
   type,
   children,
   onDismiss,
-}: StudioToastProps) => {
+}: ToastProps) => {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
@@ -48,16 +48,16 @@ export const StudioToast = ({
   }
 
   return (
-    <Toast className={tw("mb-3")}>
+    <FlowbiteToast className={tw("mb-3")}>
       {renderIcon(type)}
       <div className={tw("ml-3 text-sm font-normal")}>{children}</div>
-      <Toast.Toggle
+      <FlowbiteToast.Toggle
         onDismiss={() => {
           setIsVisible(false);
           onDismiss?.();
         }}
       />
-    </Toast>
+    </FlowbiteToast>
   );
 };
 
