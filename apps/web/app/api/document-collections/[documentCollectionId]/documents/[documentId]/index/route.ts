@@ -4,10 +4,9 @@ import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
 
 import { Id, DocumentCollectionResponse, DocumentResponse, StreamChunkResponse } from "@repo/core";
-import { DocumentCollectionService, IndexingService, NextResponseErrors } from "@repo/backend";
+import { IndexingService, NextResponseErrors } from "@repo/backend";
 
 const permissionService = new PermissionService();
-const documentCollectionService = new DocumentCollectionService();
 const indexingService = new IndexingService();
 
 // Endpoint to index documents into vector store

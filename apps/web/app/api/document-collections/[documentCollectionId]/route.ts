@@ -40,3 +40,33 @@ export async function GET(
     DocumentCollectionResponse.fromEntity(documentCollection),
   );
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { documentCollectionId: string } },
+) {
+  const [authenticated, userId] = await isAuthenticated(req);
+  if (!authenticated) {
+    return NextResponseErrors.unauthorized();
+  }
+
+  // Check permissions
+  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+    params.documentCollectionId,
+  );
+  const [permission, resp] =
+    await permissionService.hasWriteDocumentCollectionPermission(
+      userId!,
+      documentCollectionId,
+    );
+  if (!permission) {
+    return resp;
+  }
+
+  const documentCollection =
+    await documentCollectionService.delete(documentCollectionId);
+  if (!documentCollection) {
+    return NextResponseErrors.notFound();
+  }
+  return NextResponse.json({});
+}

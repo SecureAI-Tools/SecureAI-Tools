@@ -11,6 +11,7 @@ export class DocumentCollectionResponse {
   organizationId!: string;
   createdAt!: number;
   updatedAt!: number;
+  deletedAt?: number;
 
   static fromEntity(e: DocumentCollection): DocumentCollectionResponse {
     return {
@@ -23,6 +24,7 @@ export class DocumentCollectionResponse {
       organizationId: e.organizationId,
       createdAt: e.createdAt.getTime(),
       updatedAt: e.updatedAt.getTime(),
+      deletedAt: e.deletedAt?.getTime(),
     };
   }
 }

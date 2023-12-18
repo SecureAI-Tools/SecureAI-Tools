@@ -58,6 +58,7 @@ export class DocumentCollectionService {
     return await prisma.documentCollection.findFirst({
       where: {
         id: id.toString(),
+        deletedAt: null,
       },
     });
   }
@@ -89,7 +90,10 @@ export class DocumentCollectionService {
     pagination?: API.PaginationParams;
   }): Promise<DocumentCollection[]> {
     return await prisma.documentCollection.findMany({
-      where: where,
+      where: {
+        ...where,
+        deletedAt: null,
+      },
       orderBy: orderBy,
       skip: pagination?.skip(),
       take: pagination?.take(),
@@ -99,8 +103,33 @@ export class DocumentCollectionService {
   async count(where: Prisma.DocumentCollectionWhereInput): Promise<number> {
     return await prismaClient.$transaction(async (prisma: TxPrismaClient) => {
       return await prisma.documentCollection.count({
-        where: where,
+        where: {
+          ...where,
+          deletedAt: null,
+        },
       });
+    });
+  }
+
+  async delete(
+    id: Id<DocumentCollectionResponse>,
+  ): Promise<DocumentCollection | null> {
+    return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
+      return await this.deleteWithTxn(tx, id);
+    });
+  }
+
+  async deleteWithTxn(
+    prisma: TxPrismaClient,
+    id: Id<DocumentCollectionResponse>,
+  ): Promise<DocumentCollection | null> {
+    return await prisma.documentCollection.update({
+      where: {
+        id: id.toString(),
+      },
+      data: {
+        deletedAt: new Date(),
+      }
     });
   }
 }
