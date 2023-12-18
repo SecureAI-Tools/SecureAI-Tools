@@ -74,6 +74,14 @@ docker compose up -d
 1. Set up the AI model by going to http://localhost:28669/-/settings?tab=ai
 1. Navigate to http://localhost:28669/- and start using AI tools
 
+## Upgrade
+
+To upgrade, please run the following command where `docker-compose.yml` file lives in your set-up (it should be in `secure-ai-tools` directory from [installation step-#1](https://github.com/SecureAI-Tools/SecureAI-Tools/tree/main?tab=readme-ov-file#1-create-a-directory)).
+
+```sh
+docker compose pull && docker compose up -d
+```
+
 ## Hardware requirements
 
 ### Running AI model (LLM) locally
