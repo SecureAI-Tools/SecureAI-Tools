@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { tw } from "twind";
 import Image from "next/image";
+import { Button } from "flowbite-react";
 
 import useToasts from "lib/fe/hooks/use-toasts";
 import { FrontendRoutes } from "lib/fe/routes";
@@ -153,6 +154,13 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
                     multiple
                   />
                 </div>
+                <Button
+                  type="submit"
+                  className={tw("mt-4 w-full")}
+                  isProcessing={isSubmitting}
+                >
+                  Submit
+                </Button>
               </div>
             </div>
           </form>

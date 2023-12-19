@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { Message } from "ai";
 import { useChat } from "ai/react";
 import { tw } from "twind";
-import { Progress, Spinner, Tooltip } from "flowbite-react";
+import { Button, Progress, Spinner, Tooltip } from "flowbite-react";
 import { HiOutlineClipboard, HiOutlineClipboardCheck } from "react-icons/hi";
 import clipboardCopy from "clipboard-copy";
+import { MdSend } from "react-icons/md";
 
 import ChatInput from "lib/fe/components/chat-input";
 import { ChatResponse } from "lib/types/api/chat.response";
@@ -400,6 +401,8 @@ export function Chat({
         <form
           ref={formRef}
           onSubmit={async (e) => {
+            e.preventDefault();
+
             try {
               // First create
               await postChatMessage(chatId, {
@@ -441,11 +444,17 @@ export function Chat({
                 }
               />
             </div>
-            {isLoading ? (
-              <div className={tw("m-auto pl-2")}>
-                <Spinner aria-label="generating response..." size="lg" />
-              </div>
-            ) : null}
+            <Button
+              type="submit"
+              disabled={isEmpty(input) || isLoading}
+              className={tw("ml-2")}
+            >
+              {isLoading ? (
+                <Spinner aria-label="generating response..." />
+              ) : (
+                <MdSend className={tw("h-6 w-6")}/>
+              )}
+            </Button>
           </div>
         </form>
       </div>
