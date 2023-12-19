@@ -7,7 +7,13 @@ import {
 import { customAlphabet } from "nanoid";
 
 import { API } from "../utils/api.utils";
-import { Id, OrganizationResponse, ModelType, DocumentCollectionResponse, UserResponse } from "@repo/core";
+import {
+  Id,
+  OrganizationResponse,
+  ModelType,
+  DocumentCollectionResponse,
+  UserResponse,
+} from "@repo/core";
 
 export interface DocumentCollectionCreateInput {
   name?: string;
@@ -129,7 +135,29 @@ export class DocumentCollectionService {
       },
       data: {
         deletedAt: new Date(),
-      }
+      },
+    });
+  }
+
+  async update(
+    id: Id<DocumentCollectionResponse>,
+    data: Prisma.DocumentCollectionUpdateInput,
+  ): Promise<DocumentCollection | null> {
+    return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
+      return await this.updateWithTxn(tx, id, data);
+    });
+  }
+
+  async updateWithTxn(
+    prisma: TxPrismaClient,
+    id: Id<DocumentCollectionResponse>,
+    data: Prisma.DocumentCollectionUpdateInput,
+  ): Promise<DocumentCollection | null> {
+    return await prisma.documentCollection.update({
+      where: {
+        id: id.toString(),
+      },
+      data: data,
     });
   }
 }

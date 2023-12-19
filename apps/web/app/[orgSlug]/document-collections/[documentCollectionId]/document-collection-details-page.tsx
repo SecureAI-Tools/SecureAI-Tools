@@ -4,10 +4,17 @@ import useSWR from "swr";
 import ReactTimeAgo from "react-time-ago";
 import { tw } from "twind";
 import { useEffect, useState } from "react";
-import { Badge, Button, Progress, Spinner, Tooltip } from "flowbite-react";
+import {
+  Badge,
+  Button,
+  Dropdown,
+  Progress,
+  Spinner,
+  Tooltip,
+} from "flowbite-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { HiBadgeCheck } from "react-icons/hi";
+import { HiBadgeCheck, HiDotsHorizontal } from "react-icons/hi";
 
 import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
 import { Sidebar } from "lib/fe/components/side-bar";
@@ -29,8 +36,20 @@ import { FE } from "lib/fe/route-utils";
 import { DocumentCollectionStatsResponse } from "lib/types/api/document-collection-stats.response";
 import ChatCreationModal from "./chat-creation-modal";
 import { EmptyState } from "lib/fe/components/empty-state";
+import useToasts from "lib/fe/hooks/use-toasts";
+import { Toasts } from "lib/fe/components/toasts";
+import { FrontendRoutes } from "lib/fe/routes";
+import DocumentCollectionUpdateModal from "./document-collection-update-modal";
 
-import { PAGINATION_DEFAULT_PAGE_SIZE, Id, DocumentCollectionResponse, DocumentResponse, DEFAULT_DOCUMENT_COLLECTION_NAME, DocumentIndexingStatus, isEmpty } from "@repo/core";
+import {
+  PAGINATION_DEFAULT_PAGE_SIZE,
+  Id,
+  DocumentCollectionResponse,
+  DocumentResponse,
+  DEFAULT_DOCUMENT_COLLECTION_NAME,
+  DocumentIndexingStatus,
+  isEmpty,
+} from "@repo/core";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;
 const pollingIntervalMS = 10000;
@@ -50,8 +69,13 @@ const DocumentCollectionDetailsPage = ({
   const [processingStats, setProcessingStats] = useState<ProcessingStats>();
   const [showChatCreationModal, setShowChatCreationModal] =
     useState<boolean>(false);
+  const [
+    showDocumentCollectionUpdateModal,
+    setShowDocumentCollectionUpdateModal,
+  ] = useState<boolean>(false);
   const [tableState, setTableState] = useTableState();
   const { data: session, status: sessionStatus } = useSession();
+  const [toasts, addToast] = useToasts();
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -81,6 +105,7 @@ const DocumentCollectionDetailsPage = ({
   const {
     data: documentCollectionResponse,
     error: documentCollectionFetchError,
+    mutate: mutateDocumentCollectionResponse,
   } = useSWR(
     shouldFetchDocumentCollection
       ? getDocumentCollectionApiPath(documentCollectionId)
@@ -255,6 +280,7 @@ const DocumentCollectionDetailsPage = ({
 
   return (
     <AppsLoggedInLayout>
+      <Toasts toasts={toasts} />
       <div className={tw("flex flex-row")}>
         <Sidebar orgSlug={orgSlug} />
         <div
@@ -281,7 +307,7 @@ const DocumentCollectionDetailsPage = ({
                   }
                 />
               </div>
-              <div className={tw("float-right")}>
+              <div className={tw("flex flex-row float-right")}>
                 <Tooltip
                   content={
                     disableNewChat
@@ -299,6 +325,30 @@ const DocumentCollectionDetailsPage = ({
                     New Chat
                   </Button>
                 </Tooltip>
+                <Dropdown
+                  label=""
+                  dismissOnClick={false}
+                  renderTrigger={() => {
+                    return (
+                      <Button
+                        pill
+                        outline
+                        disabled={disableNewChat}
+                        className={tw("ml-2")}
+                      >
+                        <HiDotsHorizontal className={tw("h-6 w-6")} />
+                      </Button>
+                    );
+                  }}
+                >
+                  <Dropdown.Item
+                    onClick={() => {
+                      setShowDocumentCollectionUpdateModal(true);
+                    }}
+                  >
+                    Edit
+                  </Dropdown.Item>
+                </Dropdown>
               </div>
             </div>
             <div className={tw("mt-2 text-sm")}>
@@ -346,10 +396,49 @@ const DocumentCollectionDetailsPage = ({
           documentCollectionId={documentCollectionId}
           orgSlug={orgSlug}
           show={showChatCreationModal}
+          onSuccess={(chatId) => {
+            router.push(
+              `${FrontendRoutes.getChatRoute(
+                orgSlug,
+                chatId,
+              )}?src=doc-collection-new-chat`,
+            );
+          }}
+          onError={(e) => {
+            addToast({
+              type: "failure",
+              children: <p>Something went wrong. Please try again later.</p>,
+            });
+          }}
           onClose={() => {
             setShowChatCreationModal(false);
           }}
         />
+      </div>
+      <div>
+        {documentCollectionResponse ? (
+          <DocumentCollectionUpdateModal
+            documentCollection={documentCollectionResponse.response}
+            show={showDocumentCollectionUpdateModal}
+            onSuccess={() => {
+              addToast({
+                type: "success",
+                children: <p>Successfully updated document collection.</p>,
+              });
+              mutateDocumentCollectionResponse();
+              setShowDocumentCollectionUpdateModal(false);
+            }}
+            onError={(e) => {
+              addToast({
+                type: "failure",
+                children: <p>Something went wrong. Please try again later.</p>,
+              });
+            }}
+            onClose={() => {
+              setShowDocumentCollectionUpdateModal(false);
+            }}
+          />
+        ) : null}
       </div>
     </AppsLoggedInLayout>
   );

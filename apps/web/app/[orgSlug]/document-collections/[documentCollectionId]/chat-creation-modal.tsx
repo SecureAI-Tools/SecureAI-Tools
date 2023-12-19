@@ -4,29 +4,28 @@ import { Button, Modal } from "flowbite-react";
 
 import ChatInput from "lib/fe/components/chat-input";
 import { ChatType } from "lib/types/core/chat-type";
-import { useRouter } from "next/navigation";
-import { FrontendRoutes } from "lib/fe/routes";
 import { postChat, postChatMessage } from "lib/fe/chat-utils";
-import useToasts from "lib/fe/hooks/use-toasts";
-import { Toasts } from "lib/fe/components/toasts";
 
 import { Id, DocumentCollectionResponse, isEmpty } from "@repo/core";
+import { ChatResponse } from "lib/types/api/chat.response";
 
 const ChatCreationModal = ({
   show,
   documentCollectionId,
   orgSlug,
+  onSuccess,
+  onError,
   onClose,
 }: {
   show: boolean;
   documentCollectionId: Id<DocumentCollectionResponse>;
   orgSlug: string;
+  onSuccess: (chatId: Id<ChatResponse>) => void;
+  onError: (e: unknown) => void;
   onClose: () => void;
 }) => {
   const [input, setInput] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const router = useRouter();
-  const [toasts, addToast] = useToasts();
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -35,7 +34,7 @@ const ChatCreationModal = ({
         type: ChatType.CHAT_WITH_DOCS,
         documentCollectionId: documentCollectionId?.toString(),
       });
-      const chatId = Id.from(chatResponse.id);
+      const chatId = Id.from<ChatResponse>(chatResponse.id);
 
       const chatMessageResponse = await postChatMessage(chatId, {
         message: {
@@ -43,26 +42,16 @@ const ChatCreationModal = ({
           role: "user",
         },
       });
-
-      router.push(
-        `${FrontendRoutes.getChatRoute(
-          orgSlug,
-          chatId,
-        )}?src=doc-collection-new-chat`,
-      );
+      onSuccess(chatId);
     } catch (e) {
       console.error("couldn't create chat", e);
-      addToast({
-        type: "failure",
-        children: <p>Something went wrong. Please try again later.</p>,
-      });
       setIsSubmitting(false);
+      onError(e);
     }
   };
 
   return (
     <>
-      <Toasts toasts={toasts} />
       <Modal
         show={show}
         size="2xl"
@@ -109,6 +98,3 @@ const ChatCreationModal = ({
 };
 
 export default ChatCreationModal;
-function setState<T>(arg0: string): [any, any] {
-  throw new Error("Function not implemented.");
-}
