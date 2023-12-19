@@ -26,7 +26,7 @@ services:
     command: sh -c "cd /app && node apps/web/server.js"
     depends_on:
       db:
-        condition: service_started
+        condition: service_healthy
       inference:
         condition: service_started
       vector-db:
@@ -52,7 +52,7 @@ services:
     command: sh -c "cd /app/apps/task-master/ && node --experimental-specifier-resolution=node dist/main.js"
     depends_on:
       db:
-        condition: service_started
+        condition: service_healthy
       inference:
         condition: service_started
       vector-db:
@@ -78,7 +78,8 @@ services:
       restart_policy:
         condition: none
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:latest
@@ -88,6 +89,11 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 5s
+      timeout: 3s
+      retries: 8
 
   vector-db:
     image: chromadb/chroma:latest
