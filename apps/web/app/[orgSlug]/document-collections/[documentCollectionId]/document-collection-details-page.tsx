@@ -295,17 +295,15 @@ const DocumentCollectionDetailsPage = ({
                   "float-left h-full align-middle max-w-4xl truncate",
                 )}
               >
-                <PageTitle
-                  title={
-                    documentCollectionResponse
-                      ? documentCollectionResponse.response.name ?? (
-                          <span className={tw("italic")}>
-                            {DEFAULT_DOCUMENT_COLLECTION_NAME}
-                          </span>
-                        )
-                      : ""
-                  }
-                />
+                <PageTitle>
+                  {documentCollectionResponse
+                    ? documentCollectionResponse.response.name ?? (
+                        <span className={tw("italic")}>
+                          {DEFAULT_DOCUMENT_COLLECTION_NAME}
+                        </span>
+                      )
+                    : null}
+                </PageTitle>
               </div>
               <div className={tw("flex flex-row float-right")}>
                 <Tooltip

@@ -230,7 +230,7 @@ const DocumentCollectionListPage = ({ orgSlug }: { orgSlug: string }) => {
         >
           <div className={tw("flow-root w-full align-middle")}>
             <div className={tw("float-left h-full align-middle")}>
-              <PageTitle title="Document collections" />
+              <PageTitle>Document collections</PageTitle>
             </div>
             <div className={tw("float-right")}>
               <Button

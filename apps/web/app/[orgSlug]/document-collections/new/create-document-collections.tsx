@@ -76,7 +76,7 @@ const CreateDocumentCollections = ({ orgSlug }: { orgSlug: string }) => {
               >
                 <HiArrowLeft className={tw("h-6 w-6")} />
               </Link>
-              <PageTitle title="Create document collection" />
+              <PageTitle>Create document collection</PageTitle>
             </div>
             <div className={tw("mt-8")}>
               <form

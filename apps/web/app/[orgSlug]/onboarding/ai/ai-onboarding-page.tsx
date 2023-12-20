@@ -16,7 +16,7 @@ export default function AIOnboardingPage({ orgSlug }: { orgSlug: string }) {
       <div className={tw("flex flex-col items-center")}>
         <div>
           <div className={tw("mt-6 mb-6 ml-4")}>
-            <PageTitle title={"Set up AI Model"} />
+            <PageTitle>Set up AI Model</PageTitle>
           </div>
           <div className={tw("w-96")}>
             <OrgAISettings

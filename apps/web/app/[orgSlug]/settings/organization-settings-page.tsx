@@ -50,7 +50,7 @@ export function OrganizationSettingsPage({
           >
             <HiArrowLeft className={tw("h-6 w-6")} />
           </Link>
-          <PageTitle title="Organization settings" />
+          <PageTitle>Organization settings</PageTitle>
         </div>
 
         <div className={tw("mt-6 overflow-x-auto max-w-4xl")}>
@@ -93,5 +93,5 @@ const tabNameToIndex = (name: string): number => {
 };
 
 const tabIndexToName = (idx: number): string => {
-  return TAB_NAMES_LIST[idx < TAB_NAMES_LIST.length ? idx : 0] ?? '';
+  return TAB_NAMES_LIST[idx < TAB_NAMES_LIST.length ? idx : 0] ?? "";
 };

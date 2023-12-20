@@ -6,10 +6,7 @@ import useSWR from "swr";
 import { tw } from "twind";
 import ReactTimeAgo from "react-time-ago";
 import { useSession } from "next-auth/react";
-import {
-  HiOutlineExclamationCircle,
-  HiOutlinePlus,
-} from "react-icons/hi";
+import { HiOutlineExclamationCircle, HiOutlinePlus } from "react-icons/hi";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -32,7 +29,12 @@ import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
 import { Sidebar } from "lib/fe/components/side-bar";
 import { PageTitle } from "lib/fe/components/page-title";
 
-import { DEFAULT_CHAT_TITLE, Id, isEmpty, PAGINATION_DEFAULT_PAGE_SIZE } from "@repo/core";
+import {
+  DEFAULT_CHAT_TITLE,
+  Id,
+  isEmpty,
+  PAGINATION_DEFAULT_PAGE_SIZE,
+} from "@repo/core";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;
 
@@ -60,8 +62,7 @@ export default function ChatHistory({ orgSlug }: { orgSlug: string }) {
     });
   }, [tableState]);
 
-  const shouldFetchChats =
-    sessionStatus === "authenticated" && session;
+  const shouldFetchChats = sessionStatus === "authenticated" && session;
   const chatsSWRKey = chatsApiPath({
     orgIdOrSlug: orgSlug,
     userId: (session?.user as TokenUser)?.id,
@@ -102,16 +103,9 @@ export default function ChatHistory({ orgSlug }: { orgSlug: string }) {
       >
         <div>
           <div className={tw("flex flex-row text-base font-normal")}>
-            <Link
-              href={FrontendRoutes.getChatRoute(
-                orgSlug,
-                Id.from(item.id),
-              )}
-            >
+            <Link href={FrontendRoutes.getChatRoute(orgSlug, Id.from(item.id))}>
               {item.title ?? (
-                <span className={tw("italic")}>
-                  {DEFAULT_CHAT_TITLE}
-                </span>
+                <span className={tw("italic")}>{DEFAULT_CHAT_TITLE}</span>
               )}
             </Link>
           </div>
@@ -128,30 +122,23 @@ export default function ChatHistory({ orgSlug }: { orgSlug: string }) {
         onDeleteSuccess={() => {
           addToast({
             type: "success",
-            children: (
-              <p>Successfully deleted chat</p>
-            ),
+            children: <p>Successfully deleted chat</p>,
           });
 
           // Refetch current page to relfect updated values!
-          mutateChatsResponse()
+          mutateChatsResponse();
         }}
         onDeleteError={(e) => {
-          console.log(
-            "something went wrong while trying to delete chat!",
-            e,
-          );
+          console.log("something went wrong while trying to delete chat!", e);
           addToast({
             type: "failure",
-            children: (
-              <p>Something went wrong! Please try again later</p>
-            ),
+            children: <p>Something went wrong! Please try again later</p>,
           });
         }}
         key={`${item.id}.actions`}
-      />
+      />,
     ];
-  }
+  };
 
   if (fetchChatsError) {
     return renderErrors(fetchChatsError);
@@ -174,13 +161,10 @@ export default function ChatHistory({ orgSlug }: { orgSlug: string }) {
         >
           <div className={tw("flow-root w-full align-middle")}>
             <div className={tw("float-left h-full align-middle")}>
-              <PageTitle title="Chat History" />
+              <PageTitle>Chat History</PageTitle>
             </div>
             <div className={tw("float-right")}>
-              <Button
-                pill
-                href={FrontendRoutes.getOrgHomeRoute(orgSlug)}
-              >
+              <Button pill href={FrontendRoutes.getOrgHomeRoute(orgSlug)}>
                 New Chat
               </Button>
             </div>
@@ -210,8 +194,7 @@ export default function ChatHistory({ orgSlug }: { orgSlug: string }) {
                 renderCells={renderCells}
                 page={tableState.pagination.currentPage}
                 totalPages={numberOfPages(
-                  chatsResponse?.headers.pagination?.totalCount ??
-                  0,
+                  chatsResponse?.headers.pagination?.totalCount ?? 0,
                   pageSize,
                 )}
                 onPageChange={onPageChange}
@@ -242,7 +225,7 @@ function RowActionItem({
         actions={[
           {
             label: "Delete",
-            onClick: () => setOpenModal(true)
+            onClick: () => setOpenModal(true),
           },
         ]}
       />
@@ -268,7 +251,8 @@ function RowActionItem({
                 "mb-5 text-lg font-normal text-black-500 dark:text-black-400",
               )}
             >
-              Are you sure you want to delete "{chat.title ?? DEFAULT_CHAT_TITLE}"?
+              Are you sure you want to delete "
+              {chat.title ?? DEFAULT_CHAT_TITLE}"?
             </h3>
             <div className={tw("flex justify-center gap-4")}>
               <Button
@@ -303,7 +287,7 @@ function RowActionItem({
         </Modal.Body>
       </Modal>
     </div>
-  )
+  );
 }
 
 async function deleteChat(id: Id<ChatResponse>): Promise<ChatResponse> {

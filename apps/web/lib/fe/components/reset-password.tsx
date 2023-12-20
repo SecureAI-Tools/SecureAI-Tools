@@ -43,7 +43,7 @@ export const ResetPassword = ({
       <Toasts toasts={toasts} />
       <div className={tw("flex flex-col")}>
         <div>
-          <PageTitle title={"Change password"} />
+          <PageTitle>Change password</PageTitle>
           <form
             className={tw("flex max-w-md flex-col gap-4 mt-4")}
             onSubmit={(e) => {

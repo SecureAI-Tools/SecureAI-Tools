@@ -26,7 +26,7 @@ const AppHomePage: NextPage<Props> = ({ organizations }: Props) => {
 
   const renderOrganizationSelector = () => (
     <>
-      <PageTitle title="Select organization" />
+      <PageTitle>Select organization</PageTitle>
       {organizations.map((org) => (
         <Card
           className={tw("max-w-sm w-96 mt-4")}
@@ -109,7 +109,9 @@ export const getServerSideProps: GetServerSideProps = async (
     return {
       redirect: {
         permanent: false,
-        destination: FrontendRoutes.getOrgHomeRoute(orgMemberships[0]!.org.slug),
+        destination: FrontendRoutes.getOrgHomeRoute(
+          orgMemberships[0]!.org.slug,
+        ),
       },
     };
   }

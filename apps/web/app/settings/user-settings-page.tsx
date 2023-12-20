@@ -48,7 +48,7 @@ export function UserSettingsPage() {
           >
             <HiArrowLeft className={tw("h-6 w-6")} />
           </Link>
-          <PageTitle title="User settings" />
+          <PageTitle>User settings</PageTitle>
         </div>
 
         <div className={tw("mt-6 overflow-x-auto max-w-4xl")}>

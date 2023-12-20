@@ -34,7 +34,13 @@ import { OrgMembershipStatus } from "lib/types/core/org-membership-status";
 import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
 import { PageTitle } from "lib/fe/components/page-title";
 
-import { Id, OrganizationResponse, PAGINATION_DEFAULT_PAGE_SIZE, PAGINATION_STARTING_PAGE_NUMBER, UserResponse } from "@repo/core";
+import {
+  Id,
+  OrganizationResponse,
+  PAGINATION_DEFAULT_PAGE_SIZE,
+  PAGINATION_STARTING_PAGE_NUMBER,
+  UserResponse,
+} from "@repo/core";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;
 const orgSlugParam = "orgSlug";
@@ -333,9 +339,9 @@ export const OrganizationUsersPage = ({
         <Toasts toasts={toasts} />
         <div className={tw("flow-root w-full align-middle")}>
           <div className={tw("float-left h-full align-middle")}>
-            <PageTitle
-              title={organization ? `Users of ${organization!.name}` : ""}
-            />
+            <PageTitle>
+              {organization ? `Users of ${organization!.name}` : ""}
+            </PageTitle>
           </div>
           {isOrgAdmin ? (
             <div className={tw("float-right")}>
