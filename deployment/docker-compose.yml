@@ -32,7 +32,7 @@ services:
       vector-db:
         condition: service_started
       message-broker:
-        condition: service_started
+        condition: service_healthy
       db-migrate-and-seed:
         condition: service_completed_successfully
         restart: false
@@ -58,7 +58,7 @@ services:
       vector-db:
         condition: service_started
       message-broker:
-        condition: service_started
+        condition: service_healthy
       db-migrate-and-seed:
         condition: service_completed_successfully
         restart: false
@@ -108,6 +108,11 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 3s
+      timeout: 3s
+      retries: 30
 
   inference:
     image: ollama/ollama:latest
