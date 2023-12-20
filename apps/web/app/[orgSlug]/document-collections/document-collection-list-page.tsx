@@ -7,10 +7,7 @@ import { useEffect, useState } from "react";
 import { Button, Modal } from "flowbite-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import {
-  HiOutlinePlus,
-  HiOutlineExclamationCircle,
-} from "react-icons/hi";
+import { HiOutlinePlus, HiOutlineExclamationCircle } from "react-icons/hi";
 
 import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
 import { Sidebar } from "lib/fe/components/side-bar";
@@ -19,7 +16,13 @@ import { FrontendRoutes } from "lib/fe/routes";
 import { RenderCellsFn, Table } from "lib/fe/components/table";
 import useTableState, { PAGE_PARAM } from "lib/fe/hooks/use-table-state";
 import { numberOfPages } from "lib/core/pagination-utils";
-import { getDocumentCollectionApiPath, getOrganizationsIdOrSlugDocumentCollectionApiPath } from "lib/fe/api-paths";
+import {
+  getDocumentCollectionApiPath,
+  getOrgMembershipsApiPath,
+  getOrganizationsIdOrSlugDocumentCollectionApiPath,
+  organizationsIdOrSlugApiPath,
+  organizationsIdOrSlugModelsApiPath,
+} from "lib/fe/api-paths";
 import { TokenUser } from "lib/types/core/token-user";
 import { createFetcher, delete_ } from "lib/fe/api";
 import { renderErrors } from "lib/fe/components/generic-error";
@@ -30,8 +33,20 @@ import { EmptyState } from "lib/fe/components/empty-state";
 import { ActionMenu } from "lib/fe/components/action-menu";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { Toasts } from "lib/fe/components/toasts";
+import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
+import { isAdmin } from "lib/fe/permission-utils";
+import { ModelsResponse } from "lib/types/api/models.response";
+import { ModelSetupAlert } from "lib/fe/components/model-setup-alert";
 
-import { PAGINATION_DEFAULT_PAGE_SIZE, Id, DocumentCollectionResponse, DEFAULT_DOCUMENT_COLLECTION_NAME, isEmpty } from "@repo/core";
+import {
+  PAGINATION_DEFAULT_PAGE_SIZE,
+  Id,
+  DocumentCollectionResponse,
+  DEFAULT_DOCUMENT_COLLECTION_NAME,
+  isEmpty,
+  OrganizationResponse,
+  ModelType,
+} from "@repo/core";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;
 
@@ -69,19 +84,52 @@ const DocumentCollectionListPage = ({ orgSlug }: { orgSlug: string }) => {
   } = useSWR(
     shouldFetchDocumentCollections
       ? getOrganizationsIdOrSlugDocumentCollectionApiPath({
-        orgIdOrSlug: orgSlug,
-        userId: Id.from((session.user as TokenUser).id),
-        ordering: {
-          orderBy: "createdAt",
-          order: "desc",
-        },
-        pagination: {
-          page: tableState.pagination.currentPage,
-          pageSize: pageSize,
-        },
-      })
+          orgIdOrSlug: orgSlug,
+          userId: Id.from((session.user as TokenUser).id),
+          ordering: {
+            orderBy: "createdAt",
+            order: "desc",
+          },
+          pagination: {
+            page: tableState.pagination.currentPage,
+            pageSize: pageSize,
+          },
+        })
       : null,
     createFetcher<DocumentCollectionResponse[]>(),
+  );
+
+  // Fetch organization
+  const { data: organizationResponse, error: fetchOrganizationError } = useSWR(
+    organizationsIdOrSlugApiPath(orgSlug),
+    createFetcher<OrganizationResponse>(),
+  );
+
+  // Fetch current user's membership to organization
+  const shouldFetchOrgMembership = organizationResponse !== undefined;
+  const { data: orgMembershipResponse, error: fetchOrgMembershipError } =
+    useSWR(
+      shouldFetchOrgMembership
+        ? getOrgMembershipsApiPath(Id.from(organizationResponse.response.id), {
+            userId: (session!.user as TokenUser).id,
+          })
+        : null,
+      createFetcher<OrgMembershipResponse[]>(),
+    );
+
+  // Fetch model info
+  const shouldFetchModels =
+    orgMembershipResponse !== undefined &&
+    isAdmin(orgMembershipResponse.response) &&
+    organizationResponse?.response.defaultModelType === ModelType.OLLAMA;
+  const { data: modelsResponse, error: fetchModelsError } = useSWR(
+    shouldFetchModels
+      ? organizationsIdOrSlugModelsApiPath(
+          orgSlug,
+          organizationResponse.response.defaultModel,
+        )
+      : null,
+    createFetcher<ModelsResponse>(),
   );
 
   const onPageChange = (newPage: number) => {
@@ -133,13 +181,11 @@ const DocumentCollectionListPage = ({ orgSlug }: { orgSlug: string }) => {
         onDeleteSuccess={() => {
           addToast({
             type: "success",
-            children: (
-              <p>Successfully deleted document collection</p>
-            ),
+            children: <p>Successfully deleted document collection</p>,
           });
 
           // Refetch current page to relfect updated values!
-          mutateDocumentCollectionsResponse()
+          mutateDocumentCollectionsResponse();
         }}
         onDeleteError={(e) => {
           console.log(
@@ -148,13 +194,11 @@ const DocumentCollectionListPage = ({ orgSlug }: { orgSlug: string }) => {
           );
           addToast({
             type: "failure",
-            children: (
-              <p>Something went wrong! Please try again later</p>
-            ),
+            children: <p>Something went wrong! Please try again later</p>,
           });
         }}
         key={`${item.id}.actions`}
-      />
+      />,
     ];
   };
 
@@ -166,6 +210,13 @@ const DocumentCollectionListPage = ({ orgSlug }: { orgSlug: string }) => {
     !isDocumentCollectionsResponseLoading &&
     tableState.pagination.currentPage === 1 &&
     documentCollectionsResponse?.response.length === 0;
+
+  const modelSetupRequired =
+    orgMembershipResponse !== undefined &&
+    isAdmin(orgMembershipResponse.response) &&
+    organizationResponse?.response.defaultModelType === ModelType.OLLAMA &&
+    modelsResponse !== undefined &&
+    modelsResponse.response.models.length <= 0;
 
   return (
     <AppsLoggedInLayout>
@@ -190,7 +241,7 @@ const DocumentCollectionListPage = ({ orgSlug }: { orgSlug: string }) => {
               </Button>
             </div>
           </div>
-
+          {modelSetupRequired ? <ModelSetupAlert orgSlug={orgSlug} /> : null}
           <div className={tw("mt-4 grow")}>
             {shouldRenderEmptyState ? (
               <EmptyState
@@ -200,9 +251,12 @@ const DocumentCollectionListPage = ({ orgSlug }: { orgSlug: string }) => {
                   <Button
                     outline
                     size="lg"
-                    href={FrontendRoutes.getNewDocumentCollectionsRoute(
-                      orgSlug,
-                    )}
+                    href={
+                      modelSetupRequired
+                        ? undefined
+                        : FrontendRoutes.getNewDocumentCollectionsRoute(orgSlug)
+                    }
+                    disabled={modelSetupRequired}
                   >
                     <HiOutlinePlus className="mr-2 h-5 w-5" />
                     Add collection
@@ -218,7 +272,7 @@ const DocumentCollectionListPage = ({ orgSlug }: { orgSlug: string }) => {
                 page={tableState.pagination.currentPage}
                 totalPages={numberOfPages(
                   documentCollectionsResponse?.headers.pagination?.totalCount ??
-                  0,
+                    0,
                   pageSize,
                 )}
                 onPageChange={onPageChange}
@@ -251,7 +305,7 @@ function RowActionItem({
         actions={[
           {
             label: "Delete",
-            onClick: () => setOpenModal(true)
+            onClick: () => setOpenModal(true),
           },
         ]}
       />
@@ -277,7 +331,8 @@ function RowActionItem({
                 "mb-5 text-lg font-normal text-black-500 dark:text-black-400",
               )}
             >
-              Are you sure you want to delete "{documentCollection.name ?? DEFAULT_DOCUMENT_COLLECTION_NAME}"?
+              Are you sure you want to delete "
+              {documentCollection.name ?? DEFAULT_DOCUMENT_COLLECTION_NAME}"?
             </h3>
             <div className={tw("flex justify-center gap-4")}>
               <Button
@@ -312,15 +367,12 @@ function RowActionItem({
         </Modal.Body>
       </Modal>
     </div>
-  )
+  );
 }
 
 const deleteDocumentCollection = async (
-  documentCollectionId: Id<DocumentCollectionResponse>
+  documentCollectionId: Id<DocumentCollectionResponse>,
 ): Promise<{}> => {
-  return (
-    await delete_<{}>(
-      getDocumentCollectionApiPath(documentCollectionId),
-    )
-  ).response;
+  return (await delete_<{}>(getDocumentCollectionApiPath(documentCollectionId)))
+    .response;
 };

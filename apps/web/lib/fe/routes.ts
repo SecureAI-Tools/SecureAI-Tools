@@ -46,6 +46,9 @@ export namespace FrontendRoutes {
   ): string =>
     `${getOrgHomeRoute(orgSlug)}/document-collections/${documentCollectionId}`;
 
+  export const getOnboardingAIRoute = (orgSlug: string): string =>
+    `${getOrgHomeRoute(orgSlug)}/onboarding/ai`;
+
   export const getLogInWithEmailRoute = (email: string): string =>
     `${LOG_IN}&email=${encodeURIComponent(email)}`;
 }

@@ -25,6 +25,7 @@ export default function ChatInput({
       <textarea
         className={tw(
           "m-0 w-full resize-none border-0 bg-transparent py-[10px] pr-10 focus:ring-0 focus-visible:ring-0 dark:bg-transparent md:py-4 md:pr-12 pl-3 md:pl-4",
+          disabled ? "cursor-not-allowed" : "",
         )}
         value={value}
         placeholder={placeholder}

@@ -5,6 +5,8 @@ import { useState } from "react";
 import { tw } from "twind";
 import Image from "next/image";
 import { Button } from "flowbite-react";
+import useSWR from "swr";
+import { useSession } from "next-auth/react";
 
 import useToasts from "lib/fe/hooks/use-toasts";
 import { FrontendRoutes } from "lib/fe/routes";
@@ -19,11 +21,30 @@ import {
 } from "lib/fe/document-utils";
 import { postChat, postChatMessage } from "lib/fe/chat-utils";
 import { IndexingMode } from "lib/types/core/indexing-mode";
+import {
+  getOrgMembershipsApiPath,
+  organizationsIdOrSlugApiPath,
+  organizationsIdOrSlugModelsApiPath,
+} from "lib/fe/api-paths";
+import { createFetcher } from "lib/fe/api";
+import { TokenUser } from "lib/types/core/token-user";
+import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
+import { isAdmin } from "lib/fe/permission-utils";
+import { ModelsResponse } from "lib/types/api/models.response";
+import { ModelSetupAlert } from "lib/fe/components/model-setup-alert";
 
-import { Id, DocumentCollectionResponse, DocumentResponse } from "@repo/core";
+import {
+  Id,
+  DocumentCollectionResponse,
+  DocumentResponse,
+  OrganizationResponse,
+  ModelType,
+  isEmpty,
+} from "@repo/core";
 
 export default function NewChat({ orgSlug }: { orgSlug: string }) {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [input, setInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -84,10 +105,55 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
     });
   };
 
+  // Fetch organization
+  const { data: organizationResponse, error: fetchOrganizationError } = useSWR(
+    organizationsIdOrSlugApiPath(orgSlug),
+    createFetcher<OrganizationResponse>(),
+  );
+
+  // Fetch current user's membership to organization
+  const shouldFetchOrgMembership = organizationResponse !== undefined;
+  const { data: orgMembershipResponse, error: fetchOrgMembershipError } =
+    useSWR(
+      shouldFetchOrgMembership
+        ? getOrgMembershipsApiPath(Id.from(organizationResponse.response.id), {
+            userId: (session!.user as TokenUser).id,
+          })
+        : null,
+      createFetcher<OrgMembershipResponse[]>(),
+    );
+
+  // Fetch model info
+  const shouldFetchModels =
+    orgMembershipResponse !== undefined &&
+    isAdmin(orgMembershipResponse.response) &&
+    organizationResponse?.response.defaultModelType === ModelType.OLLAMA;
+  const { data: modelsResponse, error: fetchModelsError } = useSWR(
+    shouldFetchModels
+      ? organizationsIdOrSlugModelsApiPath(
+          orgSlug,
+          organizationResponse.response.defaultModel,
+        )
+      : null,
+    createFetcher<ModelsResponse>(),
+  );
+
+  const modelSetupRequired =
+    orgMembershipResponse !== undefined &&
+    isAdmin(orgMembershipResponse.response) &&
+    organizationResponse?.response.defaultModelType === ModelType.OLLAMA &&
+    modelsResponse !== undefined &&
+    modelsResponse.response.models.length <= 0;
+
   return (
     <>
       <Toasts toasts={toasts} />
       <div className={tw("flex flex-col w-full h-screen")}>
+        {modelSetupRequired ? (
+          <div className={tw("m-5")}>
+            <ModelSetupAlert orgSlug={orgSlug} />
+          </div>
+        ) : null}
         <div className={tw("flex flex-col grow items-center justify-center")}>
           <div className={tw("flex flex-col items-center")}>
             <Image
@@ -125,7 +191,7 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
                     setInput(e.target.value);
                   }}
                   onEnter={handleSubmit}
-                  disabled={isSubmitting}
+                  disabled={modelSetupRequired || isSubmitting}
                   placeholder="Type something and hit Enter to start a new chat..."
                 />
                 <div id="fileUpload" className={tw("mt-4 w-full h-24")}>
@@ -149,7 +215,7 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
                     }
                     onFilesSelected={handleFilesSelected}
                     accept=".pdf"
-                    disabled={isSubmitting}
+                    disabled={modelSetupRequired || isSubmitting}
                     spinner={isSubmitting}
                     multiple
                   />
@@ -158,6 +224,7 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
                   type="submit"
                   className={tw("mt-4 w-full")}
                   isProcessing={isSubmitting}
+                  disabled={modelSetupRequired || isEmpty(input)}
                 >
                   Submit
                 </Button>

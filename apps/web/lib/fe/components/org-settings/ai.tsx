@@ -25,7 +25,13 @@ import { renderErrors } from "lib/fe/components/generic-error";
 import { Link } from "lib/fe/components/link";
 import { ModelProviderResponse } from "lib/types/api/mode-provider.response";
 
-import { ModelType, OrganizationResponse, Id, toModelType, modelTypeToReadableName } from "@repo/core";
+import {
+  ModelType,
+  OrganizationResponse,
+  Id,
+  toModelType,
+  modelTypeToReadableName,
+} from "@repo/core";
 
 const OrgAISettings = ({
   orgSlug,
@@ -110,6 +116,7 @@ const OrgAISettings = ({
           type: "success",
           children: <p>Successfully updated LLM.</p>,
         });
+        onSuccess?.();
       })
       .catch((e) => {
         showErrorToast();
@@ -231,7 +238,6 @@ const OrgAISettings = ({
         }}
         onSuccessContinue={() => {
           setShowDownloadModal(false);
-          onSuccess?.();
         }}
         onFailure={() => {
           setIsFormSubmitting(false);
