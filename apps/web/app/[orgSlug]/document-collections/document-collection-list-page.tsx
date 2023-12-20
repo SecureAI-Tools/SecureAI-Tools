@@ -235,7 +235,12 @@ const DocumentCollectionListPage = ({ orgSlug }: { orgSlug: string }) => {
             <div className={tw("float-right")}>
               <Button
                 pill
-                href={FrontendRoutes.getNewDocumentCollectionsRoute(orgSlug)}
+                href={
+                  modelSetupRequired
+                    ? undefined
+                    : FrontendRoutes.getNewDocumentCollectionsRoute(orgSlug)
+                }
+                disabled={modelSetupRequired}
               >
                 Add Collection
               </Button>
