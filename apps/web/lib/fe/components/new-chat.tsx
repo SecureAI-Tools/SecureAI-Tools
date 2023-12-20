@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { tw } from "twind";
 import Image from "next/image";
-import { Button } from "flowbite-react";
+import { Button, Dropdown } from "flowbite-react";
 import useSWR from "swr";
 import { useSession } from "next-auth/react";
 
@@ -32,6 +32,7 @@ import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 import { isAdmin } from "lib/fe/permission-utils";
 import { ModelsResponse } from "lib/types/api/models.response";
 import { ModelSetupAlert } from "lib/fe/components/model-setup-alert";
+import { Tooltip } from "lib/fe/components/tooltip";
 
 import {
   Id,
@@ -40,6 +41,7 @@ import {
   OrganizationResponse,
   ModelType,
   isEmpty,
+  modelTypeToReadableName,
 } from "@repo/core";
 
 export default function NewChat({ orgSlug }: { orgSlug: string }) {
@@ -144,6 +146,8 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
     organizationResponse?.response.defaultModelType === ModelType.OLLAMA &&
     modelsResponse !== undefined &&
     modelsResponse.response.models.length <= 0;
+  
+  const modelEditDisabled = orgMembershipResponse === undefined || !isAdmin(orgMembershipResponse.response);
 
   return (
     <>
@@ -153,7 +157,38 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
           <div className={tw("m-5")}>
             <ModelSetupAlert orgSlug={orgSlug} />
           </div>
-        ) : null}
+        ) : (
+          <div className={tw("flex flex-col items-center mt-1.5")}>
+            <div className={tw("rounded-lg border bg-gray-50 shadow-sm p-3")}>
+              {organizationResponse ? (
+                <Dropdown label={
+                    <div className={tw("text-sm font-light mr-1")}>
+                      {organizationResponse.response.defaultModel} ({modelTypeToReadableName(organizationResponse.response.defaultModelType)})
+                    </div>
+                  }
+                  inline
+                >
+                  <Dropdown.Item
+                    disabled={modelEditDisabled}
+                    href={modelEditDisabled ? undefined : `${FrontendRoutes.getOrgSettingsRoute(orgSlug)}?tab=ai`}
+                    className={tw(modelEditDisabled ? "cursor-not-allowed" : "")}
+                  >
+                    <Tooltip tipContent={modelEditDisabled ? "Ask your organization admin to change AI settings" : undefined}>
+                      <div className={tw("text-left")}>
+                        <div>
+                          Change AI model
+                        </div>
+                        <div className={tw("text-xs font-light")}>
+                          Use a different AI model by changing AI settings
+                        </div>
+                      </div>
+                    </Tooltip>
+                  </Dropdown.Item>
+                </Dropdown>
+              ) : null}
+            </div>
+          </div>
+        )}
         <div className={tw("flex flex-col grow items-center justify-center")}>
           <div className={tw("flex flex-col items-center")}>
             <Image
