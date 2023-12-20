@@ -26,13 +26,13 @@ services:
     command: sh -c "cd /app && node apps/web/server.js"
     depends_on:
       db:
-        condition: service_started
+        condition: service_healthy
       inference:
         condition: service_started
       vector-db:
         condition: service_started
       message-broker:
-        condition: service_started
+        condition: service_healthy
       db-migrate-and-seed:
         condition: service_completed_successfully
         restart: false
@@ -52,13 +52,13 @@ services:
     command: sh -c "cd /app/apps/task-master/ && node --experimental-specifier-resolution=node dist/main.js"
     depends_on:
       db:
-        condition: service_started
+        condition: service_healthy
       inference:
         condition: service_started
       vector-db:
         condition: service_started
       message-broker:
-        condition: service_started
+        condition: service_healthy
       db-migrate-and-seed:
         condition: service_completed_successfully
         restart: false
@@ -78,7 +78,8 @@ services:
       restart_policy:
         condition: none
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:latest
@@ -88,6 +89,11 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 3s
+      retries: 8
 
   vector-db:
     image: chromadb/chroma:latest
@@ -102,6 +108,11 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 3s
+      timeout: 3s
+      retries: 30
 
   inference:
     image: ollama/ollama:latest
