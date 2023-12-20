@@ -29,11 +29,12 @@ export class ModelProviderService {
       throw new Error(`could not get config for model-type = ${modelType}`);
     }
 
-    logger.debug("Instantiating model", { modelType: modelType });
+    logger.debug("Instantiating chat model", { modelType: modelType, config: config });
 
     switch (modelType) {
       case ModelType.OPENAI:
         return new ChatOpenAI({
+          ...config.options,
           openAIApiKey: config.apiKey,
           modelName: modelName,
           streaming: true,
@@ -44,6 +45,7 @@ export class ModelProviderService {
 
       case ModelType.OLLAMA:
         return new ChatOllama({
+          ...config.options,
           baseUrl: config.apiBaseUrl,
           model: modelName,
         });
@@ -71,7 +73,7 @@ export class ModelProviderService {
       throw new Error(`could not get config for model-type = ${modelType}`);
     }
 
-    logger.debug("Instantiating model", { modelType: modelType });
+    logger.debug("Instantiating embedding model", { modelType: modelType, config: config });
 
     switch (modelType) {
       case ModelType.OPENAI:
@@ -93,6 +95,7 @@ export class ModelProviderService {
           // OllamaEmbeddings does not like extra slash at the end!
           baseUrl: removeTrailingSlash(config.apiBaseUrl),
           model: modelName,
+          requestOptions: config.options,
         });
 
       default:
