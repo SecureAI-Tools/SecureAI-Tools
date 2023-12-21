@@ -45,10 +45,10 @@ export const getDocumentCollectionApiPath = (
   return `/api/document-collections/${documentCollectionId}`;
 };
 
-export const postDocumentCollectionDocumentsApiPath = (
+export const uploadDocumentApiPath = (
   documentCollectionId: Id<DocumentCollectionResponse>,
 ): string => {
-  return `/api/document-collections/${documentCollectionId}/documents`;
+  return `/api/document-collections/${documentCollectionId}/documents/upload`;
 };
 
 export const getDocumentCollectionDocumentsApiPath = ({

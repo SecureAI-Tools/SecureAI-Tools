@@ -44,7 +44,7 @@ export class IndexingService {
         : 200,
     });
 
-    const fileBuffer = await this.objectStorageService.get(document.objectKey);
+    const fileBuffer = await this.objectStorageService.get(document.uri);
     var langchainDocuments: LangchainDocument[] = [];
     var loader;
     var docs;

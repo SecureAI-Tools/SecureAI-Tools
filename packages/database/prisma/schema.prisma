@@ -45,16 +45,17 @@ model Organization {
 
 // Organization membership
 model OrgMembership {
-  id        String       @id
-  role      String
-  status    String
-  orgId     String
-  org       Organization @relation(fields: [orgId], references: [id])
-  userId    String
-  user      User         @relation(fields: [userId], references: [id])
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  Chat      Chat[]
+  id          String                 @id
+  role        String
+  status      String
+  orgId       String
+  org         Organization           @relation(fields: [orgId], references: [id])
+  userId      String
+  user        User                   @relation(fields: [userId], references: [id])
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  Chat        Chat[]
+  connections DataSourceConnection[]
 
   @@unique([orgId, userId])
   @@index([id])
@@ -120,16 +121,21 @@ model DocumentCollection {
 }
 
 model Document {
-  id             String             @id
+  id             String               @id
   name           String
   mimeType       String
-  objectKey      String
+  // Unique resource identifier in DataSourceConnection
+  // 
+  // For uploads, this is the object-key in object storage
+  uri            String
   // Enum controlled by DocumentIndexingStatus in TS
   indexingStatus String
   collectionId   String
-  collection     DocumentCollection @relation(fields: [collectionId], references: [id])
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
+  collection     DocumentCollection   @relation(fields: [collectionId], references: [id])
+  connectionId   String
+  connection     DataSourceConnection @relation(fields: [connectionId], references: [id])
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
   citations      Citation[]
 
   @@index([id])
@@ -148,6 +154,23 @@ model Citation {
   chatMessageId   String
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
+
+  @@index([id])
+}
+
+model DataSourceConnection {
+  id                   String        @id
+  // Enum controlled by DataSource in TS
+  dataSource           String
+  baseUrl              String?
+  accessToken          String?
+  accessTokenExpiresAt DateTime?
+  refreshToken         String?
+  membership           OrgMembership @relation(fields: [membershipId], references: [id])
+  membershipId         String
+  documents            Document[]
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
 
   @@index([id])
 }

@@ -1,6 +1,6 @@
 import { Document, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
 import { API } from "../utils/api.utils";
-import { Id, DocumentResponse, DocumentIndexingStatus, DocumentCollectionResponse } from "@repo/core";
+import { Id, DocumentResponse, DocumentIndexingStatus, DocumentCollectionResponse, DataSourceConnectionResponse } from "@repo/core";
 
 
 export interface DocumentCreateInput {
@@ -9,7 +9,8 @@ export interface DocumentCreateInput {
   indexingStatus: DocumentIndexingStatus;
   mimeType: string;
   collectionId: Id<DocumentCollectionResponse>;
-  objectKey: string;
+  uri: string;
+  connectionId: Id<DataSourceConnectionResponse>;
 }
 
 export class DocumentService {
@@ -30,7 +31,8 @@ export class DocumentService {
         mimeType: i.mimeType,
         indexingStatus: i.indexingStatus,
         collectionId: i.collectionId.toString(),
-        objectKey: i.objectKey,
+        uri: i.uri,
+        connectionId: i.connectionId.toString(),
       },
     });
   }
@@ -116,7 +118,7 @@ export class DocumentService {
     id: Id<DocumentResponse>,
     data: Pick<
       Prisma.DocumentUpdateInput,
-      "name" | "indexingStatus" | "mimeType" | "objectKey"
+      "name" | "indexingStatus" | "mimeType" | "uri"
     >,
   ): Promise<Document | null> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {

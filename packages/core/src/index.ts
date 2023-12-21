@@ -12,4 +12,6 @@ export * from "./types/organization.response";
 export * from "./types/response-headers";
 export * from "./types/stream-chunk.response";
 export * from "./types/user.response";
+export * from "./types/data-source";
+export * from "./types/data-source-connection.response";
 export * from "./utils/string-utils";

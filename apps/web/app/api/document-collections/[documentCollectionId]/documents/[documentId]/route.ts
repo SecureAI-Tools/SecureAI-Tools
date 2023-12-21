@@ -41,7 +41,7 @@ export async function GET(
     return NextResponseErrors.notFound();
   }
 
-  const data = await objectStorageService.get(document.objectKey);
+  const data = await objectStorageService.get(document.uri);
 
   const headers = new Headers();
   headers.append("Content-Type", document.mimeType);
