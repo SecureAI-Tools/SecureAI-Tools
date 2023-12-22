@@ -33,7 +33,6 @@ import { EmptyState } from "lib/fe/components/empty-state";
 import { ActionMenu } from "lib/fe/components/action-menu";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { Toasts } from "lib/fe/components/toasts";
-import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 import { isAdmin } from "lib/fe/permission-utils";
 import { ModelsResponse } from "lib/types/api/models.response";
 import { ModelSetupAlert } from "lib/fe/components/model-setup-alert";
@@ -46,6 +45,7 @@ import {
   isEmpty,
   OrganizationResponse,
   ModelType,
+  OrgMembershipResponse,
 } from "@repo/core";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;

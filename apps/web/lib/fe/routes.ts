@@ -1,6 +1,6 @@
 import { ChatResponse } from "lib/types/api/chat.response";
 
-import { Id, DocumentCollectionResponse } from "@repo/core";
+import { Id, DocumentCollectionResponse, DataSource } from "@repo/core";
 
 export namespace FrontendRoutes {
   export const INDEX = "/";
@@ -45,6 +45,17 @@ export namespace FrontendRoutes {
     documentCollectionId: Id<DocumentCollectionResponse>,
   ): string =>
     `${getOrgHomeRoute(orgSlug)}/document-collections/${documentCollectionId}`;
+
+  export const getDataSourcesRoute = (orgSlug: string): string =>
+    `${getOrgHomeRoute(orgSlug)}/data-sources`;
+
+  export const getConnectDataSourceRoute = (
+    orgSlug: string,
+    dataSource: DataSource,
+  ): string =>
+    `${getOrgHomeRoute(
+      orgSlug,
+    )}/data-sources/connect/${dataSource.toLowerCase()}`;
 
   export const getOnboardingAIRoute = (orgSlug: string): string =>
     `${getOrgHomeRoute(orgSlug)}/onboarding/ai`;

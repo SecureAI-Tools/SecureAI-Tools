@@ -14,7 +14,6 @@ import {
   orgMembershipApiPath,
 } from "lib/fe/api-paths";
 import { FE } from "lib/fe/route-utils";
-import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 import { RenderCellsFn, Table } from "lib/fe/components/table";
 import { FrontendRoutes } from "lib/fe/routes";
 import { numberOfPages } from "lib/core/pagination-utils";
@@ -29,8 +28,6 @@ import { OrgMembershipUpdateRequest } from "lib/types/api/org-membership-update.
 import { Toasts } from "lib/fe/components/toasts";
 import { isAdmin } from "lib/fe/permission-utils";
 import useToasts from "lib/fe/hooks/use-toasts";
-import { OrgMembershipRole } from "lib/types/core/org-membership-role";
-import { OrgMembershipStatus } from "lib/types/core/org-membership-status";
 import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
 import { PageTitle } from "lib/fe/components/page-title";
 
@@ -40,6 +37,9 @@ import {
   PAGINATION_DEFAULT_PAGE_SIZE,
   PAGINATION_STARTING_PAGE_NUMBER,
   UserResponse,
+  OrgMembershipResponse,
+  OrgMembershipRole,
+  OrgMembershipStatus,
 } from "@repo/core";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;

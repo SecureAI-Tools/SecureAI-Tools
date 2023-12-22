@@ -11,3 +11,4 @@ export * from "./services/document-to-collection-service";
 export * from "./utils/api.utils";
 export * from "./utils/document-uri-utils";
 export * from "./utils/utils";
+export * from "./clients/paperless-ngx-client";
