@@ -2,12 +2,12 @@ import { OrgMembership, User } from "@repo/database";
 import {
   OrgMembershipRole,
   toOrgMembershipRole,
-} from "../core/org-membership-role";
+} from "./org-membership-role";
 import {
   OrgMembershipStatus,
   toOrgMembershipStatus,
-} from "../core/org-membership-status";
-import { UserResponse } from "@repo/core";
+} from "./org-membership-status";
+import { UserResponse } from "./user.response";
 
 export class OrgMembershipResponse {
   id!: string;

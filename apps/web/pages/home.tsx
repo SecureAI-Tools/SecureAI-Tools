@@ -13,9 +13,8 @@ import { FrontendRoutes } from "lib/fe/routes";
 import { isAuthenticatedWithRedirect } from "lib/ssr/auth";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { PageTitle } from "lib/fe/components/page-title";
-import { OrgMembershipStatus } from "lib/types/core/org-membership-status";
 
-import { OrganizationResponse } from "@repo/core";
+import { OrganizationResponse, OrgMembershipStatus } from "@repo/core";
 
 interface Props {
   organizations: OrganizationResponse[];

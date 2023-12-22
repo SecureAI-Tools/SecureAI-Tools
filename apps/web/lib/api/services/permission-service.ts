@@ -4,9 +4,13 @@ import { NextResponse } from "next/server";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { ChatService } from "lib/api/services/chat-service";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
-import { OrgMembershipStatus } from "lib/types/core/org-membership-status";
 
-import { Id, UserResponse, DocumentCollectionResponse } from "@repo/core";
+import {
+  Id,
+  UserResponse,
+  DocumentCollectionResponse,
+  OrgMembershipStatus,
+} from "@repo/core";
 import { DocumentCollectionService, NextResponseErrors } from "@repo/backend";
 
 export class PermissionService {
@@ -18,7 +22,7 @@ export class PermissionService {
   async hasReadPermission(
     userId: Id<UserResponse>,
     chatId: Id<ChatResponse>,
-  ): Promise<[boolean, NextResponse | undefined]> {
+  ): Promise<[boolean, Response | undefined]> {
     // Only chat creators can read a chat for now.
     //
     // Revisit this when allowing sharing!
@@ -30,7 +34,7 @@ export class PermissionService {
   async hasWritePermission(
     userId: Id<UserResponse>,
     chatId: Id<ChatResponse>,
-  ): Promise<[boolean, NextResponse | undefined]> {
+  ): Promise<[boolean, Response | undefined]> {
     // Only chat creators can write to a chat for now.
     //
     // Revisit this when allowing sharing!
@@ -40,7 +44,7 @@ export class PermissionService {
   async hasWriteDocumentCollectionPermission(
     userId: Id<UserResponse>,
     documentCollectionId: Id<DocumentCollectionResponse>,
-  ): Promise<[boolean, NextResponse | undefined]> {
+  ): Promise<[boolean, Response | undefined]> {
     // Only chat creators can write to document collection for now.
     //
     // Revisit this when allowing sharing!
@@ -53,7 +57,7 @@ export class PermissionService {
   async hasReadDocumentCollectionPermission(
     userId: Id<UserResponse>,
     documentCollectionId: Id<DocumentCollectionResponse>,
-  ): Promise<[boolean, NextResponse | undefined]> {
+  ): Promise<[boolean, Response | undefined]> {
     // Only chat creators can read to document collection for now.
     //
     // Revisit this when allowing sharing!
@@ -66,7 +70,7 @@ export class PermissionService {
   private async isChatCreatorWithActiveMembership(
     userId: Id<UserResponse>,
     chatId: Id<ChatResponse>,
-  ): Promise<[boolean, NextResponse | undefined]> {
+  ): Promise<[boolean, Response | undefined]> {
     const chat = await this.chatService.get(chatId);
     if (!chat) {
       return [false, NextResponseErrors.notFound()];
@@ -93,7 +97,7 @@ export class PermissionService {
   private async isDocumentCollectionCreatorWithActiveMembership(
     userId: Id<UserResponse>,
     documentCollectionId: Id<DocumentCollectionResponse>,
-  ): Promise<[boolean, NextResponse | undefined]> {
+  ): Promise<[boolean, Response | undefined]> {
     const collection =
       await this.documentCollectionService.get(documentCollectionId);
 

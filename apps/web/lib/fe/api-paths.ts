@@ -1,9 +1,17 @@
 import { ChatResponse } from "lib/types/api/chat.response";
 import { OrderingParams, PaginationParams } from "lib/fe/api-params";
-import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 
-import { DocumentCollectionResponse, DocumentResponse, Id, OrganizationResponse, UserResponse, isEmpty } from "@repo/core";
+import {
+  DocumentCollectionResponse,
+  DocumentResponse,
+  Id,
+  OrganizationResponse,
+  UserResponse,
+  isEmpty,
+  OrgMembershipResponse,
+  DataSource,
+} from "@repo/core";
 
 export const userApiPath = (userId: Id<UserResponse>): string => {
   return `/api/users/${userId}`;
@@ -166,6 +174,39 @@ export const getOrganizationsIdOrSlugDocumentCollectionApiPath = ({
   pagination: PaginationParams;
 }): string => {
   return `/api/organizations/${orgIdOrSlug}/document-collections?userId=${userId}&orderBy=${ordering.orderBy}&order=${ordering.order}&page=${pagination.page}&pageSize=${pagination.pageSize}`;
+};
+
+export const getOrganizationsIdOrSlugDataSourceConnectionsApiPath = ({
+  orgIdOrSlug,
+  userId,
+  ordering,
+  pagination,
+  dataSources,
+}: {
+  orgIdOrSlug: string;
+  userId: Id<UserResponse>;
+  ordering: OrderingParams;
+  pagination: PaginationParams;
+  dataSources?: DataSource[];
+}): string => {
+  return (
+    `/api/organizations/${orgIdOrSlug}/data-source-connections?userId=${userId}&orderBy=${ordering.orderBy}&order=${ordering.order}&page=${pagination.page}&pageSize=${pagination.pageSize}` +
+    (dataSources && dataSources.length > 0
+      ? dataSources.map((d) => `&dataSource=${d}`).join("")
+      : "")
+  );
+};
+
+export const checkDataSourceConnectionsApiPath = (
+  orgIdOrSlug: string,
+): string => {
+  return `/api/organizations/${orgIdOrSlug}/data-source-connections/check`;
+};
+
+export const postDataSourceConnectionsApiPath = (
+  orgIdOrSlug: string,
+): string => {
+  return `/api/organizations/${orgIdOrSlug}/data-source-connections`;
 };
 
 export const getOrgMembershipsApiPath = (

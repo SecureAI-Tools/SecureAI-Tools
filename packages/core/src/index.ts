@@ -14,4 +14,7 @@ export * from "./types/stream-chunk.response";
 export * from "./types/user.response";
 export * from "./types/data-source";
 export * from "./types/data-source-connection.response";
+export * from "./types/org-membership.response";
+export * from "./types/org-membership-role";
+export * from "./types/org-membership-status";
 export * from "./utils/string-utils";

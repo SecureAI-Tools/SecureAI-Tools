@@ -28,7 +28,6 @@ import {
 } from "lib/fe/api-paths";
 import { createFetcher } from "lib/fe/api";
 import { TokenUser } from "lib/types/core/token-user";
-import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 import { isAdmin } from "lib/fe/permission-utils";
 import { ModelsResponse } from "lib/types/api/models.response";
 import { ModelSetupAlert } from "lib/fe/components/model-setup-alert";
@@ -42,6 +41,7 @@ import {
   ModelType,
   isEmpty,
   modelTypeToReadableName,
+  OrgMembershipResponse,
 } from "@repo/core";
 
 export default function NewChat({ orgSlug }: { orgSlug: string }) {
