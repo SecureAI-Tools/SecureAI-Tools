@@ -8,7 +8,7 @@ export interface ModelProviderConfig {
   // Model provider specific options.
   // All fields except for model-name and api-key! Those two fields are overridden based on the model selected in UI and apiBaseUrl above!
   // 
-  // Ollama: https://api.js.langchain.com/interfaces/llms_ollama.OllamaInput.html
-  // OpenAI: https://api.js.langchain.com/interfaces/llms_openai.OpenAIInput.html
+  // Ollama: https://api.js.langchain.com/interfaces/langchain_community_llms_ollama.OllamaInput.html
+  // OpenAI: https://api.js.langchain.com/interfaces/langchain_llms_openai.OpenAIInput.html
   options?: any;
 }
