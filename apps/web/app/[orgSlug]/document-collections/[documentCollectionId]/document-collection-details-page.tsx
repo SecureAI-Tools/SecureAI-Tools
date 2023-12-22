@@ -118,6 +118,7 @@ const DocumentCollectionDetailsPage = ({
     data: documentsResponse,
     error: documentsFetchError,
     isLoading: isDocumentsResponseLoading,
+    mutate: mutateDocumentsResponse
   } = useSWR(
     shouldFetchDocuments
       ? getDocumentCollectionDocumentsApiPath({
@@ -170,7 +171,11 @@ const DocumentCollectionDetailsPage = ({
       // Refetch in a few seconds
       setTimeout(() => {
         refreshStats();
+        mutateDocumentsResponse();
       }, pollingIntervalMS);
+    } else {
+      // Refetch current page to reflect updated statuses.
+      mutateDocumentsResponse();
     }
   }, [processingStats]);
 
