@@ -106,7 +106,7 @@ const DocumentCollectionListPage = ({ orgSlug }: { orgSlug: string }) => {
   );
 
   // Fetch current user's membership to organization
-  const shouldFetchOrgMembership = organizationResponse !== undefined;
+  const shouldFetchOrgMembership = organizationResponse !== undefined && session;
   const { data: orgMembershipResponse, error: fetchOrgMembershipError } =
     useSWR(
       shouldFetchOrgMembership
