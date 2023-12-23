@@ -124,7 +124,13 @@ model Document {
   id          String                 @id
   name        String
   mimeType    String
-  objectKey   String
+  // Unique resource identifier
+  // [org-id]/[data-source-base-url]/[unique-identifier-in-external-data-source-instance]
+  uri         String
+  // id from external system (data source)
+  // 
+  // For uploads, this is the object-key in object storage
+  externalId  String
   createdAt   DateTime               @default(now())
   updatedAt   DateTime               @updatedAt
   citations   Citation[]
