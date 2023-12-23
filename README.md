@@ -122,6 +122,6 @@ SecureAI Tools can be used with OpenAI APIs and any other provider that provides
 You can customize LLM provider-specific options like the number of layers to offload to GPUs, or stop words, etc. Specify these options in the `MODEL_PROVIDER_CONFIGS` environment variable. For example, below is how we can offload 30 layers to GPUs in Ollama.
 
    ```
-   MODEL_PROVIDER_CONFIGS='[{"type":"OLLAMA","apiBaseUrl":"http://inference:11434/","apiKey":"","options":{"numGpu":30}}}]'
+   MODEL_PROVIDER_CONFIGS='[{"type":"OLLAMA","apiBaseUrl":"http://inference:11434/","apiKey":"","options":{"numGpu":30}}]'
    ```
 Please [see here](https://github.com/SecureAI-Tools/SecureAI-Tools/blob/5f1c253af43f6b58c34ce481650069b1f65a20df/packages/core/src/types/model-provider-config.ts#L8-L13) for more info on what options are available for which provider.
