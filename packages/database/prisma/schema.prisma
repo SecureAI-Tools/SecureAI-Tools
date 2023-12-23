@@ -95,11 +95,11 @@ model ChatMessage {
 }
 
 model DocumentCollection {
-  id             String       @id
+  id             String                 @id
   // User facing name of the collection
   name           String?
   // Internal name for vector db etc
-  internalName   String       @unique
+  internalName   String                 @unique
   // User facing description
   description    String?
   // The AI model used for indexing documents of this collection
@@ -107,30 +107,27 @@ model DocumentCollection {
   // Enum controlled by ModelType
   modelType      String?
   chats          Chat[]
-  documents      Document[]
+  documents      DocumentToCollection[]
   ownerId        String
-  owner          User         @relation(fields: [ownerId], references: [id])
+  owner          User                   @relation(fields: [ownerId], references: [id])
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  organization   Organization           @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
   deletedAt      DateTime?
 
   @@index([id])
 }
 
 model Document {
-  id             String             @id
+  id             String                 @id
   name           String
   mimeType       String
   objectKey      String
-  // Enum controlled by DocumentIndexingStatus in TS
-  indexingStatus String
-  collectionId   String
-  collection     DocumentCollection @relation(fields: [collectionId], references: [id])
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
   citations      Citation[]
+  collections    DocumentToCollection[]
 
   @@index([id])
 }
@@ -148,6 +145,21 @@ model Citation {
   chatMessageId   String
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
+
+  @@index([id])
+}
+
+// many-to-many relationship between Document and DocumentCollection
+model DocumentToCollection {
+  id             String             @id
+  documentId     String
+  document       Document           @relation(fields: [documentId], references: [id])
+  collectionId   String
+  collection     DocumentCollection @relation(fields: [collectionId], references: [id])
+  // Enum controlled by DocumentIndexingStatus in TS
+  indexingStatus String
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
 
   @@index([id])
 }
