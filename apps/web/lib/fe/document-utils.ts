@@ -3,7 +3,7 @@ import { FetchError } from "lib/fe/types/fetch-error";
 import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
 import {
   getDocumentCollectionApiPath,
-  postDocumentCollectionDocumentsApiPath,
+  uploadDocumentApiPath,
   postOrganizationsIdOrSlugDocumentCollectionApiPath,
 } from "lib/fe/api-paths";
 import { IndexingMode } from "lib/types/core/indexing-mode";
@@ -45,7 +45,7 @@ export const uploadDocument = async (
   formData.append("indexingMode", indexingMode);
 
   const res = await fetch(
-    postDocumentCollectionDocumentsApiPath(documentCollectionId),
+    uploadDocumentApiPath(documentCollectionId),
     {
       method: "POST",
       body: formData,

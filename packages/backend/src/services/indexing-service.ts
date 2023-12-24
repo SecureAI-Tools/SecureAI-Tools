@@ -23,16 +23,19 @@ export class IndexingService {
   });
 
   // Indexes given document and yields statuses that can be streamed or logged.
-  async* index(documentId: Id<DocumentResponse>): AsyncGenerator<StreamChunkResponse> {
+  async* index(
+    documentId: Id<DocumentResponse>,
+    collectionId: Id<DocumentCollectionResponse>,
+  ): AsyncGenerator<StreamChunkResponse> {
     const document = await this.documentService.get(documentId);
 
     if (!document) {
       throw new Error(`Document does not exist: ${documentId.toString()}`);
     }
 
-    const documentCollection = await this.documentCollectionService.get(Id.from<DocumentCollectionResponse>(document.collectionId));
+    const documentCollection = await this.documentCollectionService.get(collectionId);
     if (!documentCollection) {
-      throw new Error(`Document collection does not exist: ${document.collectionId.toString()}`);
+      throw new Error(`Document collection does not exist: ${collectionId.toString()}`);
     }
 
     const textSplitter = new RecursiveCharacterTextSplitter({
@@ -44,7 +47,7 @@ export class IndexingService {
         : 200,
     });
 
-    const fileBuffer = await this.objectStorageService.get(document.objectKey);
+    const fileBuffer = await this.objectStorageService.get(document.externalId);
     var langchainDocuments: LangchainDocument[] = [];
     var loader;
     var docs;
@@ -95,14 +98,16 @@ export class IndexingService {
     if (!isEmpty(addResponse.error)) {
       logger.error("could not add document to vector db", {
         documentId: document.id,
-        documentCollectionId: document.collectionId,
+        documentCollectionId: collectionId,
         error: addResponse.error,
       });
       yield { error: "something went wrong when indexing the doc" };
       return;
     }
 
-    await this.documentService.update(documentId, {
+    await this.documentService.updateIndexingStatus({
+      documentId: documentId,
+      collectionId: collectionId,
       indexingStatus: DocumentIndexingStatus.INDEXED,
     });
     yield { status: "Document processed successfully" };

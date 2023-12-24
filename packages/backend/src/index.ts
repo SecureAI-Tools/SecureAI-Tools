@@ -6,5 +6,8 @@ export * from "./services/indexing-service";
 export * from "./services/local-object-storage-service";
 export * from "./services/model-provider-service";
 export * from "./services/object-storage-service";
+export * from "./services/data-source-connection-service";
+export * from "./services/document-to-collection-service";
 export * from "./utils/api.utils";
+export * from "./utils/document-uri-utils";
 export * from "./utils/utils";

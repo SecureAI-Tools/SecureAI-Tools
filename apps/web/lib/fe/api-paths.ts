@@ -45,10 +45,10 @@ export const getDocumentCollectionApiPath = (
   return `/api/document-collections/${documentCollectionId}`;
 };
 
-export const postDocumentCollectionDocumentsApiPath = (
+export const uploadDocumentApiPath = (
   documentCollectionId: Id<DocumentCollectionResponse>,
 ): string => {
-  return `/api/document-collections/${documentCollectionId}/documents`;
+  return `/api/document-collections/${documentCollectionId}/documents/upload`;
 };
 
 export const getDocumentCollectionDocumentsApiPath = ({
@@ -61,6 +61,16 @@ export const getDocumentCollectionDocumentsApiPath = ({
   pagination: PaginationParams;
 }): string => {
   return `/api/document-collections/${documentCollectionId}/documents?orderBy=${ordering.orderBy}&order=${ordering.order}&page=${pagination.page}&pageSize=${pagination.pageSize}`;
+};
+
+export const getDocumentToCollections = ({
+  documentCollectionId,
+  documentIds,
+}: {
+  documentCollectionId: Id<DocumentCollectionResponse>;
+  documentIds: Id<DocumentResponse>[];
+}): string => {
+  return `/api/document-collections/${documentCollectionId}/documents/document-to-collection?documentIds=${documentIds.join(",")}`;
 };
 
 export const documentCollectionDocumentApiPath = (

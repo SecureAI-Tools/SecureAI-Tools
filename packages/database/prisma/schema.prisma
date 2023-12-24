@@ -124,8 +124,8 @@ model Document {
   id          String                 @id
   name        String
   mimeType    String
-  // Unique resource identifier
-  // [org-id]/[data-source-base-url]/[unique-identifier-in-external-data-source-instance]
+  // Unique resource identifier to deduplicate documents across all data source connections
+  // within an org
   uri         String
   // id from external system (data source)
   // 

@@ -5,10 +5,10 @@ import { PermissionService } from "lib/api/services/permission-service";
 import { DocumentCollectionStatsResponse } from "lib/types/api/document-collection-stats.response";
 
 import { Id, DocumentCollectionResponse, DocumentIndexingStatus } from "@repo/core";
-import { DocumentService, NextResponseErrors } from "@repo/backend";
+import { DocumentToCollectionService, NextResponseErrors } from "@repo/backend";
 
 const permissionService = new PermissionService();
-const documentService = new DocumentService();
+const documentToCollectionService = new DocumentToCollectionService();
 
 export async function GET(
   req: NextRequest,
@@ -32,11 +32,11 @@ export async function GET(
     return resp;
   }
 
-  const totalDocumentCount = await documentService.count({
+  const totalDocumentCount = await documentToCollectionService.count({
     collectionId: documentCollectionId.toString(),
   });
 
-  const indexedDocumentCount = await documentService.count({
+  const indexedDocumentCount = await documentToCollectionService.count({
     collectionId: documentCollectionId.toString(),
     indexingStatus: DocumentIndexingStatus.INDEXED,
   });

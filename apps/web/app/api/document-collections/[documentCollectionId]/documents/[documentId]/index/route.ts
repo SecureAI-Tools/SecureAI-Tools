@@ -37,7 +37,7 @@ export async function POST(
   }
 
   const documentId = Id.from<DocumentResponse>(params.documentId);
-  const stream = iteratorToStream(indexingService.index(documentId));
+  const stream = iteratorToStream(indexingService.index(documentId, documentCollectionId));
 
   return new Response(stream);
 }

@@ -1,15 +1,17 @@
-import { Document, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
 import { API } from "../utils/api.utils";
-import { Id, DocumentResponse, DocumentIndexingStatus, DocumentCollectionResponse } from "@repo/core";
 
+import { Document, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
+import { Id, DocumentResponse, DocumentIndexingStatus, DocumentCollectionResponse, DocumentToCollectionResponse, DataSourceConnectionResponse } from "@repo/core";
 
 export interface DocumentCreateInput {
   id: Id<DocumentResponse>;
   name: string;
-  indexingStatus: DocumentIndexingStatus;
   mimeType: string;
+  uri: string;
+  externalId: string;
+  indexingStatus: DocumentIndexingStatus;
   collectionId: Id<DocumentCollectionResponse>;
-  objectKey: string;
+  connectionId: Id<DataSourceConnectionResponse>;
 }
 
 export class DocumentService {
@@ -23,16 +25,36 @@ export class DocumentService {
     prisma: TxPrismaClient,
     i: DocumentCreateInput,
   ): Promise<Document> {
-    return await prisma.document.create({
+    const createdDocument = await prisma.document.create({
       data: {
         id: i.id.toString(),
         name: i.name,
         mimeType: i.mimeType,
-        indexingStatus: i.indexingStatus,
-        collectionId: i.collectionId.toString(),
-        objectKey: i.objectKey,
+        uri: i.uri,
+        externalId: i.externalId,
       },
     });
+
+    // Create corresponding DocumentToCollection
+    await prisma.documentToCollection.create({
+      data: {
+        id: Id.generate(DocumentToCollectionResponse).toString(),
+        documentId: createdDocument.id,
+        collectionId: i.collectionId.toString(),
+        indexingStatus: i.indexingStatus,
+      },
+    });
+
+    // Create corresponding DocumentToDataSource
+    await prisma.documentToDataSource.create({
+      data: {
+        id: Id.generate(DocumentToCollectionResponse).toString(),
+        documentId: createdDocument.id,
+        dataSourceId: i.connectionId.toString(),
+      },
+    });
+
+    return createdDocument;
   }
 
   async get(id: Id<DocumentResponse>): Promise<Document | null> {
@@ -112,19 +134,24 @@ export class DocumentService {
     });
   }
 
-  async update(
-    id: Id<DocumentResponse>,
-    data: Pick<
-      Prisma.DocumentUpdateInput,
-      "name" | "indexingStatus" | "mimeType" | "objectKey"
-    >,
-  ): Promise<Document | null> {
-    return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
-      return await tx.document.update({
+  async updateIndexingStatus({
+    documentId,
+    collectionId,
+    indexingStatus,
+  }: {
+    documentId: Id<DocumentResponse>,
+    collectionId: Id<DocumentCollectionResponse>,
+    indexingStatus: DocumentIndexingStatus,
+  }): Promise<void> {
+    await prismaClient.$transaction(async (tx: TxPrismaClient) => {
+      await tx.documentToCollection.updateMany({
         where: {
-          id: id.toString(),
+          documentId: documentId.toString(),
+          collectionId: collectionId.toString(),
         },
-        data: data,
+        data: {
+          indexingStatus: indexingStatus,
+        }
       });
     });
   }

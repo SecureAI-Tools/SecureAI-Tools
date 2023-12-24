@@ -31,7 +31,11 @@ import { CitationResponse } from "lib/types/api/citation-response";
 import { Link } from "lib/fe/components/link";
 import { ChatMessageRole } from "lib/types/core/chat-message-role";
 
-import { DocumentResponse, Id, DEFAULT_CHAT_TITLE, DocumentIndexingStatus, StreamChunkResponse, isEmpty } from "@repo/core";
+import { DocumentResponse, Id, DEFAULT_CHAT_TITLE, DocumentIndexingStatus, StreamChunkResponse, isEmpty, DocumentCollectionResponse } from "@repo/core";
+
+export interface DocumentsWithIndexingStatus extends DocumentResponse {
+  indexingStatus: DocumentIndexingStatus;
+}
 
 const MessageEntry = ({
   message,
@@ -154,7 +158,7 @@ export function Chat({
 }: {
   chat: ChatResponse;
   chatMessages: ChatMessageResponse[];
-  documents?: DocumentResponse[];
+  documents?: DocumentsWithIndexingStatus[];
   citations?: CitationResponse[];
   onJumpToPage?: (docId: string, pageIndex: number) => void;
 }) {
@@ -269,13 +273,14 @@ export function Chat({
     });
   };
 
-  const indexDocuments = async (docs: DocumentResponse[]): Promise<boolean> => {
+  const indexDocuments = async (docs: DocumentsWithIndexingStatus[]): Promise<boolean> => {
     try {
       // TODO: See if we can parallelize this in batches!
       for (let i = 0; i < docs.length; i++) {
         const doc = docs[i]!;
         setProcessingDocumentName(doc.name);
         await indexDocument({
+          collectionId: Id.from(chat.documentCollectionId!),
           doc: doc,
           onGeneratedChunk: (chunk) => {
             if (chunk.status) {
@@ -475,10 +480,12 @@ const postChatMessage = async (
 };
 
 const indexDocument = async ({
+  collectionId,
   doc,
   onGeneratedChunk,
 }: {
-  doc: DocumentResponse;
+  collectionId: Id<DocumentCollectionResponse>,
+  doc: DocumentsWithIndexingStatus;
   onGeneratedChunk: (chunk: StreamChunkResponse) => void;
 }): Promise<void> => {
   return new Promise((resolve, reject) => {
@@ -489,7 +496,7 @@ const indexDocument = async ({
 
     postStreaming<{}>({
       input: documentCollectionDocumentIndexApiPath(
-        Id.from(doc.collectionId),
+        collectionId,
         Id.from(doc.id),
       ),
       req: {},

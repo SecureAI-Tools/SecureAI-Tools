@@ -28,7 +28,7 @@ async function main() {
       if (data) {
         const msg = JSON.parse(data.content.toString()) as IndexingQueueMessage;
         logger.info("Received message: ", msg);
-        const asyncGenerator = indexingService.index(Id.from(msg.documentId));
+        const asyncGenerator = indexingService.index(Id.from(msg.documentId), Id.from(msg.collectionId));
         for await (const chunk of asyncGenerator) {
           logger.info(`[doc = ${msg.documentId}] chunk`, chunk);
         }

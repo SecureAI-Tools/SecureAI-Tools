@@ -3,11 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
 
-import { Id, DocumentCollectionResponse, DocumentResponse } from "@repo/core";
-import { DocumentService, NextResponseErrors, API } from "@repo/backend";
+import { Id, DocumentCollectionResponse, DocumentToCollectionResponse } from "@repo/core";
+import { NextResponseErrors, DocumentToCollectionService } from "@repo/backend";
 
 const permissionService = new PermissionService();
-const documentService = new DocumentService();
+const documentToCollectionService = new DocumentToCollectionService();
 
 export async function GET(
   req: NextRequest,
@@ -32,28 +32,19 @@ export async function GET(
   }
 
   const { searchParams } = new URL(req.url);
-  const where = {
-    collections: {
-      some: {
-        collectionId: documentCollectionId.toString()
-      }
-    }
-  };
-  const documents = await documentService.getAll({
-    where: where,
-    orderBy: API.searchParamsToOrderByInput(searchParams),
-    pagination: API.PaginationParams.from(searchParams),
-  });
-  const count = await documentService.count(where);
+  const documentIdsStr = searchParams.get("documentIds")
+  const documentIds = documentIdsStr?.split(",");
+  if (!documentIds || documentIds.length === 0) {
+    return NextResponseErrors.badRequest("documentIds is required");
+  }
 
-  return NextResponse.json(
-    documents.map((cd) => DocumentResponse.fromEntity(cd)),
-    {
-      headers: API.createResponseHeaders({
-        pagination: {
-          totalCount: count,
-        },
-      }),
-    },
-  );
+  const documentToCollections = await documentToCollectionService.getAll({
+    where: {
+      collectionId: documentCollectionId.toString(),
+      documentId: {
+        in: documentIds,
+      },
+    }
+  });
+  return NextResponse.json(documentToCollections.map((d) => DocumentToCollectionResponse.fromEntity(d)))
 }
