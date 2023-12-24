@@ -30,9 +30,12 @@ export async function GET(
   const { searchParams } = new URL(req.url);
   const name = searchParams.get("name");
 
-  if (isEmpty(name)) {
+  if (!name || isEmpty(name)) {
     return NextResponseErrors.badRequest("name must be specified");
   }
+
+  // If the name doesn't have a tag, then add `:latest` tag. Otherwise, Ollama doesn't recognize the model
+  const modelNameWithTag = name.includes(':') ? name : `${name}:latest`;
 
   const ollamaResponse = await fetch(
     `${
@@ -45,7 +48,7 @@ export async function GET(
   );
 
   const parsedResponse = (await ollamaResponse.json()) as ModelsResponse;
-  const model = parsedResponse.models.find((m) => m.name === name);
+  const model = parsedResponse.models.find((m) => m.name === modelNameWithTag);
   const response: ModelsResponse = {
     models: model ? [{ ...model }] : [],
   };
