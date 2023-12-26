@@ -422,6 +422,7 @@ export function Chat({
               console.log("something went wrong: ", e);
               // TODO: Show error toast
             }
+            return false;
           }}
           className={tw(
             "stretch mx-2 flex flex-row gap-3 last:mb-2 md:mx-4 md:last:mb-6 lg:mx-auto lg:max-w-2xl xl:max-w-3xl",
