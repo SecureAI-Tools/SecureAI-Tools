@@ -1,4 +1,5 @@
 import { Pagination, Spinner, Table as FlowbiteTable } from "flowbite-react";
+import { ReactNode } from "react";
 import { tw } from "twind";
 
 export type RenderCellsFn<T extends unknown> = ({
@@ -19,7 +20,7 @@ export const Table = <T extends unknown>({
 }: {
   // Data
   data: T[] | undefined;
-  columns: string[];
+  columns: ReactNode[];
 
   // Rendering
   loading: boolean | undefined;

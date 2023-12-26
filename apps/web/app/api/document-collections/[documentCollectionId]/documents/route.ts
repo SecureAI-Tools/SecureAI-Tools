@@ -2,18 +2,67 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
-import { getDocumentObjectKey } from "lib/api/core/document.utils";
+import { DocumentCreateRequest } from "lib/types/api/document-create.request";
+import { OrgMembershipService } from "lib/api/services/org-membership-service";
+
+import { Id, DocumentCollectionResponse, DocumentResponse, DataSourceConnectionResponse, DataSource, DocumentIndexingStatus } from "@repo/core";
+import { DocumentService, NextResponseErrors, API, DataSourceConnectionService, generateDocumentUri, PaperlessNgxClient, addToIndexingQueue } from "@repo/backend";
 import { IndexingMode } from "lib/types/core/indexing-mode";
 
-import { Id, DocumentCollectionResponse, DocumentResponse, DocumentIndexingStatus, IndexingQueueMessage } from "@repo/core";
-import { DocumentCollectionService, DocumentService, LocalObjectStorageService, NextResponseErrors, getAMQPChannel, API } from "@repo/backend";
-
 const permissionService = new PermissionService();
-const documentCollectionService = new DocumentCollectionService();
 const documentService = new DocumentService();
-const objectStorageService = new LocalObjectStorageService();
+const dataSourceConnectionService = new DataSourceConnectionService();
+const orgMembershipService = new OrgMembershipService();
 
-// Endpoint to handle upload docs
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { documentCollectionId: string } },
+) {
+  const [authenticated, userId] = await isAuthenticated(req);
+  if (!authenticated) {
+    return NextResponseErrors.unauthorized();
+  }
+
+  // Check permission
+  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+    params.documentCollectionId,
+  );
+  const [permission, resp] =
+    await permissionService.hasReadDocumentCollectionPermission(
+      userId!,
+      documentCollectionId,
+    );
+  if (!permission) {
+    return resp;
+  }
+
+  const { searchParams } = new URL(req.url);
+  const where = {
+    collections: {
+      some: {
+        collectionId: documentCollectionId.toString()
+      }
+    }
+  };
+  const documents = await documentService.getAll({
+    where: where,
+    orderBy: API.searchParamsToOrderByInput(searchParams),
+    pagination: API.PaginationParams.from(searchParams),
+  });
+  const count = await documentService.count(where);
+
+  return NextResponse.json(
+    documents.map((cd) => DocumentResponse.fromEntity(cd)),
+    {
+      headers: API.createResponseHeaders({
+        pagination: {
+          totalCount: count,
+        },
+      }),
+    },
+  );
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: { documentCollectionId: string } },
@@ -40,105 +89,65 @@ export async function POST(
     return resp;
   }
 
-  const formData = await req.formData();
-  const file = formData.get("file") as File | null;
-  const indexingMode = formData.get("indexingMode") as IndexingMode | null ?? IndexingMode.OFFLINE;
-  if (!file) {
-    return NextResponseErrors.badRequest("file is required.");
-  }
-  if (file.type !== "application/pdf") {
-    return NextResponseErrors.badRequest("file.type must be application/pdf");
+  const documentCreateRequest =
+    (await req.json()) as DocumentCreateRequest;
+
+  // Check if user has permission to use data source connection
+  const dataSourceConnectionId = Id.from<DataSourceConnectionResponse>(documentCreateRequest.dataSourceConnectionId);
+  const [hasPermissions, permissionResp] = await permissionService.hasReadDocumentsFromDataSourceConnectionPermission(
+    userId!,
+    dataSourceConnectionId,
+  );
+  if (!hasPermissions) {
+    return permissionResp;
   }
 
-  const documentCollection =
-    await documentCollectionService.get(documentCollectionId);
-  if (!documentCollection) {
+  const dataSourceConnection = await dataSourceConnectionService.get(dataSourceConnectionId);
+  if (!dataSourceConnection) {
     return NextResponseErrors.notFound();
   }
 
-  const documentId = Id.generate(DocumentResponse);
-  const documentObjectKey = getDocumentObjectKey({
-    orgId: Id.from(documentCollection.organizationId),
-    documentCollectionId: documentCollectionId,
-    documentId: documentId,
-    file,
+  const orgMembership = await orgMembershipService.get(Id.from(dataSourceConnection.membershipId));
+  if (!orgMembership) {
+    return NextResponseErrors.notFound();
+  }
+
+  if (dataSourceConnection.dataSource !== DataSource.PAPERLESS_NGX) {
+    return NextResponseErrors.badRequest(`Unsupported data source ${dataSourceConnection.dataSource}`);
+  }
+
+  // Check whether data-source-connection can read externalId doc in data source.
+  const paperlessNgxClient = new PaperlessNgxClient(dataSourceConnection.baseUrl!, dataSourceConnection.accessToken!);
+  const docResp = await paperlessNgxClient.getDocument(documentCreateRequest.externalId);
+  if (!docResp.ok) {
+    return NextResponseErrors.badRequest(`Data source connection could not access doc (id = ${documentCreateRequest.externalId}). Received ${docResp.statusText} (${docResp.status})`);
+  }
+
+  const uri = generateDocumentUri({
+    orgId: Id.from(orgMembership.orgId),
+    dataSourceBaseUrl: dataSourceConnection.baseUrl!,
+    guidInDataSource: documentCreateRequest.externalId,
   });
-
-  const buffer = Buffer.from(await file.arrayBuffer());
-  await objectStorageService.put(documentObjectKey, buffer);
-
-  const document = await documentService.create({
-    id: documentId,
-    name: file.name,
-    mimeType: file.type,
+  const document = await documentService.createOrLink({
+    id: Id.generate(DocumentResponse),
+    name: documentCreateRequest.name,
+    mimeType: "application/pdf",
     indexingStatus: DocumentIndexingStatus.NOT_INDEXED,
-    objectKey: documentObjectKey,
+    uri: uri,
+    externalId: documentCreateRequest.externalId,
     collectionId: documentCollectionId,
+    connectionId: Id.from(dataSourceConnection.id),
   });
 
-  if (indexingMode === IndexingMode.OFFLINE) {
+  // Insert into indexing queue
+  if (documentCreateRequest.indexingMode === IndexingMode.OFFLINE) {
     // Insert document into the queue so task-master can process it offline!
-    const msg: IndexingQueueMessage = {
-      documentId: documentId.toString(),
-    }
-    const amqpServerUrl = process.env.AMQP_SERVER_URL;
-    if (!amqpServerUrl) {
-      throw new Error("Invalid AMQP_SERVER_URL");
-    }
-    const queueName = process.env.AMQP_DOCS_INDEXING_QUEUE_NAME;
-    if (!queueName) {
-      throw new Error("Invalid AMQP_DOCS_INDEXING_QUEUE_NAME");
-    }
-
-    const channel = await getAMQPChannel(amqpServerUrl);
-    await channel.assertQueue(queueName);
-    await channel.sendToQueue(queueName, Buffer.from(JSON.stringify(msg)));
+    await addToIndexingQueue({
+      documentId: document.id,
+      collectionId: documentCollectionId.toString(),
+      dataSourceConnectionId: dataSourceConnection.id,
+    });
   }
 
   return NextResponse.json(DocumentResponse.fromEntity(document));
-}
-
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { documentCollectionId: string } },
-) {
-  const [authenticated, userId] = await isAuthenticated(req);
-  if (!authenticated) {
-    return NextResponseErrors.unauthorized();
-  }
-
-  // Check permission
-  const documentCollectionId = Id.from<DocumentCollectionResponse>(
-    params.documentCollectionId,
-  );
-  const [permission, resp] =
-    await permissionService.hasReadDocumentCollectionPermission(
-      userId!,
-      documentCollectionId,
-    );
-  if (!permission) {
-    return resp;
-  }
-
-  const { searchParams } = new URL(req.url);
-  const where = {
-    collectionId: documentCollectionId.toString(),
-  };
-  const documents = await documentService.getAll({
-    where: where,
-    orderBy: API.searchParamsToOrderByInput(searchParams),
-    pagination: API.PaginationParams.from(searchParams),
-  });
-  const count = await documentService.count(where);
-
-  return NextResponse.json(
-    documents.map((cd) => DocumentResponse.fromEntity(cd)),
-    {
-      headers: API.createResponseHeaders({
-        pagination: {
-          totalCount: count,
-        },
-      }),
-    },
-  );
 }

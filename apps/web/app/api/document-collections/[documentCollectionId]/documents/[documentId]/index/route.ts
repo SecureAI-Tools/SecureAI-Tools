@@ -3,11 +3,13 @@ import { NextRequest } from "next/server";
 import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
 
-import { Id, DocumentCollectionResponse, DocumentResponse, StreamChunkResponse } from "@repo/core";
-import { IndexingService, NextResponseErrors } from "@repo/backend";
+import { Id, DocumentCollectionResponse, DocumentResponse, StreamChunkResponse, OrgMembershipStatus } from "@repo/core";
+import { DocumentCollectionService, IndexingService, NextResponseErrors } from "@repo/backend";
+import { prismaClient } from "@repo/database";
 
 const permissionService = new PermissionService();
 const indexingService = new IndexingService();
+const documentCollectionService = new DocumentCollectionService();
 
 // Endpoint to index documents into vector store
 export async function POST(
@@ -36,8 +38,37 @@ export async function POST(
     return resp;
   }
 
+  const documentCollection = await documentCollectionService.get(documentCollectionId);
+  if (!documentCollectionId) {
+    return NextResponseErrors.notFound();
+  }
+
+  // This only works for the document collection owner.
+  // TODO: Expand this if/when needed!
   const documentId = Id.from<DocumentResponse>(params.documentId);
-  const stream = iteratorToStream(indexingService.index(documentId));
+  const documentToDataSources = await prismaClient.documentToDataSource.findMany({
+    where: {
+      documentId: documentId.toString(),
+      dataSource: {
+        membership: {
+          userId: userId!.toString(),
+          status: OrgMembershipStatus.ACTIVE,
+          orgId: documentCollection!.organizationId,
+        }
+      }
+    }
+  });
+  if (documentToDataSources.length < 1) {
+    return NextResponseErrors.badRequest("invalid document data source");
+  }
+
+  const stream = iteratorToStream(
+    indexingService.index(
+      documentId,
+      documentCollectionId,
+      Id.from(documentToDataSources[0]!.dataSourceId)
+    )
+  );
 
   return new Response(stream);
 }

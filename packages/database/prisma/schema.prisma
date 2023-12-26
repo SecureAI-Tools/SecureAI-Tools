@@ -45,16 +45,17 @@ model Organization {
 
 // Organization membership
 model OrgMembership {
-  id        String       @id
-  role      String
-  status    String
-  orgId     String
-  org       Organization @relation(fields: [orgId], references: [id])
-  userId    String
-  user      User         @relation(fields: [userId], references: [id])
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  Chat      Chat[]
+  id          String                 @id
+  role        String
+  status      String
+  orgId       String
+  org         Organization           @relation(fields: [orgId], references: [id])
+  userId      String
+  user        User                   @relation(fields: [userId], references: [id])
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  Chat        Chat[]
+  connections DataSourceConnection[]
 
   @@unique([orgId, userId])
   @@index([id])
@@ -95,11 +96,11 @@ model ChatMessage {
 }
 
 model DocumentCollection {
-  id             String       @id
+  id             String                 @id
   // User facing name of the collection
   name           String?
   // Internal name for vector db etc
-  internalName   String       @unique
+  internalName   String                 @unique
   // User facing description
   description    String?
   // The AI model used for indexing documents of this collection
@@ -107,30 +108,35 @@ model DocumentCollection {
   // Enum controlled by ModelType
   modelType      String?
   chats          Chat[]
-  documents      Document[]
+  documents      DocumentToCollection[]
   ownerId        String
-  owner          User         @relation(fields: [ownerId], references: [id])
+  owner          User                   @relation(fields: [ownerId], references: [id])
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  organization   Organization           @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
   deletedAt      DateTime?
 
   @@index([id])
 }
 
 model Document {
-  id             String             @id
-  name           String
-  mimeType       String
-  objectKey      String
-  // Enum controlled by DocumentIndexingStatus in TS
-  indexingStatus String
-  collectionId   String
-  collection     DocumentCollection @relation(fields: [collectionId], references: [id])
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
-  citations      Citation[]
+  id          String                 @id
+  name        String
+  mimeType    String
+  // Unique resource identifier to deduplicate documents across all data source connections
+  // within an org
+  uri         String                 @unique
+  // id from external system (data source)
+  // 
+  // For uploads, this is the object-key in object storage
+  externalId  String
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  citations   Citation[]
+  collections DocumentToCollection[]
+  dataSources DocumentToDataSource[]
+  chunks      DocumentChunk[]
 
   @@index([id])
 }
@@ -150,4 +156,58 @@ model Citation {
   updatedAt       DateTime    @updatedAt
 
   @@index([id])
+}
+
+// many-to-many relationship between Document and DocumentCollection
+model DocumentToCollection {
+  id             String             @id
+  documentId     String
+  document       Document           @relation(fields: [documentId], references: [id])
+  collectionId   String
+  collection     DocumentCollection @relation(fields: [collectionId], references: [id])
+  // Enum controlled by DocumentIndexingStatus in TS
+  indexingStatus String
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([id])
+}
+
+model DataSourceConnection {
+  id                   String                 @id
+  // Enum controlled by DataSource in TS
+  dataSource           String
+  baseUrl              String?
+  accessToken          String?
+  accessTokenExpiresAt DateTime?
+  refreshToken         String?
+  membership           OrgMembership          @relation(fields: [membershipId], references: [id])
+  membershipId         String
+  documents            DocumentToDataSource[]
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+
+  @@index([id])
+}
+
+// many-to-many relationship between Document and DataSourceConnection
+model DocumentToDataSource {
+  id           String               @id
+  documentId   String
+  document     Document             @relation(fields: [documentId], references: [id])
+  dataSourceId String
+  dataSource   DataSourceConnection @relation(fields: [dataSourceId], references: [id])
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  @@index([id])
+}
+
+model DocumentChunk {
+  id           String               @id
+  // Id from external vector db
+  vectorDbId   String
+  documentId   String
+  document     Document             @relation(fields: [documentId], references: [id])
+  @@index([id])  
 }

@@ -4,10 +4,15 @@ import { isAuthenticated } from "lib/api/core/auth";
 import { withLogging } from "lib/api/core/with-logging";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { OrgMembershipUpdateRequest } from "lib/types/api/org-membership-update.request";
-import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 
-import { ErrorResponse, Id } from "@repo/core";
-import { sendUnsupportedMethodError, API, sendBadRequestError, sendNotFoundError, sendForbiddenError } from "@repo/backend";
+import { ErrorResponse, Id, OrgMembershipResponse } from "@repo/core";
+import {
+  sendUnsupportedMethodError,
+  API,
+  sendBadRequestError,
+  sendNotFoundError,
+  sendForbiddenError,
+} from "@repo/backend";
 
 const orgMembershipService = new OrgMembershipService();
 

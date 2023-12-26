@@ -3,13 +3,16 @@ import { FetchError } from "lib/fe/types/fetch-error";
 import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
 import {
   getDocumentCollectionApiPath,
-  postDocumentCollectionDocumentsApiPath,
+  uploadDocumentApiPath,
   postOrganizationsIdOrSlugDocumentCollectionApiPath,
+  postDocumentApiPath,
 } from "lib/fe/api-paths";
 import { IndexingMode } from "lib/types/core/indexing-mode";
-
-import { DocumentCollectionResponse, Id, DocumentResponse } from "@repo/core";
 import { DocumentCollectionUpdateRequest } from "lib/types/api/document-collection-update.request";
+import { SelectedDocument } from "lib/fe/types/selected-document";
+import { DocumentCreateRequest } from "lib/types/api/document-create.request";
+
+import { DocumentCollectionResponse, Id, DocumentResponse, DataSource } from "@repo/core";
 
 export const createDocumentCollection = async (
   orgSlug: string,
@@ -35,7 +38,30 @@ export const updateDocumentCollection = async (
   ).response;
 };
 
-export const uploadDocument = async (
+export const createDocument = async (
+  documentCollectionId: Id<DocumentCollectionCreateRequest>,
+  selectedDocument: SelectedDocument,
+  indexingMode: IndexingMode,
+): Promise<DocumentResponse> => {
+  if (selectedDocument.dataSource === DataSource.UPLOAD) {
+    return await uploadDocument(documentCollectionId, selectedDocument.file!, indexingMode);
+  }
+
+  // Create doc
+  return (
+    await post<DocumentCreateRequest, DocumentResponse>(
+      postDocumentApiPath(documentCollectionId),
+      {
+        name: selectedDocument.name,
+        externalId: selectedDocument.externalId!,
+        dataSourceConnectionId: selectedDocument.dataSourceConnectionId!.toString(),
+        indexingMode: indexingMode,
+      },
+    )
+  ).response;
+}
+
+const uploadDocument = async (
   documentCollectionId: Id<DocumentCollectionCreateRequest>,
   file: File,
   indexingMode: IndexingMode,
@@ -45,7 +71,7 @@ export const uploadDocument = async (
   formData.append("indexingMode", indexingMode);
 
   const res = await fetch(
-    postDocumentCollectionDocumentsApiPath(documentCollectionId),
+    uploadDocumentApiPath(documentCollectionId),
     {
       method: "POST",
       body: formData,

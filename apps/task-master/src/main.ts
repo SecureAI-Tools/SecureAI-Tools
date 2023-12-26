@@ -25,15 +25,27 @@ async function main() {
   channel.consume(
     queueName,
     async (data) => {
-      if (data) {
+      if (!data) {
+        return;
+      }
+      try {
         const msg = JSON.parse(data.content.toString()) as IndexingQueueMessage;
         logger.info("Received message: ", msg);
-        const asyncGenerator = indexingService.index(Id.from(msg.documentId));
+        const asyncGenerator = indexingService.index(
+          Id.from(msg.documentId),
+          Id.from(msg.collectionId),
+          Id.from(msg.dataSourceConnectionId),
+        );
         for await (const chunk of asyncGenerator) {
           logger.info(`[doc = ${msg.documentId}] chunk`, chunk);
         }
-        channel.ack(data)
+      } catch (e) {
+        logger.error("something went wrong when indexing. Skipping document...", {
+          error: e,
+          data: data,
+        })
       }
+      channel.ack(data);
     },
     { noAck: false }
   );

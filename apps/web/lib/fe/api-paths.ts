@@ -1,9 +1,18 @@
 import { ChatResponse } from "lib/types/api/chat.response";
 import { OrderingParams, PaginationParams } from "lib/fe/api-params";
-import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 
-import { DocumentCollectionResponse, DocumentResponse, Id, OrganizationResponse, UserResponse, isEmpty } from "@repo/core";
+import {
+  DocumentCollectionResponse,
+  DocumentResponse,
+  Id,
+  OrganizationResponse,
+  UserResponse,
+  isEmpty,
+  OrgMembershipResponse,
+  DataSource,
+  DataSourceConnectionResponse,
+} from "@repo/core";
 
 export const userApiPath = (userId: Id<UserResponse>): string => {
   return `/api/users/${userId}`;
@@ -45,11 +54,18 @@ export const getDocumentCollectionApiPath = (
   return `/api/document-collections/${documentCollectionId}`;
 };
 
-export const postDocumentCollectionDocumentsApiPath = (
+export const uploadDocumentApiPath = (
+  documentCollectionId: Id<DocumentCollectionResponse>,
+): string => {
+  return `/api/document-collections/${documentCollectionId}/documents/upload`;
+};
+
+export const postDocumentApiPath = (
   documentCollectionId: Id<DocumentCollectionResponse>,
 ): string => {
   return `/api/document-collections/${documentCollectionId}/documents`;
 };
+
 
 export const getDocumentCollectionDocumentsApiPath = ({
   documentCollectionId,
@@ -61,6 +77,16 @@ export const getDocumentCollectionDocumentsApiPath = ({
   pagination: PaginationParams;
 }): string => {
   return `/api/document-collections/${documentCollectionId}/documents?orderBy=${ordering.orderBy}&order=${ordering.order}&page=${pagination.page}&pageSize=${pagination.pageSize}`;
+};
+
+export const getDocumentToCollections = ({
+  documentCollectionId,
+  documentIds,
+}: {
+  documentCollectionId: Id<DocumentCollectionResponse>;
+  documentIds: Id<DocumentResponse>[];
+}): string => {
+  return `/api/document-collections/${documentCollectionId}/documents/document-to-collection?documentIds=${documentIds.join(",")}`;
 };
 
 export const documentCollectionDocumentApiPath = (
@@ -168,6 +194,39 @@ export const getOrganizationsIdOrSlugDocumentCollectionApiPath = ({
   return `/api/organizations/${orgIdOrSlug}/document-collections?userId=${userId}&orderBy=${ordering.orderBy}&order=${ordering.order}&page=${pagination.page}&pageSize=${pagination.pageSize}`;
 };
 
+export const getOrganizationsIdOrSlugDataSourceConnectionsApiPath = ({
+  orgIdOrSlug,
+  userId,
+  ordering,
+  pagination,
+  dataSources,
+}: {
+  orgIdOrSlug: string;
+  userId: Id<UserResponse>;
+  ordering: OrderingParams;
+  pagination: PaginationParams;
+  dataSources?: DataSource[];
+}): string => {
+  return (
+    `/api/organizations/${orgIdOrSlug}/data-source-connections?userId=${userId}&orderBy=${ordering.orderBy}&order=${ordering.order}&page=${pagination.page}&pageSize=${pagination.pageSize}` +
+    (dataSources && dataSources.length > 0
+      ? dataSources.map((d) => `&dataSource=${d}`).join("")
+      : "")
+  );
+};
+
+export const checkDataSourceConnectionsApiPath = (
+  orgIdOrSlug: string,
+): string => {
+  return `/api/organizations/${orgIdOrSlug}/data-source-connections/check`;
+};
+
+export const postDataSourceConnectionsApiPath = (
+  orgIdOrSlug: string,
+): string => {
+  return `/api/organizations/${orgIdOrSlug}/data-source-connections`;
+};
+
 export const getOrgMembershipsApiPath = (
   orgId: Id<OrganizationResponse>,
   // filters and ordering
@@ -226,4 +285,16 @@ export const instanceConfigApiPath = (): string => {
 
 export const modelProvidersApiPath = (): string => {
   return `/api/model-providers`;
+};
+
+export const getDataSourceConnetionDocumentsApiPath = ({
+  connectionId,
+  query,
+  pagination,
+}: {
+  connectionId: Id<DataSourceConnectionResponse>;
+  query: string;
+  pagination: PaginationParams;
+}): string => {
+  return `/api/data-source-connections/${connectionId}/documents?query=${encodeURIComponent(query)}&page=${pagination.page}&pageSize=${pagination.pageSize}`;
 };

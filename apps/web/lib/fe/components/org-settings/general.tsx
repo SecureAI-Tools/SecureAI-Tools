@@ -13,7 +13,6 @@ import {
 import { createFetcher, get, patch, ResponseWithHeaders } from "lib/fe/api";
 import { TokenUser } from "lib/types/core/token-user";
 import { renderErrors } from "lib/fe/components/generic-error";
-import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 import { FrontendRoutes } from "lib/fe/routes";
 import useDebounce from "lib/fe/hooks/use-debounce";
 import { FetchError } from "lib/fe/types/fetch-error";
@@ -23,7 +22,12 @@ import { Toasts } from "lib/fe/components/toasts";
 import { isAdmin } from "lib/fe/permission-utils";
 import useToasts from "lib/fe/hooks/use-toasts";
 
-import { OrganizationResponse, Id, isEmpty } from "@repo/core";
+import {
+  OrganizationResponse,
+  Id,
+  isEmpty,
+  OrgMembershipResponse,
+} from "@repo/core";
 
 type SlugAvailability = "available" | "unavailable" | "unknown" | "loading";
 

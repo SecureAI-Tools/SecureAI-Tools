@@ -1,36 +1,80 @@
-import { Document, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
 import { API } from "../utils/api.utils";
-import { Id, DocumentResponse, DocumentIndexingStatus, DocumentCollectionResponse } from "@repo/core";
+import { LocalObjectStorageService } from "./local-object-storage-service";
+import { PaperlessNgxClient } from "../clients/paperless-ngx-client";
 
+import { DataSourceConnection, Document, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
+import { Id, DocumentResponse, DocumentIndexingStatus, DocumentCollectionResponse, DocumentToCollectionResponse, DataSourceConnectionResponse, DataSource } from "@repo/core";
 
 export interface DocumentCreateInput {
   id: Id<DocumentResponse>;
   name: string;
-  indexingStatus: DocumentIndexingStatus;
   mimeType: string;
+  uri: string;
+  externalId: string;
+  indexingStatus: DocumentIndexingStatus;
   collectionId: Id<DocumentCollectionResponse>;
-  objectKey: string;
+  connectionId: Id<DataSourceConnectionResponse>;
 }
 
 export class DocumentService {
-  async create(i: DocumentCreateInput): Promise<Document> {
+  private objectStorageService = new LocalObjectStorageService();
+
+  async createOrLink(i: DocumentCreateInput): Promise<Document> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
-      return await this.createWithTxn(tx, i);
+      return await this.createOrLinkWithTxn(tx, i);
     });
   }
 
-  async createWithTxn(
+  async createOrLinkWithTxn(
     prisma: TxPrismaClient,
     i: DocumentCreateInput,
   ): Promise<Document> {
+    const document = await this.getOrCreateByUri(prisma, i);
+
+    // Create corresponding DocumentToCollection
+    await prisma.documentToCollection.create({
+      data: {
+        id: Id.generate(DocumentToCollectionResponse).toString(),
+        documentId: document.id,
+        collectionId: i.collectionId.toString(),
+        indexingStatus: i.indexingStatus,
+      },
+    });
+
+    // Create corresponding DocumentToDataSource
+    await prisma.documentToDataSource.create({
+      data: {
+        id: Id.generate(DocumentToCollectionResponse).toString(),
+        documentId: document.id,
+        dataSourceId: i.connectionId.toString(),
+      },
+    });
+
+    return document;
+  }
+
+  // Returns a document with given uri; Creates a new if one does not exist!
+  private async getOrCreateByUri(
+    prisma: TxPrismaClient,
+    i: DocumentCreateInput,
+  ): Promise<Document> {
+    const document = await prisma.document.findUnique({
+      where: {
+        uri: i.uri,
+      },
+    });
+
+    if (document) {
+      return document;
+    }
+
     return await prisma.document.create({
       data: {
         id: i.id.toString(),
         name: i.name,
         mimeType: i.mimeType,
-        indexingStatus: i.indexingStatus,
-        collectionId: i.collectionId.toString(),
-        objectKey: i.objectKey,
+        uri: i.uri,
+        externalId: i.externalId,
       },
     });
   }
@@ -45,7 +89,7 @@ export class DocumentService {
     prisma: TxPrismaClient,
     id: Id<DocumentResponse>,
   ): Promise<Document | null> {
-    return await prisma.document.findFirst({
+    return await prisma.document.findUnique({
       where: {
         id: id.toString(),
       },
@@ -112,20 +156,46 @@ export class DocumentService {
     });
   }
 
-  async update(
-    id: Id<DocumentResponse>,
-    data: Pick<
-      Prisma.DocumentUpdateInput,
-      "name" | "indexingStatus" | "mimeType" | "objectKey"
-    >,
-  ): Promise<Document | null> {
-    return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
-      return await tx.document.update({
+  async updateIndexingStatus({
+    documentId,
+    collectionId,
+    indexingStatus,
+  }: {
+    documentId: Id<DocumentResponse>,
+    collectionId: Id<DocumentCollectionResponse>,
+    indexingStatus: DocumentIndexingStatus,
+  }): Promise<void> {
+    await prismaClient.$transaction(async (tx: TxPrismaClient) => {
+      await tx.documentToCollection.updateMany({
         where: {
-          id: id.toString(),
+          documentId: documentId.toString(),
+          collectionId: collectionId.toString(),
         },
-        data: data,
+        data: {
+          indexingStatus: indexingStatus,
+        }
       });
     });
+  }
+
+  async read(
+    document: Document,
+    dataSourceConnection: DataSourceConnection,
+  ): Promise<Blob> {
+    switch (dataSourceConnection.dataSource) {
+      case DataSource.UPLOAD:
+        const fileBuffer = await this.objectStorageService.get(document.externalId);
+        return new Blob([fileBuffer]);
+      case DataSource.PAPERLESS_NGX:
+        const paperlessNgxClient = new PaperlessNgxClient(dataSourceConnection.baseUrl!, dataSourceConnection.accessToken!);
+        const resp = await paperlessNgxClient.downloadDocument(document.externalId);
+        if (!resp.ok) {
+          throw new Error(`could not download document ${document.id} from ${dataSourceConnection.dataSource} (${dataSourceConnection.baseUrl}); Received ${resp.statusText} (${resp.status})`);
+        }
+
+        return resp.data!;
+      default:
+        throw new Error(`${dataSourceConnection.dataSource} not supported`)
+    }
   }
 }

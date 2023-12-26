@@ -27,6 +27,7 @@ import {
   getDocumentCollectionApiPath,
   getDocumentCollectionDocumentsApiPath,
   getDocumentCollectionStatsApiPath,
+  getDocumentToCollections,
 } from "lib/fe/api-paths";
 import { createFetcher, get } from "lib/fe/api";
 import { renderErrors } from "lib/fe/components/generic-error";
@@ -49,6 +50,7 @@ import {
   DEFAULT_DOCUMENT_COLLECTION_NAME,
   DocumentIndexingStatus,
   isEmpty,
+  DocumentToCollectionResponse,
 } from "@repo/core";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;
@@ -59,6 +61,11 @@ interface ProcessingStats {
   updatedAt: Date;
 }
 
+interface RowDatum {
+  document: DocumentResponse;
+  indexingStatus?: DocumentIndexingStatus;
+}
+
 const DocumentCollectionDetailsPage = ({
   orgSlug,
   documentCollectionId: documentCollectionIdRaw,
@@ -66,6 +73,7 @@ const DocumentCollectionDetailsPage = ({
   orgSlug: string;
   documentCollectionId: string;
 }) => {
+  const [rowData, setRowData] = useState<RowDatum[]>([]);
   const [processingStats, setProcessingStats] = useState<ProcessingStats>();
   const [showChatCreationModal, setShowChatCreationModal] =
     useState<boolean>(false);
@@ -118,7 +126,6 @@ const DocumentCollectionDetailsPage = ({
     data: documentsResponse,
     error: documentsFetchError,
     isLoading: isDocumentsResponseLoading,
-    mutate: mutateDocumentsResponse
   } = useSWR(
     shouldFetchDocuments
       ? getDocumentCollectionDocumentsApiPath({
@@ -136,6 +143,21 @@ const DocumentCollectionDetailsPage = ({
     createFetcher<DocumentResponse[]>(),
   );
 
+  const shouldFetchDocumentToCollections = documentsResponse && documentsResponse.response.length > 0;
+  const {
+    data: documentToCollectionsResponse,
+    error: documentToCollectionsFetchError,
+    mutate: mutateDocumentToCollectionsResponse
+  } = useSWR(
+    shouldFetchDocumentToCollections
+      ? getDocumentToCollections({
+          documentCollectionId: documentCollectionId,
+          documentIds: documentsResponse!.response.map(d => Id.from(d.id)),
+        })
+      : null,
+    createFetcher<DocumentToCollectionResponse[]>(),
+  );
+
   useEffect(() => {
     if (document && documentCollectionResponse) {
       document.title = `Document collection: ${
@@ -144,6 +166,36 @@ const DocumentCollectionDetailsPage = ({
       }`;
     }
   }, [documentCollectionResponse]);
+
+  useEffect(() => {
+    if (!documentsResponse) {
+      return;
+    }
+
+    setRowData(documentsResponse.response.map(d => {
+      return {
+        document: d,
+        d2c: undefined,
+      }
+    }));
+  }, [documentsResponse]);
+
+  useEffect(() => {
+    if (!documentToCollectionsResponse) {
+      return;
+    }
+
+    setRowData(old => {
+      const docIdToIndexingStatusMap = new Map(documentToCollectionsResponse.response.map(d2c => [d2c.documentId, d2c.indexingStatus]));
+
+      return old.map(o => {
+        return {
+          ...o,
+          indexingStatus: docIdToIndexingStatusMap.get(o.document.id),
+        }
+      });
+    });
+  }, [documentToCollectionsResponse]);
 
   const refreshStats = async () => {
     const responseWithHeaders = await get<DocumentCollectionStatsResponse>(
@@ -171,11 +223,11 @@ const DocumentCollectionDetailsPage = ({
       // Refetch in a few seconds
       setTimeout(() => {
         refreshStats();
-        mutateDocumentsResponse();
+        mutateDocumentToCollectionsResponse();
       }, pollingIntervalMS);
     } else {
       // Refetch current page to reflect updated statuses.
-      mutateDocumentsResponse();
+      mutateDocumentToCollectionsResponse();
     }
   }, [processingStats]);
 
@@ -188,7 +240,8 @@ const DocumentCollectionDetailsPage = ({
     }));
   };
 
-  const renderCells: RenderCellsFn<DocumentResponse> = ({ item }) => {
+  const renderCells: RenderCellsFn<RowDatum> = ({ item }) => {
+    const { document, indexingStatus } = item;
     return [
       <div
         className={tw(
@@ -201,23 +254,23 @@ const DocumentCollectionDetailsPage = ({
               <Link
                 href={documentCollectionDocumentApiPath(
                   documentCollectionId,
-                  Id.from(item.id),
+                  Id.from(document.id),
                 )}
                 target="_blank"
               >
-                {item.name}
+                {document.name}
               </Link>
             </div>
           </div>
         </div>
       </div>,
       <div className={tw("flex flex-col items-start")}>
-        {renderIndexingStatus(item.indexingStatus)}
+        {renderIndexingStatus(indexingStatus)}
       </div>,
       <div className={tw("flex flex-col")}>
-        <div>{formatDateTime(item.createdAt)}</div>
+        <div>{formatDateTime(document.createdAt)}</div>
         <div className={tw("mt-1 text-sm")}>
-          <ReactTimeAgo date={item.createdAt} locale="en-US" />
+          <ReactTimeAgo date={document.createdAt} locale="en-US" />
         </div>
       </div>,
     ];
@@ -269,8 +322,8 @@ const DocumentCollectionDetailsPage = ({
     );
   };
 
-  if (documentCollectionFetchError || documentsFetchError) {
-    return renderErrors(documentCollectionFetchError, documentsFetchError);
+  if (documentCollectionFetchError || documentsFetchError || documentToCollectionsFetchError) {
+    return renderErrors(documentCollectionFetchError, documentsFetchError, documentToCollectionsFetchError);
   }
 
   const disableNewChat =
@@ -379,7 +432,7 @@ const DocumentCollectionDetailsPage = ({
                 </div>
                 <Table
                   loading={isDocumentsResponseLoading}
-                  data={documentsResponse?.response}
+                  data={rowData}
                   columns={["Document", "Status", "Added Date"]}
                   renderCells={renderCells}
                   page={tableState.pagination.currentPage}
@@ -449,7 +502,11 @@ const DocumentCollectionDetailsPage = ({
 
 export default DocumentCollectionDetailsPage;
 
-const renderIndexingStatus = (indexingStatus: DocumentIndexingStatus) => {
+const renderIndexingStatus = (indexingStatus: DocumentIndexingStatus | undefined) => {
+  if (!indexingStatus) {
+    return <Spinner size="sm" />;
+  }
+
   let color = "";
   let text = "";
   let tooltip = "";

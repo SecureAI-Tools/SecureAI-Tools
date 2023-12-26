@@ -14,7 +14,6 @@ import {
 } from "lib/fe/api-paths";
 import { createFetcher, get, patch, ResponseWithHeaders } from "lib/fe/api";
 import { TokenUser } from "lib/types/core/token-user";
-import { OrgMembershipResponse } from "lib/types/api/org-membership.response";
 import { OrganizationUpdateRequest } from "lib/types/api/organization-update.request";
 import { Toasts } from "lib/fe/components/toasts";
 import { isAdmin } from "lib/fe/permission-utils";
@@ -31,6 +30,7 @@ import {
   Id,
   toModelType,
   modelTypeToReadableName,
+  OrgMembershipResponse,
 } from "@repo/core";
 
 const OrgAISettings = ({

@@ -4,21 +4,31 @@ import { NextResponse } from "next/server";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { ChatService } from "lib/api/services/chat-service";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
-import { OrgMembershipStatus } from "lib/types/core/org-membership-status";
 
-import { Id, UserResponse, DocumentCollectionResponse } from "@repo/core";
-import { DocumentCollectionService, NextResponseErrors } from "@repo/backend";
+import {
+  Id,
+  UserResponse,
+  DocumentCollectionResponse,
+  OrgMembershipStatus,
+  DataSourceConnectionResponse,
+} from "@repo/core";
+import {
+  DataSourceConnectionService,
+  DocumentCollectionService,
+  NextResponseErrors
+} from "@repo/backend";
 
 export class PermissionService {
   private chatService = new ChatService();
   private orgMembershipService = new OrgMembershipService();
   private documentCollectionService = new DocumentCollectionService();
+  private dataSourceConnectionService = new DataSourceConnectionService();
 
   // TODO: Rename to hasReadChatPermission
   async hasReadPermission(
     userId: Id<UserResponse>,
     chatId: Id<ChatResponse>,
-  ): Promise<[boolean, NextResponse | undefined]> {
+  ): Promise<[boolean, Response | undefined]> {
     // Only chat creators can read a chat for now.
     //
     // Revisit this when allowing sharing!
@@ -30,7 +40,7 @@ export class PermissionService {
   async hasWritePermission(
     userId: Id<UserResponse>,
     chatId: Id<ChatResponse>,
-  ): Promise<[boolean, NextResponse | undefined]> {
+  ): Promise<[boolean, Response | undefined]> {
     // Only chat creators can write to a chat for now.
     //
     // Revisit this when allowing sharing!
@@ -40,7 +50,7 @@ export class PermissionService {
   async hasWriteDocumentCollectionPermission(
     userId: Id<UserResponse>,
     documentCollectionId: Id<DocumentCollectionResponse>,
-  ): Promise<[boolean, NextResponse | undefined]> {
+  ): Promise<[boolean, Response | undefined]> {
     // Only chat creators can write to document collection for now.
     //
     // Revisit this when allowing sharing!
@@ -53,7 +63,7 @@ export class PermissionService {
   async hasReadDocumentCollectionPermission(
     userId: Id<UserResponse>,
     documentCollectionId: Id<DocumentCollectionResponse>,
-  ): Promise<[boolean, NextResponse | undefined]> {
+  ): Promise<[boolean, Response | undefined]> {
     // Only chat creators can read to document collection for now.
     //
     // Revisit this when allowing sharing!
@@ -63,10 +73,34 @@ export class PermissionService {
     );
   }
 
+  async hasReadDocumentsFromDataSourceConnectionPermission(
+    userId: Id<UserResponse>,
+    dataSourceConnectionId: Id<DataSourceConnectionResponse>,
+  ): Promise<[boolean, Response | undefined]> {
+    // Only creator can access documents from DataSource connection
+    const dataSourceConnections = await this.dataSourceConnectionService.getAll({
+      where: {
+        id: dataSourceConnectionId.toString(),
+        membership: {
+          userId: userId.toString(),
+          status: OrgMembershipStatus.ACTIVE,
+        }
+      }
+    });
+
+    if (dataSourceConnections.length < 1) {
+      // No such data source connection exists!
+      return [false, NextResponseErrors.notFound()];
+    }
+
+    // Data source connection exists for given user's ACTIVE memebership.
+    return [true, undefined];
+  }
+
   private async isChatCreatorWithActiveMembership(
     userId: Id<UserResponse>,
     chatId: Id<ChatResponse>,
-  ): Promise<[boolean, NextResponse | undefined]> {
+  ): Promise<[boolean, Response | undefined]> {
     const chat = await this.chatService.get(chatId);
     if (!chat) {
       return [false, NextResponseErrors.notFound()];
@@ -93,7 +127,7 @@ export class PermissionService {
   private async isDocumentCollectionCreatorWithActiveMembership(
     userId: Id<UserResponse>,
     documentCollectionId: Id<DocumentCollectionResponse>,
-  ): Promise<[boolean, NextResponse | undefined]> {
+  ): Promise<[boolean, Response | undefined]> {
     const collection =
       await this.documentCollectionService.get(documentCollectionId);
 
@@ -112,6 +146,6 @@ export class PermissionService {
       return [collection.ownerId === userId.toString(), undefined];
     }
 
-    return [false, NextResponse.json({ status: StatusCodes.FORBIDDEN })];
+    return [false, NextResponseErrors.forbidden()];
   }
 }

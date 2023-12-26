@@ -1,4 +1,4 @@
-import { OrgMembershipRole } from "lib/types/core/org-membership-role";
+import { OrgMembershipRole } from "@repo/core";
 
 export class AddUsersRequest {
   users!: AddUserRequest[];

@@ -1,7 +1,6 @@
 import { NextApiResponse } from "next/types";
 import { StatusCodes } from "http-status-codes";
 
-import { NextResponse } from "next/server";
 import { ErrorResponse } from "@repo/core";
 
 export async function sleep(ms: number): Promise<unknown> {
@@ -55,38 +54,29 @@ export function sendUnsupportedMethodError<T>(
 export namespace NextResponseErrors {
   export function forbidden(
     error: string = "insufficient permission",
-  ): NextResponse {
-    return NextResponse.json(
-      { error: error },
-      { status: StatusCodes.FORBIDDEN },
-    );
+  ): Response {
+    return Response.json({ error: error }, { status: StatusCodes.FORBIDDEN });
   }
 
-  export function notFound(error: string = "object not found"): NextResponse {
-    return NextResponse.json(
-      { error: error },
-      { status: StatusCodes.NOT_FOUND },
-    );
+  export function notFound(error: string = "object not found"): Response {
+    return Response.json({ error: error }, { status: StatusCodes.NOT_FOUND });
   }
 
-  export function unauthorized(error: string = "unauthorized"): NextResponse {
-    return NextResponse.json(
+  export function unauthorized(error: string = "unauthorized"): Response {
+    return Response.json(
       { error: error },
       { status: StatusCodes.UNAUTHORIZED },
     );
   }
 
-  export function badRequest(error: string = "invalid request"): NextResponse {
-    return NextResponse.json(
-      { error: error },
-      { status: StatusCodes.BAD_REQUEST },
-    );
+  export function badRequest(error: string = "invalid request"): Response {
+    return Response.json({ error: error }, { status: StatusCodes.BAD_REQUEST });
   }
 
   export function internalServerError(
     error: string = "Uh oh! Something went wrong",
-  ): NextResponse {
-    return NextResponse.json(
+  ): Response {
+    return Response.json(
       { error: error },
       { status: StatusCodes.INTERNAL_SERVER_ERROR },
     );

@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "lib/api/core/auth";
 import { ChatService } from "lib/api/services/chat-service";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
-import { OrgMembershipStatus } from "lib/types/core/org-membership-status";
 import { ChatResponse } from "lib/types/api/chat.response";
 
 import { API, NextResponseErrors } from "@repo/backend";
+import { OrgMembershipStatus } from "@repo/core";
 
 const chatService = new ChatService();
 const orgMembershipService = new OrgMembershipService();
