@@ -14,6 +14,8 @@ export const dataSourceToReadableName = (type: DataSource): string => {
   switch (type) {
     case DataSource.PAPERLESS_NGX:
       return "Paperless-ngx";
+    case DataSource.UPLOAD:
+      return "Upload";
     default:
       return type;
   }

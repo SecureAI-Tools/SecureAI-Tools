@@ -10,13 +10,19 @@ import {
   UserResponse,
   DocumentCollectionResponse,
   OrgMembershipStatus,
+  DataSourceConnectionResponse,
 } from "@repo/core";
-import { DocumentCollectionService, NextResponseErrors } from "@repo/backend";
+import {
+  DataSourceConnectionService,
+  DocumentCollectionService,
+  NextResponseErrors
+} from "@repo/backend";
 
 export class PermissionService {
   private chatService = new ChatService();
   private orgMembershipService = new OrgMembershipService();
   private documentCollectionService = new DocumentCollectionService();
+  private dataSourceConnectionService = new DataSourceConnectionService();
 
   // TODO: Rename to hasReadChatPermission
   async hasReadPermission(
@@ -65,6 +71,30 @@ export class PermissionService {
       userId,
       documentCollectionId,
     );
+  }
+
+  async hasReadDocumentsFromDataSourceConnectionPermission(
+    userId: Id<UserResponse>,
+    dataSourceConnectionId: Id<DataSourceConnectionResponse>,
+  ): Promise<[boolean, Response | undefined]> {
+    // Only creator can access documents from DataSource connection
+    const dataSourceConnections = await this.dataSourceConnectionService.getAll({
+      where: {
+        id: dataSourceConnectionId.toString(),
+        membership: {
+          userId: userId.toString(),
+          status: OrgMembershipStatus.ACTIVE,
+        }
+      }
+    });
+
+    if (dataSourceConnections.length < 1) {
+      // No such data source connection exists!
+      return [false, NextResponseErrors.notFound()];
+    }
+
+    // Data source connection exists for given user's ACTIVE memebership.
+    return [true, undefined];
   }
 
   private async isChatCreatorWithActiveMembership(
@@ -116,6 +146,6 @@ export class PermissionService {
       return [collection.ownerId === userId.toString(), undefined];
     }
 
-    return [false, NextResponse.json({ status: StatusCodes.FORBIDDEN })];
+    return [false, NextResponseErrors.forbidden()];
   }
 }

@@ -4,7 +4,6 @@ import useSWR from "swr";
 import { tw } from "twind";
 import { useEffect, useState } from "react";
 import { Button } from "flowbite-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { HiOutlineCheckCircle } from "react-icons/hi";
@@ -19,8 +18,6 @@ import { TokenUser } from "lib/types/core/token-user";
 import { createFetcher } from "lib/fe/api";
 import { renderErrors } from "lib/fe/components/generic-error";
 import { formatDateTime } from "lib/core/date-format";
-import useToasts from "lib/fe/hooks/use-toasts";
-import { Toasts } from "lib/fe/components/toasts";
 
 import {
   PAGINATION_STARTING_PAGE_NUMBER,
@@ -29,21 +26,13 @@ import {
   DataSource,
   dataSourceToReadableName,
 } from "@repo/core";
-
-interface DataSourceRecord {
-  dataSource: DataSource;
-  connection?: DataSourceConnectionResponse;
-}
+import { DataSourceRecord, getDataSourceRecords, getLogoSrc } from "lib/fe/data-source-utils";
 
 const DataSourcesListPage = ({ orgSlug }: { orgSlug: string }) => {
   const [dataSourceRecords, setDataSourceRecords] = useState<
     DataSourceRecord[] | undefined
   >(undefined);
   const { data: session, status: sessionStatus } = useSession();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const [toasts, addToast] = useToasts();
 
   // Fetch ALL connections
   const shouldFetchDataSourceConnections =
@@ -51,7 +40,6 @@ const DataSourcesListPage = ({ orgSlug }: { orgSlug: string }) => {
   const {
     data: dataSourceConnectionsResponse,
     error: dataSourceConnectionsFetchError,
-    mutate: mutateDataSourceConnectionResponse,
   } = useSWR(
     shouldFetchDataSourceConnections
       ? getOrganizationsIdOrSlugDataSourceConnectionsApiPath({
@@ -75,27 +63,15 @@ const DataSourcesListPage = ({ orgSlug }: { orgSlug: string }) => {
     if (!dataSourceConnectionsResponse) {
       return;
     }
-    const dataSourceConnections = dataSourceConnectionsResponse.response;
-    var dataSourceConnectionsMap = new Map(
-      dataSourceConnections.map((dsc) => [dsc.dataSource, dsc]),
-    );
+
+    const dataSourceRecords = getDataSourceRecords(dataSourceConnectionsResponse.response);
 
     // Remove implicit data sources like upload and web
-    const dataSources = Object.values(DataSource).filter(
-      (d) => d !== DataSource.UPLOAD,
+    const filteredDataSources = dataSourceRecords.filter(
+      (d) => d.dataSource !== DataSource.UPLOAD,
     );
 
-    // Sort alphabetically
-    dataSources.sort();
-
-    const newDataSourceRecords = dataSources.map((ds): DataSourceRecord => {
-      return {
-        dataSource: ds,
-        connection: dataSourceConnectionsMap.get(ds),
-      };
-    });
-
-    setDataSourceRecords([...newDataSourceRecords]);
+    setDataSourceRecords([...filteredDataSources]);
   }, [dataSourceConnectionsResponse]);
 
   const renderCells: RenderCellsFn<DataSourceRecord> = ({ item }) => {
@@ -109,7 +85,7 @@ const DataSourcesListPage = ({ orgSlug }: { orgSlug: string }) => {
           <div className={tw("flex flex-row items-center")}>
             <div>
               <Image
-                src={`/data-source-logos/${item.dataSource.toLowerCase()}.svg`}
+                src={getLogoSrc(item.dataSource)}
                 alt={`${dataSourceToReadableName(item.dataSource)} logo`}
                 width={20}
                 height={20}
@@ -152,7 +128,6 @@ const DataSourcesListPage = ({ orgSlug }: { orgSlug: string }) => {
 
   return (
     <AppsLoggedInLayout>
-      <Toasts toasts={toasts} />
       <div className={tw("flex flex-row")}>
         <Sidebar orgSlug={orgSlug} />
         <div

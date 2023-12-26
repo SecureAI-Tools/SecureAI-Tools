@@ -1,7 +1,9 @@
 import { API } from "../utils/api.utils";
+import { LocalObjectStorageService } from "./local-object-storage-service";
+import { PaperlessNgxClient } from "../clients/paperless-ngx-client";
 
-import { Document, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
-import { Id, DocumentResponse, DocumentIndexingStatus, DocumentCollectionResponse, DocumentToCollectionResponse, DataSourceConnectionResponse } from "@repo/core";
+import { DataSourceConnection, Document, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
+import { Id, DocumentResponse, DocumentIndexingStatus, DocumentCollectionResponse, DocumentToCollectionResponse, DataSourceConnectionResponse, DataSource } from "@repo/core";
 
 export interface DocumentCreateInput {
   id: Id<DocumentResponse>;
@@ -15,31 +17,25 @@ export interface DocumentCreateInput {
 }
 
 export class DocumentService {
-  async create(i: DocumentCreateInput): Promise<Document> {
+  private objectStorageService = new LocalObjectStorageService();
+
+  async createOrLink(i: DocumentCreateInput): Promise<Document> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
-      return await this.createWithTxn(tx, i);
+      return await this.createOrLinkWithTxn(tx, i);
     });
   }
 
-  async createWithTxn(
+  async createOrLinkWithTxn(
     prisma: TxPrismaClient,
     i: DocumentCreateInput,
   ): Promise<Document> {
-    const createdDocument = await prisma.document.create({
-      data: {
-        id: i.id.toString(),
-        name: i.name,
-        mimeType: i.mimeType,
-        uri: i.uri,
-        externalId: i.externalId,
-      },
-    });
+    const document = await this.getOrCreateByUri(prisma, i);
 
     // Create corresponding DocumentToCollection
     await prisma.documentToCollection.create({
       data: {
         id: Id.generate(DocumentToCollectionResponse).toString(),
-        documentId: createdDocument.id,
+        documentId: document.id,
         collectionId: i.collectionId.toString(),
         indexingStatus: i.indexingStatus,
       },
@@ -49,12 +45,38 @@ export class DocumentService {
     await prisma.documentToDataSource.create({
       data: {
         id: Id.generate(DocumentToCollectionResponse).toString(),
-        documentId: createdDocument.id,
+        documentId: document.id,
         dataSourceId: i.connectionId.toString(),
       },
     });
 
-    return createdDocument;
+    return document;
+  }
+
+  // Returns a document with given uri; Creates a new if one does not exist!
+  private async getOrCreateByUri(
+    prisma: TxPrismaClient,
+    i: DocumentCreateInput,
+  ): Promise<Document> {
+    const document = await prisma.document.findUnique({
+      where: {
+        uri: i.uri,
+      },
+    });
+
+    if (document) {
+      return document;
+    }
+
+    return await prisma.document.create({
+      data: {
+        id: i.id.toString(),
+        name: i.name,
+        mimeType: i.mimeType,
+        uri: i.uri,
+        externalId: i.externalId,
+      },
+    });
   }
 
   async get(id: Id<DocumentResponse>): Promise<Document | null> {
@@ -67,7 +89,7 @@ export class DocumentService {
     prisma: TxPrismaClient,
     id: Id<DocumentResponse>,
   ): Promise<Document | null> {
-    return await prisma.document.findFirst({
+    return await prisma.document.findUnique({
       where: {
         id: id.toString(),
       },
@@ -154,5 +176,26 @@ export class DocumentService {
         }
       });
     });
+  }
+
+  async read(
+    document: Document,
+    dataSourceConnection: DataSourceConnection,
+  ): Promise<Blob> {
+    switch (dataSourceConnection.dataSource) {
+      case DataSource.UPLOAD:
+        const fileBuffer = await this.objectStorageService.get(document.externalId);
+        return new Blob([fileBuffer]);
+      case DataSource.PAPERLESS_NGX:
+        const paperlessNgxClient = new PaperlessNgxClient(dataSourceConnection.baseUrl!, dataSourceConnection.accessToken!);
+        const resp = await paperlessNgxClient.downloadDocument(document.externalId);
+        if (!resp.ok) {
+          throw new Error(`could not download document ${document.id} from ${dataSourceConnection.dataSource} (${dataSourceConnection.baseUrl}); Received ${resp.statusText} (${resp.status})`);
+        }
+
+        return resp.data!;
+      default:
+        throw new Error(`${dataSourceConnection.dataSource} not supported`)
+    }
   }
 }

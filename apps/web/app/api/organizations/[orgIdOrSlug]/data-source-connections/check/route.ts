@@ -67,7 +67,7 @@ export async function POST(
   // TODO: Add switch case when we have more data sources that can be checked!
 
   const client = new PaperlessNgxClient(baseUrl, token);
-  const resp = await client.getDocuments();
+  const resp = await client.getDocuments({});
   if (!resp.ok) {
     const response: DataSourceConnectionCheckResponse = {
       ok: false,

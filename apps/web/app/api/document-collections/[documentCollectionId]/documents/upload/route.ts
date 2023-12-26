@@ -5,8 +5,8 @@ import { PermissionService } from "lib/api/services/permission-service";
 import { getDocumentObjectKey } from "lib/api/core/document.utils";
 import { IndexingMode } from "lib/types/core/indexing-mode";
 
-import { Id, DocumentCollectionResponse, DocumentResponse, DocumentIndexingStatus, IndexingQueueMessage, DataSource, OrganizationResponse } from "@repo/core";
-import { DocumentCollectionService, DocumentService, LocalObjectStorageService, NextResponseErrors, getAMQPChannel, DataSourceConnectionService, generateDocumentUri } from "@repo/backend";
+import { Id, DocumentCollectionResponse, DocumentResponse, DocumentIndexingStatus, DataSource, OrganizationResponse } from "@repo/core";
+import { DocumentCollectionService, DocumentService, LocalObjectStorageService, NextResponseErrors, DataSourceConnectionService, generateDocumentUri, addToIndexingQueue } from "@repo/backend";
 
 const permissionService = new PermissionService();
 const documentCollectionService = new DocumentCollectionService();
@@ -82,7 +82,7 @@ export async function POST(
     dataSourceBaseUrl: 'upload',
     guidInDataSource: documentObjectKey,
   });
-  const document = await documentService.create({
+  const document = await documentService.createOrLink({
     id: documentId,
     name: file.name,
     mimeType: file.type,
@@ -95,22 +95,11 @@ export async function POST(
 
   if (indexingMode === IndexingMode.OFFLINE) {
     // Insert document into the queue so task-master can process it offline!
-    const msg: IndexingQueueMessage = {
-      documentId: documentId.toString(),
+    await addToIndexingQueue({
+      documentId: document.id,
       collectionId: documentCollectionId.toString(),
-    }
-    const amqpServerUrl = process.env.AMQP_SERVER_URL;
-    if (!amqpServerUrl) {
-      throw new Error("Invalid AMQP_SERVER_URL");
-    }
-    const queueName = process.env.AMQP_DOCS_INDEXING_QUEUE_NAME;
-    if (!queueName) {
-      throw new Error("Invalid AMQP_DOCS_INDEXING_QUEUE_NAME");
-    }
-
-    const channel = await getAMQPChannel(amqpServerUrl);
-    await channel.assertQueue(queueName);
-    await channel.sendToQueue(queueName, Buffer.from(JSON.stringify(msg)));
+      dataSourceConnectionId: dataSourceConnection.id,
+    });
   }
 
   return NextResponse.json(DocumentResponse.fromEntity(document));

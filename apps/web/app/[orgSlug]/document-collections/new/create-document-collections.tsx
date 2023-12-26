@@ -12,35 +12,26 @@ import { PageTitle } from "lib/fe/components/page-title";
 import { Toasts } from "lib/fe/components/toasts";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { Button, Label, TextInput, Textarea } from "flowbite-react";
-import { FilesUpload } from "lib/fe/components/files-upload";
 import { createDocumentCollection } from "lib/fe/document-utils";
-import { DocumentsUploadModal } from "lib/fe/components/documents-upload-modal";
+import { DocumentsCreationModal } from "lib/fe/components/documents-creation-modal";
 import { Sidebar } from "lib/fe/components/side-bar";
+import { DocumentsDataSourceSelector } from "lib/fe/components/data-sources/documents-data-source-selector";
+import { SelectedDocument } from "lib/fe/types/selected-document";
 
-import { Id, DocumentCollectionResponse, isEmpty } from "@repo/core";
+import { Id, DocumentCollectionResponse, isEmpty, DataSource } from "@repo/core";
 
 const CreateDocumentCollections = ({ orgSlug }: { orgSlug: string }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [documentCollectionId, setDocumentCollectionId] = useState<
     Id<DocumentCollectionResponse> | undefined
   >();
+  const [selectedDocuments, setSelectedDocuments] = useState<
+    Map<DataSource, SelectedDocument[]>
+  >(new Map());
   const [toasts, addToast] = useToasts();
   const router = useRouter();
-
-  const handleFilesSelected = (files: File[]) => {
-    if (files.length < 1) {
-      console.log("eh! got no files");
-      return;
-    }
-
-    setSelectedFiles((currentlySelectedFiles) => {
-      // TODO: Deduplicate? How to do without full file path?
-      return [...currentlySelectedFiles, ...files];
-    });
-  };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -61,6 +52,8 @@ const CreateDocumentCollections = ({ orgSlug }: { orgSlug: string }) => {
       return;
     }
   };
+
+  const selectedDocumentsList = Array.from(selectedDocuments.values()).flat();
 
   return (
     <AppsLoggedInLayout>
@@ -116,7 +109,7 @@ const CreateDocumentCollections = ({ orgSlug }: { orgSlug: string }) => {
                   </div>
                   <Textarea
                     id="description"
-                    placeholder="Describe document collection  (optional) ..."
+                    placeholder="Describe document collection (optional) ..."
                     value={description}
                     rows={4}
                     onChange={(event) => {
@@ -126,35 +119,23 @@ const CreateDocumentCollections = ({ orgSlug }: { orgSlug: string }) => {
                     disabled={isSubmitting}
                   />
                 </div>
-                <div id="fileUpload" className={tw("mt-4 w-full h-48")}>
-                  <FilesUpload
-                    cta={<p>Select documents (PDFs)</p>}
-                    help={
-                      selectedFiles.length === 0 ? (
-                        <p>Click to upload</p>
-                      ) : (
-                        <div
-                          className={tw(
-                            "flex flex-col items-center max-h-40 overflow-scroll",
-                          )}
-                        >
-                          Selected {selectedFiles.length} files
-                          {selectedFiles.map((f, i) => {
-                            return <div key={i}>{f.name}</div>;
-                          })}
-                        </div>
-                      )
-                    }
-                    onFilesSelected={handleFilesSelected}
-                    accept=".pdf"
-                    disabled={isSubmitting}
-                    multiple
+                <div className={tw("mt-4 w-full")}>
+                  <Label
+                    value="Add documents"
+                    className={tw("text-xl")}
+                  />
+                  <DocumentsDataSourceSelector
+                    orgSlug={orgSlug}
+                    selectedDocuments={selectedDocuments}
+                    onDocumentsSelected={(dataSource, newSelection) => {
+                      setSelectedDocuments(new Map(selectedDocuments.set(dataSource, newSelection)));
+                    }}
                   />
                 </div>
                 <Button
                   type="submit"
                   isProcessing={isSubmitting}
-                  disabled={isEmpty(name) || selectedFiles.length === 0}
+                  disabled={isEmpty(name) || selectedDocumentsList.length === 0}
                 >
                   Submit
                 </Button>
@@ -162,8 +143,8 @@ const CreateDocumentCollections = ({ orgSlug }: { orgSlug: string }) => {
             </div>
           </div>
           {documentCollectionId ? (
-            <DocumentsUploadModal
-              files={selectedFiles}
+            <DocumentsCreationModal
+              selectedDocuments={selectedDocumentsList}
               collectionId={documentCollectionId}
               onSuccess={() => {
                 setIsSubmitting(false);

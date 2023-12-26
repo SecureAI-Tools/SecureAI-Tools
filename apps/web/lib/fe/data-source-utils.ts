@@ -6,7 +6,7 @@ import {
   postDataSourceConnectionsApiPath,
 } from "lib/fe/api-paths";
 import { DataSourceConnectionCreateRequest } from "lib/types/api/data-source-connection-create.request";
-import { DataSourceConnectionResponse } from "@repo/core";
+import { DataSource, DataSourceConnectionResponse } from "@repo/core";
 
 export const checkDataSourceConnection = async (
   orgSlug: string,
@@ -31,3 +31,32 @@ export const createDataSourceConnection = async (
     )
   ).response;
 };
+
+export const getLogoSrc = (dataSource: DataSource): string => {
+  return `/data-source-logos/${dataSource.toLowerCase()}.svg`
+}
+
+export interface DataSourceRecord {
+  dataSource: DataSource;
+  connection?: DataSourceConnectionResponse;
+}
+
+export const getDataSourceRecords = (
+  dataSourceConnections: DataSourceConnectionResponse[],
+): DataSourceRecord[] => {
+  var dataSourceConnectionsMap = new Map(
+    dataSourceConnections.map((dsc) => [dsc.dataSource, dsc]),
+  );
+
+  const dataSources = Object.values(DataSource);
+
+  // Sort alphabetically
+  dataSources.sort();
+
+  return dataSources.map((ds): DataSourceRecord => {
+    return {
+      dataSource: ds,
+      connection: dataSourceConnectionsMap.get(ds),
+    };
+  });
+}

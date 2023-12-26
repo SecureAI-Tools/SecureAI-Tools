@@ -40,6 +40,7 @@ export class DataSourceConnectionService {
       data: {
         id: Id.generate(DataSourceConnectionResponse).toString(),
         dataSource: i.dataSource,
+        baseUrl: i.baseUrl,
         accessToken: i.accessToken,
         accessTokenExpiresAt: i.accessTokenExpiresAt
           ? new Date(i.accessTokenExpiresAt)
@@ -93,6 +94,17 @@ export class DataSourceConnectionService {
         },
       });
     });
+  }
+
+  async get(id: Id<DataSourceConnectionResponse>): Promise<DataSourceConnection | null> {
+    return await prismaClient.$transaction(
+      async (prisma: TxPrismaClient): Promise<DataSourceConnection | null> => {
+        return await prisma.dataSourceConnection.findUnique({
+          where: {
+            id: id.toString(),
+          }
+        })
+      });
   }
 
   async getOrCreate(

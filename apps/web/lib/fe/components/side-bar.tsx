@@ -125,6 +125,12 @@ export function Sidebar({
                     >
                       Organization users
                     </Dropdown.Item>
+                    <Dropdown.Item
+                      as="a"
+                      href={FrontendRoutes.getDataSourcesRoute(orgSlug)}
+                    >
+                      Data sources
+                    </Dropdown.Item>
                     <Dropdown.Item as="a" href={FrontendRoutes.USER_SETTINGS}>
                       User settings
                     </Dropdown.Item>

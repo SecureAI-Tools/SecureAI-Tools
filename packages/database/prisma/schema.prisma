@@ -126,7 +126,7 @@ model Document {
   mimeType    String
   // Unique resource identifier to deduplicate documents across all data source connections
   // within an org
-  uri         String
+  uri         String                 @unique
   // id from external system (data source)
   // 
   // For uploads, this is the object-key in object storage
@@ -136,6 +136,7 @@ model Document {
   citations   Citation[]
   collections DocumentToCollection[]
   dataSources DocumentToDataSource[]
+  chunks      DocumentChunk[]
 
   @@index([id])
 }
@@ -200,4 +201,13 @@ model DocumentToDataSource {
   updatedAt    DateTime             @updatedAt
 
   @@index([id])
+}
+
+model DocumentChunk {
+  id           String               @id
+  // Id from external vector db
+  vectorDbId   String
+  documentId   String
+  document     Document             @relation(fields: [documentId], references: [id])
+  @@index([id])  
 }

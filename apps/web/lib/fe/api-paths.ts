@@ -11,6 +11,7 @@ import {
   isEmpty,
   OrgMembershipResponse,
   DataSource,
+  DataSourceConnectionResponse,
 } from "@repo/core";
 
 export const userApiPath = (userId: Id<UserResponse>): string => {
@@ -58,6 +59,13 @@ export const uploadDocumentApiPath = (
 ): string => {
   return `/api/document-collections/${documentCollectionId}/documents/upload`;
 };
+
+export const postDocumentApiPath = (
+  documentCollectionId: Id<DocumentCollectionResponse>,
+): string => {
+  return `/api/document-collections/${documentCollectionId}/documents`;
+};
+
 
 export const getDocumentCollectionDocumentsApiPath = ({
   documentCollectionId,
@@ -277,4 +285,16 @@ export const instanceConfigApiPath = (): string => {
 
 export const modelProvidersApiPath = (): string => {
   return `/api/model-providers`;
+};
+
+export const getDataSourceConnetionDocumentsApiPath = ({
+  connectionId,
+  query,
+  pagination,
+}: {
+  connectionId: Id<DataSourceConnectionResponse>;
+  query: string;
+  pagination: PaginationParams;
+}): string => {
+  return `/api/data-source-connections/${connectionId}/documents?query=${encodeURIComponent(query)}&page=${pagination.page}&pageSize=${pagination.pageSize}`;
 };

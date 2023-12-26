@@ -12,12 +12,11 @@ import useToasts from "lib/fe/hooks/use-toasts";
 import { FrontendRoutes } from "lib/fe/routes";
 import ChatInput from "lib/fe/components/chat-input";
 import { Toasts } from "lib/fe/components/toasts";
-import { FilesUpload } from "lib/fe/components/files-upload";
 import { ChatType } from "lib/types/core/chat-type";
 import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
 import {
+  createDocument,
   createDocumentCollection,
-  uploadDocument,
 } from "lib/fe/document-utils";
 import { postChat, postChatMessage } from "lib/fe/chat-utils";
 import { IndexingMode } from "lib/types/core/indexing-mode";
@@ -42,22 +41,29 @@ import {
   isEmpty,
   modelTypeToReadableName,
   OrgMembershipResponse,
+  DataSource,
 } from "@repo/core";
+import { DocumentsDataSourceSelector } from "./data-sources/documents-data-source-selector";
+import { SelectedDocument } from "../types/selected-document";
 
 export default function NewChat({ orgSlug }: { orgSlug: string }) {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [input, setInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [selectedDocuments, setSelectedDocuments] = useState<
+    Map<DataSource, SelectedDocument[]>
+  >(new Map());
   const [toasts, addToast] = useToasts();
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
 
     try {
+      const selectedDocumentsList = Array.from(selectedDocuments.values()).flat();
+
       const chatType: ChatType =
-        selectedFiles.length === 0
+        selectedDocumentsList.length === 0
           ? ChatType.CHAT_WITH_LLM
           : ChatType.CHAT_WITH_DOCS;
 
@@ -66,7 +72,7 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
       if (chatType === ChatType.CHAT_WITH_DOCS) {
         const documentCollection = await createDocumentCollection(orgSlug, {});
         documentCollectionId = Id.from(documentCollection.id);
-        await uploadDocuments(documentCollectionId, selectedFiles);
+        await createDocuments(documentCollectionId, selectedDocumentsList);
       }
 
       const chatResponse = await postChat(orgSlug, {
@@ -93,18 +99,6 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
       });
       setIsSubmitting(false);
     }
-  };
-
-  const handleFilesSelected = (files: File[]) => {
-    if (files.length < 1) {
-      console.log("eh! got no files");
-      return;
-    }
-
-    setSelectedFiles((currentlySelectedFiles) => {
-      // TODO: Deduplicate? How to do without full file path?
-      return [...currentlySelectedFiles, ...files];
-    });
   };
 
   // Fetch organization
@@ -227,32 +221,16 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
                   }}
                   onEnter={handleSubmit}
                   disabled={modelSetupRequired || isSubmitting}
-                  placeholder="Type something and hit Enter to start a new chat..."
+                  placeholder="Type something and hit Enter to start a new chat. Optionally attach documents to chat with them..."
+                  rows={2}
                 />
-                <div id="fileUpload" className={tw("mt-4 w-full h-24")}>
-                  <FilesUpload
-                    cta={<p>Attach PDFs to chat with them (optional)</p>}
-                    help={
-                      selectedFiles.length === 0 ? (
-                        <p>Click to upload</p>
-                      ) : (
-                        <div
-                          className={tw(
-                            "flex flex-col items-center max-h-10 overflow-scroll",
-                          )}
-                        >
-                          Selected {selectedFiles.length} files
-                          {selectedFiles.map((f, i) => {
-                            return <div key={i}>{f.name}</div>;
-                          })}
-                        </div>
-                      )
-                    }
-                    onFilesSelected={handleFilesSelected}
-                    accept=".pdf"
-                    disabled={modelSetupRequired || isSubmitting}
-                    spinner={isSubmitting}
-                    multiple
+                <div className={tw("mt-2 w-full")}>
+                  <DocumentsDataSourceSelector
+                    orgSlug={orgSlug}
+                    selectedDocuments={selectedDocuments}
+                    onDocumentsSelected={(dataSource, newSelection) => {
+                      setSelectedDocuments(new Map(selectedDocuments.set(dataSource, newSelection)));
+                    }}
                   />
                 </div>
                 <Button
@@ -272,12 +250,12 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
   );
 }
 
-const uploadDocuments = async (
+const createDocuments = async (
   documentCollectionId: Id<DocumentCollectionCreateRequest>,
-  files: File[],
+  selectedDocuments: SelectedDocument[],
 ): Promise<DocumentResponse[]> => {
-  const promises = files.map((f) => {
-    return uploadDocument(documentCollectionId, f, IndexingMode.ONLINE);
+  const promises = selectedDocuments.map((sd) => {
+    return createDocument(documentCollectionId, sd, IndexingMode.ONLINE);
   });
 
   return await Promise.all(promises);
