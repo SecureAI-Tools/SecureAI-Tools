@@ -197,7 +197,7 @@ const UploadCard = ({
               <div className={tw("text-base font-normal ml-2")}>
                 Upload PDFs
                 <div className={tw("text-xs font-light")}>
-                  {selectedDocuments.length > 0 ? `${selectedDocuments.length} selected` : "Select"}
+                  {selectedDocuments.length > 0 ? `${selectedDocuments.length} documents selected` : "Select documents"}
                 </div>
               </div>
             </div>
