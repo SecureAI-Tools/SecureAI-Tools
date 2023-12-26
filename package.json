@@ -20,5 +20,8 @@
   ],
   "prisma": {
     "schema": "packages/database/prisma/schema.prisma"
+  },
+  "engines": {
+    "node": ">=18.17.x"
   }
 }
