@@ -1,24 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ChromaClient } from "chromadb";
 
 import { isAuthenticated } from "lib/api/core/auth";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { OrganizationService } from "lib/api/services/organization-service";
-import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
+import { getWebLogger } from "lib/api/core/logger";
 
 import {
-  removeTrailingSlash,
-  Id,
-  toModelType,
-  ModelType,
-  DocumentCollectionResponse,
   DataSource,
   dataSourceToReadableName,
 } from "@repo/core";
 import {
-  DocumentCollectionService,
   NextResponseErrors,
-  API,
   PaperlessNgxClient,
 } from "@repo/backend";
 import { DataSourceConnectionCheckRequest } from "lib/types/api/data-source-connection-check.request";
@@ -26,10 +18,7 @@ import { DataSourceConnectionCheckResponse } from "lib/types/api/data-source-con
 
 const orgMembershipService = new OrgMembershipService();
 const orgService = new OrganizationService();
-const documentCollectionService = new DocumentCollectionService();
-const chromaClient = new ChromaClient({
-  path: removeTrailingSlash(process.env.VECTOR_DB_SERVER!),
-});
+const logger = getWebLogger();
 
 export async function POST(
   req: NextRequest,
@@ -67,30 +56,39 @@ export async function POST(
   // TODO: Add switch case when we have more data sources that can be checked!
 
   const client = new PaperlessNgxClient(baseUrl, token);
-  const resp = await client.getDocuments({});
-  if (!resp.ok) {
+  try {
+    const resp = await client.getDocuments({});
+    if (!resp.ok) {
+      const response: DataSourceConnectionCheckResponse = {
+        ok: false,
+        status: resp.status,
+        error: resp.statusText,
+      };
+      return NextResponse.json(response);
+    }
+
+    if (resp.data!.count == 0) {
+      const response: DataSourceConnectionCheckResponse = {
+        ok: false,
+        status: resp.status,
+        error: `Did not receive any documents from ${dataSourceToReadableName(
+          dataSource,
+        )}. Make sure that the user of API auth token has access to documents.`,
+      };
+      return NextResponse.json(response);
+    }
+
     const response: DataSourceConnectionCheckResponse = {
-      ok: false,
+      ok: true,
       status: resp.status,
-      error: resp.statusText,
     };
     return NextResponse.json(response);
+  } catch (error) {
+    logger.error(`could not fetch documents from ${dataSource} @ ${baseUrl}`, {
+      error: error,
+      dataSource: dataSource,
+      baseUrl: baseUrl,
+    });
+    return NextResponseErrors.internalServerError(`could not get documents from ${dataSource} @ ${baseUrl}`);
   }
-
-  if (resp.data!.count == 0) {
-    const response: DataSourceConnectionCheckResponse = {
-      ok: false,
-      status: resp.status,
-      error: `Did not receive any documents from ${dataSourceToReadableName(
-        dataSource,
-      )}. Make sure that the user of API auth token has access to documents.`,
-    };
-    return NextResponse.json(response);
-  }
-
-  const response: DataSourceConnectionCheckResponse = {
-    ok: true,
-    status: resp.status,
-  };
-  return NextResponse.json(response);
 }

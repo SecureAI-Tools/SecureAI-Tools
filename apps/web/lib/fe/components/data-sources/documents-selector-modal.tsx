@@ -1,7 +1,8 @@
-import { Button, Checkbox, Modal, TextInput, Tooltip } from "flowbite-react";
+import { Alert, Button, Checkbox, Modal, TextInput, Tooltip } from "flowbite-react";
 import { tw } from "twind";
 import { ChangeEvent, useEffect, useState } from "react";
 import useSWR from "swr";
+import { HiOutlineExclamation } from "react-icons/hi";
 
 import useTableState from "lib/fe/hooks/use-table-state";
 import { RenderCellsFn, Table } from "lib/fe/components/table";
@@ -40,6 +41,7 @@ export const DocumentsSelectorModal = ({
     data: dataSourceDocumentsResponse,
     error: dataSourceDocumentsFetchError,
     isLoading: isDataSourceDocumentsResponseLoading,
+    mutate: mutateDataSourceDocumentsResponse,
   } = useSWR(
     getDataSourceConnetionDocumentsApiPath({
       connectionId: dataSourceConnectionId,
@@ -145,7 +147,6 @@ export const DocumentsSelectorModal = ({
   }
 
   const pageCheckboxChecked = dataSourceDocumentsResponse?.response.every(d => selectedExternalIds.has(d.externalId));
-
   const readableName = dataSourceToReadableName(dataSource);
   return (
     <Modal
@@ -158,6 +159,29 @@ export const DocumentsSelectorModal = ({
       <Modal.Header>Select documents from {readableName}</Modal.Header>
       <Modal.Body>
         <div>
+          {dataSourceDocumentsFetchError ? (
+            <Alert
+              color="failure"
+              icon={HiOutlineExclamation}
+              className={tw("mb-3")}
+            >
+              <div>
+                <h1 className={tw("text font-semibold mb-1")}>Could not get documents!</h1>
+                <div className={tw("text-xs")}>
+                  Encountered an unexpected error while fetching documents from {readableName}. This could be due to {readableName} being temporarily unavailable.
+                </div>
+                <Button
+                  onClick={() => {
+                    mutateDataSourceDocumentsResponse();
+                  }}
+                  size="xs"
+                  className={tw("mt-1")}
+                >
+                  Try again
+                </Button>
+              </div>
+            </Alert>
+          ) : null}
           <div className={tw("mb-4")}>
             <TextInput
               id="search"

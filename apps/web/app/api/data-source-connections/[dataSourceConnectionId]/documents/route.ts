@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
+import { getWebLogger } from "lib/api/core/logger";
 
 import {
   NextResponseErrors,
@@ -18,6 +19,7 @@ import {
 
 const permissionService = new PermissionService();
 const dataSourceConnectionService = new DataSourceConnectionService();
+const logger = getWebLogger();
 
 export async function GET(
   req: NextRequest,
@@ -57,26 +59,34 @@ export async function GET(
 
   const paginationParams = API.PaginationParams.from(searchParams);
   const paperlessNgxClient = new PaperlessNgxClient(dataSourceConnection.baseUrl!, dataSourceConnection.accessToken!);
-  const documentsSearchResponse = await paperlessNgxClient.getDocuments({
-    query: query ?? undefined,
-    page: paginationParams.page,
-    pageSize: paginationParams.pageSize,
-  });
+  try {
+    const documentsSearchResponse = await paperlessNgxClient.getDocuments({
+      query: query ?? undefined,
+      page: paginationParams.page,
+      pageSize: paginationParams.pageSize,
+    });
 
-  if (!documentsSearchResponse.ok) {
-    return NextResponseErrors.internalServerError(
-      `could not search documents from ${dataSourceConnection.dataSource} at ${dataSourceConnection.baseUrl}. Received "${documentsSearchResponse.statusText}" (${documentsSearchResponse.status})`
+    if (!documentsSearchResponse.ok) {
+      return NextResponseErrors.internalServerError(
+        `could not search documents from ${dataSourceConnection.dataSource} at ${dataSourceConnection.baseUrl}. Received "${documentsSearchResponse.statusText}" (${documentsSearchResponse.status})`
+      );
+    }
+
+    return NextResponse.json(
+      documentsSearchResponse.data!.results.map((r) => toDataSourceConnectionDocumentResponse(r)),
+      {
+        headers: API.createResponseHeaders({
+          pagination: {
+            totalCount: documentsSearchResponse.data!.count,
+          },
+        }),
+      },
     );
+  } catch (error) {
+    logger.error(`could not fetch documents from ${dataSourceConnection.dataSource}`, {
+      error: error,
+      dataSourceConnectionId: dataSourceConnection.id,
+    });
+    return NextResponseErrors.internalServerError(`could not get documents from ${dataSourceConnection.dataSource}`);
   }
-
-  return NextResponse.json(
-    documentsSearchResponse.data!.results.map((r) => toDataSourceConnectionDocumentResponse(r)),
-    {
-      headers: API.createResponseHeaders({
-        pagination: {
-          totalCount: documentsSearchResponse.data!.count,
-        },
-      }),
-    },
-  );
 }
