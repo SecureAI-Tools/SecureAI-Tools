@@ -1,5 +1,13 @@
 version: "3.8"
 
+#
+# WARNING: Make sure to use the released version of docker-compose.yml file:
+#
+# https://github.com/SecureAI-Tools/SecureAI-Tools/releases/latest/download/docker-compose.yml
+#
+# The docker-compose.yml file on main branch may not be compatible with the latest release.
+#
+
 services:
   web:
     image: public.ecr.aws/d8f2p0h3/secure-ai-tools:latest
@@ -11,18 +19,100 @@ services:
     environment:
       - INFERENCE_SERVER=http://inference:11434/
       - VECTOR_DB_SERVER=http://vector-db:8000
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - AMQP_SERVER_URL=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@message-broker:5672
     ports:
       - 28669:28669
-    command: sh -c "cd /app && sh tools/db-migrate-and-seed.sh ${DATABASE_FILE} && node server.js"
+    command: sh -c "cd /app && node apps/web/server.js"
     depends_on:
-      - inference
-      - vector-db
+      db:
+        condition: service_healthy
+      inference:
+        condition: service_started
+      vector-db:
+        condition: service_started
+      message-broker:
+        condition: service_healthy
+      db-migrate-and-seed:
+        condition: service_completed_successfully
+        restart: false
+
+  task-master:
+    image: public.ecr.aws/d8f2p0h3/secure-ai-tools:latest
+    platform: linux/amd64
+    volumes:
+      - ./web:/app/volume
+    env_file:
+      - .env
+    environment:
+      - INFERENCE_SERVER=http://inference:11434/
+      - VECTOR_DB_SERVER=http://vector-db:8000
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - AMQP_SERVER_URL=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@message-broker:5672
+    command: sh -c "cd /app/apps/task-master/ && node --experimental-specifier-resolution=node dist/main.js"
+    depends_on:
+      db:
+        condition: service_healthy
+      inference:
+        condition: service_started
+      vector-db:
+        condition: service_started
+      message-broker:
+        condition: service_healthy
+      db-migrate-and-seed:
+        condition: service_completed_successfully
+        restart: false
+
+  # Performs DB schema migrations and seeds db with initial data if needed.
+  db-migrate-and-seed:
+    image: public.ecr.aws/d8f2p0h3/secure-ai-tools:latest
+    platform: linux/amd64
+    volumes:
+      - ./web:/app/volume
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    command: sh -c "cd /app && sh apps/web/tools/db-migrate-and-seed.sh ${DATABASE_FILE}"
+    deploy:
+      restart_policy:
+        condition: none
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:latest
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 3s
+      retries: 8
 
   vector-db:
     image: chromadb/chroma:latest
     volumes:
       # Default configuration for persist_directory is "/chroma/chroma/"
       - ./vector-db:/chroma/chroma/
+
+  message-broker:
+    image: rabbitmq:management
+    volumes:
+      - ./message-broker:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 3s
+      timeout: 3s
+      retries: 30
 
   inference:
     image: ollama/ollama:latest

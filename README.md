@@ -12,7 +12,6 @@ Private and secure AI tools for everyone's productivity.
 * **Built-in authentication**: A simple email/password authentication so it can be opened to internet and accessed from anywhere.
 * **Built-in user management**: So family members or coworkers can use it as well if desired.
 * **Self-hosting optimized**: Comes with necessary scripts and docker-compose files to get started in under 5 minutes.
-* **Lightweight**: A simple web app with SQLite DB to avoid having to run docker container for DB. Data is persisted on host machine through docker volumes
 
 ## Demos
 
@@ -21,6 +20,9 @@ Private and secure AI tools for everyone's productivity.
 
 #### Chat with documents demo: Locally running Mistral (M2 MacBook)
 [![Chat with documents demo: Locally running Mistral](https://img.youtube.com/vi/UvRHL6f_w74/0.jpg)](https://www.youtube.com/watch?v=UvRHL6f_w74)
+
+#### Document collections demo
+[![Document Collections demo](https://img.youtube.com/vi/PwvfVx8VCoY/0.jpg)](https://www.youtube.com/watch?v=PwvfVx8VCoY)
 
 ## Install
 
@@ -40,7 +42,7 @@ curl -sL https://github.com/SecureAI-Tools/SecureAI-Tools/releases/latest/downlo
 
 
 #### 3. [Optional] Edit `.env` file
-Customize the `.env` file created in the above step to your liking.
+Customize the `.env` file created in the above step to your liking. If you want to use OpenAI LLMs, then please follow the [steps outlined here](https://github.com/SecureAI-Tools/SecureAI-Tools/#use-with-openai-or-openai-compatible-apis).
 
 #### 4. [Optional] On Linux machine with Nvidia GPUs, enable GPU support
 To accelerate inference on Linux machines, you will need to enable GPUs. This is not strictly required as the inference service will run on CPU-only mode as well, but it will be slow on CPU. So if your machine has Nvidia GPU then this step is recommended.
@@ -72,14 +74,54 @@ docker compose up -d
 1. Set up the AI model by going to http://localhost:28669/-/settings?tab=ai
 1. Navigate to http://localhost:28669/- and start using AI tools
 
+## Upgrade
+
+To upgrade, please run the following command where `docker-compose.yml` file lives in your set-up (it should be in `secure-ai-tools` directory from [installation step-#1](https://github.com/SecureAI-Tools/SecureAI-Tools/tree/main?tab=readme-ov-file#1-create-a-directory)).
+
+```sh
+docker compose pull && docker compose up -d
+```
+
+## Hardware requirements
+
+### Running AI model (LLM) locally
+* RAM: As much as the AI model requires. Most models have a variant that works well on 8 GB RAM
+* GPU: GPU is recommended but not required. It also runs in CPU-only mode but will be slower on Linux, Windows, and Mac-Intel. On M1/M2/M3 Macs, the inference speed is really good.
+
+### Using remote OpenAI-compatible APIs
+SecureAI Tools allows using [remote OpenAI-compatible APIs](https://github.com/SecureAI-Tools/SecureAI-Tools?tab=readme-ov-file#use-with-openai-or-openai-compatible-apis). If you only use a remote OpenAI-compatible API server for LLM inference, then the hardware requirements are much lower. You only need enough resources to be able to run a few docker containers: a small web server, postgresql-server, rabbit-mq.
 
 ## Features wishlist
 A set of features on our todo list (in no particular order).
 
 * ✅ Chat with documents
 * ✅ Support for OpenAI, Claude etc APIs
+* ✅ Reusable document collections
+* ✅ Offline document processing
 * Support for markdown rendering
 * Chat sharing
 * Mobile friendly UI
 * Specify AI model at chat-creation time
 * Prompt templates library
+
+## Guides
+
+### Use with OpenAI or OpenAI-compatible APIs
+SecureAI Tools can be used with OpenAI APIs and any other provider that provides OpenAI-compatible APIs. Here are the steps to enable that for your instance:
+
+1. Set the `MODEL_PROVIDER_CONFIGS` in `.env` file as shown below. If you're using other providers that don't require `apiKey` then you can specify any dummy `apiKey` value.
+
+   ```
+   MODEL_PROVIDER_CONFIGS='[{"type":"OPENAI","apiBaseUrl":"http://127.0.0.1:5000/v1","apiKey":"sk-..."}]'
+   ```
+
+2. Go to the organization settings page, select OpenAI model type, and provide the appropriate model name like `gpt3.5-turbo`
+
+### Customize LLM provider-specific options
+
+You can customize LLM provider-specific options like the number of layers to offload to GPUs, or stop words, etc. Specify these options in the `MODEL_PROVIDER_CONFIGS` environment variable. For example, below is how we can offload 30 layers to GPUs in Ollama.
+
+   ```
+   MODEL_PROVIDER_CONFIGS='[{"type":"OLLAMA","apiBaseUrl":"http://inference:11434/","apiKey":"","options":{"numGpu":30}}]'
+   ```
+Please [see here](https://github.com/SecureAI-Tools/SecureAI-Tools/blob/5f1c253af43f6b58c34ce481650069b1f65a20df/packages/core/src/types/model-provider-config.ts#L8-L13) for more info on what options are available for which provider.

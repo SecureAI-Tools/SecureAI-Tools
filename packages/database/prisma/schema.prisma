@@ -1,0 +1,153 @@
+// Prisma schema file -- https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String               @id
+  email              String               @unique
+  emailVerified      DateTime?
+  passwordHash       String
+  forcePasswordReset Boolean
+  firstName          String?
+  lastName           String?
+  memberships        OrgMembership[]
+  documentCollection DocumentCollection[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  @@index([id])
+  @@index([email])
+}
+
+model Organization {
+  id                  String               @id
+  name                String
+  slug                String               @unique
+  // Default model name
+  defaultModel        String
+  // Enum controlled by ModelType
+  defaultModelType    String?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  memberships         OrgMembership[]
+  documentCollections DocumentCollection[]
+
+  @@index([id])
+}
+
+// Organization membership
+model OrgMembership {
+  id        String       @id
+  role      String
+  status    String
+  orgId     String
+  org       Organization @relation(fields: [orgId], references: [id])
+  userId    String
+  user      User         @relation(fields: [userId], references: [id])
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  Chat      Chat[]
+
+  @@unique([orgId, userId])
+  @@index([id])
+}
+
+model Chat {
+  id                   String              @id
+  title                String?
+  // Enum controlled by ChatType in TS
+  type                 String?
+  model                String
+  // Enum controlled by ModelType
+  modelType            String?
+  membership           OrgMembership       @relation(fields: [membershipId], references: [id])
+  membershipId         String
+  messages             ChatMessage[]
+  documentCollectionId String?
+  documentCollection   DocumentCollection? @relation(fields: [documentCollectionId], references: [id])
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  deletedAt            DateTime?
+
+  @@index([id])
+}
+
+model ChatMessage {
+  id        String     @id
+  content   String
+  // Enum controlled by ChatMessageRole in TS
+  role      String
+  chat      Chat       @relation(fields: [chatId], references: [id])
+  chatId    String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  sources   Citation[]
+
+  @@index([id])
+}
+
+model DocumentCollection {
+  id             String       @id
+  // User facing name of the collection
+  name           String?
+  // Internal name for vector db etc
+  internalName   String       @unique
+  // User facing description
+  description    String?
+  // The AI model used for indexing documents of this collection
+  model          String
+  // Enum controlled by ModelType
+  modelType      String?
+  chats          Chat[]
+  documents      Document[]
+  ownerId        String
+  owner          User         @relation(fields: [ownerId], references: [id])
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+
+  @@index([id])
+}
+
+model Document {
+  id             String             @id
+  name           String
+  mimeType       String
+  objectKey      String
+  // Enum controlled by DocumentIndexingStatus in TS
+  indexingStatus String
+  collectionId   String
+  collection     DocumentCollection @relation(fields: [collectionId], references: [id])
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  citations      Citation[]
+
+  @@index([id])
+}
+
+// Citation
+// i.e. chat-message cites documents
+model Citation {
+  id              String      @id
+  // Id of document chunk in vector db
+  documentChunkId String
+  score           Float
+  document        Document    @relation(fields: [documentId], references: [id])
+  documentId      String
+  chatMessage     ChatMessage @relation(fields: [chatMessageId], references: [id])
+  chatMessageId   String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([id])
+}

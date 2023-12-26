@@ -1,0 +1,22 @@
+{
+  "name": "task-master",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "yarn build && env-cmd -f .env.development node --experimental-specifier-resolution=node dist/main.js"
+  },
+  "dependencies": {
+    "@repo/backend": "*",
+    "@repo/core": "*",
+    "@repo/database": "*",
+    "env-cmd": "^10.1.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "*",
+    "@types/node": "^20.9.4",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.2"
+  }
+}

@@ -1,0 +1,10 @@
+load database
+  from {{PGLD_SQLITE_FILE}}
+  into {{PGLD_POSTGRES_URL}}
+
+  with quote identifiers, data only
+
+  excluding table names like '%_prisma_migrations%'
+
+  /* Cast timestamps to Postgres format: https://github.com/dimitri/pgloader/issues/1381 */
+  cast type datetime to timestamptz using (lambda (x) (unix-timestamp-to-timestamptz (if x (floor x 1000))));

@@ -33,6 +33,14 @@ curl -OsL https://github.com/SecureAI-Tools/SecureAI-Tools/releases/latest/downl
 echo "  Generating .env file with sensible defaults"
 curl -sL -o .env https://github.com/SecureAI-Tools/SecureAI-Tools/releases/latest/download/example.env
 
+# Set POSTGRES_PASSWORD
+POSTGRES_PASSWORD=$(openssl rand -hex 32)
+sed -i.bak -e "s/POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=\"${POSTGRES_PASSWORD}\"/g" -- .env && rm .env.bak
+
+# Set RABBITMQ_DEFAULT_PASS
+RABBITMQ_DEFAULT_PASS=$(openssl rand -hex 32)
+sed -i.bak -e "s/RABBITMQ_DEFAULT_PASS=.*/RABBITMQ_DEFAULT_PASS=\"${RABBITMQ_DEFAULT_PASS}\"/g" -- .env && rm .env.bak
+
 # Set NEXTAUTH_SECRET
 NEXTAUTH_SECRET=$(openssl rand -hex 32)
 sed -i.bak -e "s/NEXTAUTH_SECRET=.*/NEXTAUTH_SECRET=\"${NEXTAUTH_SECRET}\"/g" -- .env && rm .env.bak
