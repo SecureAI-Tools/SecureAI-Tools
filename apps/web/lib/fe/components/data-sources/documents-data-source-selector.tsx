@@ -147,7 +147,7 @@ const DataSourceCard = ({
             <div className={tw("text-base font-normal ml-2")}>
               {readableName}
               <div className={tw("text-xs font-light")}>
-                {selectedDocuments.length > 0 ? `${selectedDocuments.length} selected` : "Select"}
+                {selectedDocuments.length > 0 ? `${selectedDocuments.length} documents selected` : "Select documents"}
               </div>
             </div>
           </div>
@@ -245,7 +245,7 @@ const ConnectModal = ({
     >
       <Modal.Header>Connect to {readableName}</Modal.Header>
       <Modal.Body>
-        Your account on {readableName} is not connected yet. You need to connect your account to {readableName} first to select documents from it. This is only required the first time.
+        Your account is not connected to {readableName} yet. You first need to connect your account to {readableName} to select documents from it. This is only required the first time.
         <Button
           href={FrontendRoutes.getConnectDataSourceRoute(
             orgSlug,
