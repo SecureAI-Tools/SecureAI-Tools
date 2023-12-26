@@ -6,7 +6,7 @@ import useSWR from "swr";
 import { tw } from "twind";
 import ReactTimeAgo from "react-time-ago";
 import { useSession } from "next-auth/react";
-import { HiOutlineExclamationCircle, HiOutlinePlus } from "react-icons/hi";
+import { HiOutlineExclamationCircle, HiOutlinePlus, HiOutlineDocumentText, HiOutlineChatAlt } from "react-icons/hi";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -28,6 +28,7 @@ import { Link } from "lib/fe/components/link";
 import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
 import { Sidebar } from "lib/fe/components/side-bar";
 import { PageTitle } from "lib/fe/components/page-title";
+import { ChatType } from "lib/types/core/chat-type";
 
 import {
   DEFAULT_CHAT_TITLE,
@@ -102,7 +103,12 @@ export default function ChatHistory({ orgSlug }: { orgSlug: string }) {
         )}
       >
         <div>
-          <div className={tw("flex flex-row text-base font-normal")}>
+          <div className={tw("flex flex-row text-base font-normal items-center")}>
+            {item.type === ChatType.CHAT_WITH_DOCS ? (
+              <HiOutlineDocumentText className={tw("mr-4 h-8 w-8")} />
+            ) : (
+              <HiOutlineChatAlt className={tw("mr-4 h-8 w-8")} />
+            )}
             <Link href={FrontendRoutes.getChatRoute(orgSlug, Id.from(item.id))}>
               {item.title ?? (
                 <span className={tw("italic")}>{DEFAULT_CHAT_TITLE}</span>
