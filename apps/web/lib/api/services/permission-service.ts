@@ -1,16 +1,12 @@
 import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
 
-import { ChatResponse } from "lib/types/api/chat.response";
 import { ChatService } from "lib/api/services/chat-service";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 
 import {
   Id,
-  UserResponse,
-  DocumentCollectionResponse,
   OrgMembershipStatus,
-  DataSourceConnectionResponse,
   IdType,
 } from "@repo/core";
 import {
@@ -25,8 +21,7 @@ export class PermissionService {
   private documentCollectionService = new DocumentCollectionService();
   private dataSourceConnectionService = new DataSourceConnectionService();
 
-  // TODO: Rename to hasReadChatPermission
-  async hasReadPermission(
+  async hasReadChatPermission(
     userId: Id<IdType.User>,
     chatId: Id<IdType.Chat>,
   ): Promise<[boolean, Response | undefined]> {
@@ -37,8 +32,7 @@ export class PermissionService {
   }
 
   // Checks whether userId has write permission to given chat!
-  // TODO: Rename to hasWriteChatPermission
-  async hasWritePermission(
+  async hasWriteChatPermission(
     userId: Id<IdType.User>,
     chatId: Id<IdType.Chat>,
   ): Promise<[boolean, Response | undefined]> {

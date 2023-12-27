@@ -46,7 +46,7 @@ export async function POST(
 
   // Check permissions
   const chatId = Id.from<IdType.Chat>(params.chatId);
-  const [permission, resp] = await permissionService.hasWritePermission(
+  const [permission, resp] = await permissionService.hasWriteChatPermission(
     userId!,
     chatId,
   );

@@ -24,7 +24,7 @@ export async function GET(
 
   // Check permissions
   const chatId = Id.from<IdType.Chat>(params.chatId);
-  const [permission, resp] = await permissionService.hasReadPermission(
+  const [permission, resp] = await permissionService.hasReadChatPermission(
     userId!,
     chatId,
   );
@@ -50,7 +50,7 @@ export async function DELETE(
 
   // Check permissions
   const chatId = Id.from<IdType.Chat>(params.chatId);
-  const [permission, resp] = await permissionService.hasWritePermission(
+  const [permission, resp] = await permissionService.hasWriteChatPermission(
     userId!,
     chatId,
   );
@@ -76,7 +76,7 @@ export async function PATCH(
 
   // Check permissions
   const chatId = Id.from<IdType.Chat>(params.chatId);
-  const [permission, resp] = await permissionService.hasWritePermission(
+  const [permission, resp] = await permissionService.hasWriteChatPermission(
     userId!,
     chatId,
   );

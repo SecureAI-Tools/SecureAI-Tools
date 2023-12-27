@@ -30,7 +30,7 @@ export async function GET(
   }
 
   const chatId = Id.from<IdType.Chat>(params.chatId);
-  const [permission, resp] = await permissionService.hasReadPermission(
+  const [permission, resp] = await permissionService.hasReadChatPermission(
     authUserId!,
     chatId,
   );
