@@ -12,12 +12,7 @@ import {
   prismaClient,
 } from "@repo/database";
 import { API } from "@repo/backend";
-import {
-  Id,
-  IdType,
-  OrgMembershipRole,
-  OrgMembershipStatus,
-} from "@repo/core";
+import { Id, IdType, OrgMembershipRole, OrgMembershipStatus } from "@repo/core";
 
 export interface AddUserResult {
   // Created or updated membership

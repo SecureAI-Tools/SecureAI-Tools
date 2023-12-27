@@ -4,11 +4,7 @@ import {
   TxPrismaClient,
   prismaClient,
 } from "@repo/database";
-import {
-  Id,
-  IdType,
-  DataSource,
-} from "@repo/core";
+import { Id, IdType, DataSource } from "@repo/core";
 
 import { API } from "../utils/api.utils";
 
@@ -93,15 +89,18 @@ export class DataSourceConnectionService {
     });
   }
 
-  async get(id: Id<IdType.DataSourceConnection>): Promise<DataSourceConnection | null> {
+  async get(
+    id: Id<IdType.DataSourceConnection>,
+  ): Promise<DataSourceConnection | null> {
     return await prismaClient.$transaction(
       async (prisma: TxPrismaClient): Promise<DataSourceConnection | null> => {
         return await prisma.dataSourceConnection.findUnique({
           where: {
             id: id.toString(),
-          }
-        })
-      });
+          },
+        });
+      },
+    );
   }
 
   async getOrCreate(

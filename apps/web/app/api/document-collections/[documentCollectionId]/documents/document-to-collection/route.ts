@@ -32,7 +32,7 @@ export async function GET(
   }
 
   const { searchParams } = new URL(req.url);
-  const documentIdsStr = searchParams.get("documentIds")
+  const documentIdsStr = searchParams.get("documentIds");
   const documentIds = documentIdsStr?.split(",");
   if (!documentIds || documentIds.length === 0) {
     return NextResponseErrors.badRequest("documentIds is required");
@@ -44,7 +44,11 @@ export async function GET(
       documentId: {
         in: documentIds,
       },
-    }
+    },
   });
-  return NextResponse.json(documentToCollections.map((d) => DocumentToCollectionResponse.fromEntity(d)))
+  return NextResponse.json(
+    documentToCollections.map((d) =>
+      DocumentToCollectionResponse.fromEntity(d),
+    ),
+  );
 }

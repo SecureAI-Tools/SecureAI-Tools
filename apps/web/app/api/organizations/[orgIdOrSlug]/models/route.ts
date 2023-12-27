@@ -35,7 +35,7 @@ export async function GET(
   }
 
   // If the name doesn't have a tag, then add `:latest` tag. Otherwise, Ollama doesn't recognize the model
-  const modelNameWithTag = name.includes(':') ? name : `${name}:latest`;
+  const modelNameWithTag = name.includes(":") ? name : `${name}:latest`;
 
   const ollamaResponse = await fetch(
     `${

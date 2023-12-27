@@ -19,7 +19,11 @@ import { CitationService } from "lib/api/services/citation-service";
 import { getWebLogger } from "lib/api/core/logger";
 
 import { Id, DocumentChunkMetadata, IdType } from "@repo/core";
-import { DocumentCollectionService, ModelProviderService, NextResponseErrors } from "@repo/backend";
+import {
+  DocumentCollectionService,
+  ModelProviderService,
+  NextResponseErrors,
+} from "@repo/backend";
 
 const chatMessageService = new ChatMessageService();
 const documentCollectionService = new DocumentCollectionService();

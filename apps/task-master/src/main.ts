@@ -40,14 +40,17 @@ async function main() {
           logger.info(`[doc = ${msg.documentId}] chunk`, chunk);
         }
       } catch (e) {
-        logger.error("something went wrong when indexing. Skipping document...", {
-          error: e,
-          data: data,
-        })
+        logger.error(
+          "something went wrong when indexing. Skipping document...",
+          {
+            error: e,
+            data: data,
+          },
+        );
       }
       channel.ack(data);
     },
-    { noAck: false }
+    { noAck: false },
   );
 }
 

@@ -7,11 +7,7 @@ import {
 import { customAlphabet } from "nanoid";
 
 import { API } from "../utils/api.utils";
-import {
-  Id,
-  IdType,
-  ModelType,
-} from "@repo/core";
+import { Id, IdType, ModelType } from "@repo/core";
 
 export interface DocumentCollectionCreateInput {
   name?: string;

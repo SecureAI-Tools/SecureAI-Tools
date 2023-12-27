@@ -144,16 +144,17 @@ const DocumentCollectionDetailsPage = ({
     createFetcher<DocumentResponse[]>(),
   );
 
-  const shouldFetchDocumentToCollections = documentsResponse && documentsResponse.response.length > 0;
+  const shouldFetchDocumentToCollections =
+    documentsResponse && documentsResponse.response.length > 0;
   const {
     data: documentToCollectionsResponse,
     error: documentToCollectionsFetchError,
-    mutate: mutateDocumentToCollectionsResponse
+    mutate: mutateDocumentToCollectionsResponse,
   } = useSWR(
     shouldFetchDocumentToCollections
       ? getDocumentToCollections({
           documentCollectionId: documentCollectionId,
-          documentIds: documentsResponse!.response.map(d => Id.from(d.id)),
+          documentIds: documentsResponse!.response.map((d) => Id.from(d.id)),
         })
       : null,
     createFetcher<DocumentToCollectionResponse[]>(),
@@ -173,12 +174,14 @@ const DocumentCollectionDetailsPage = ({
       return;
     }
 
-    setRowData(documentsResponse.response.map(d => {
-      return {
-        document: d,
-        d2c: undefined,
-      }
-    }));
+    setRowData(
+      documentsResponse.response.map((d) => {
+        return {
+          document: d,
+          d2c: undefined,
+        };
+      }),
+    );
   }, [documentsResponse]);
 
   useEffect(() => {
@@ -186,14 +189,19 @@ const DocumentCollectionDetailsPage = ({
       return;
     }
 
-    setRowData(old => {
-      const docIdToIndexingStatusMap = new Map(documentToCollectionsResponse.response.map(d2c => [d2c.documentId, d2c.indexingStatus]));
+    setRowData((old) => {
+      const docIdToIndexingStatusMap = new Map(
+        documentToCollectionsResponse.response.map((d2c) => [
+          d2c.documentId,
+          d2c.indexingStatus,
+        ]),
+      );
 
-      return old.map(o => {
+      return old.map((o) => {
         return {
           ...o,
           indexingStatus: docIdToIndexingStatusMap.get(o.document.id),
-        }
+        };
       });
     });
   }, [documentToCollectionsResponse]);
@@ -323,8 +331,16 @@ const DocumentCollectionDetailsPage = ({
     );
   };
 
-  if (documentCollectionFetchError || documentsFetchError || documentToCollectionsFetchError) {
-    return renderErrors(documentCollectionFetchError, documentsFetchError, documentToCollectionsFetchError);
+  if (
+    documentCollectionFetchError ||
+    documentsFetchError ||
+    documentToCollectionsFetchError
+  ) {
+    return renderErrors(
+      documentCollectionFetchError,
+      documentsFetchError,
+      documentToCollectionsFetchError,
+    );
   }
 
   const disableNewChat =
@@ -503,7 +519,9 @@ const DocumentCollectionDetailsPage = ({
 
 export default DocumentCollectionDetailsPage;
 
-const renderIndexingStatus = (indexingStatus: DocumentIndexingStatus | undefined) => {
+const renderIndexingStatus = (
+  indexingStatus: DocumentIndexingStatus | undefined,
+) => {
   if (!indexingStatus) {
     return <Spinner size="sm" />;
   }

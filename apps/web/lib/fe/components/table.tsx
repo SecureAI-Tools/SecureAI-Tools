@@ -65,7 +65,10 @@ export const Table = <T extends unknown>({
       <FlowbiteTable hoverable>
         <FlowbiteTable.Head className={tw("bg-gray-50")}>
           {columns.map((col, idx) => (
-            <FlowbiteTable.HeadCell key={`${col}.${idx}`} className={tw("px-6 py-4")}>
+            <FlowbiteTable.HeadCell
+              key={`${col}.${idx}`}
+              className={tw("px-6 py-4")}
+            >
               {col}
             </FlowbiteTable.HeadCell>
           ))}

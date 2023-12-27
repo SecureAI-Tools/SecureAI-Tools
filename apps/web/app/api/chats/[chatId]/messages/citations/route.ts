@@ -8,7 +8,12 @@ import { CitationResponse } from "lib/types/api/citation-response";
 import { ChatService } from "lib/api/services/chat-service";
 import { ChatType } from "lib/types/core/chat-type";
 
-import { removeTrailingSlash, Id, DocumentChunkMetadata, IdType } from "@repo/core";
+import {
+  removeTrailingSlash,
+  Id,
+  DocumentChunkMetadata,
+  IdType,
+} from "@repo/core";
 import { DocumentCollectionService, NextResponseErrors } from "@repo/backend";
 
 const chatService = new ChatService();

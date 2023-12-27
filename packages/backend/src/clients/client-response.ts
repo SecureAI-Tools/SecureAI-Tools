@@ -8,13 +8,13 @@ export interface ClientResponse<T> {
 export async function toClientResponse<T>(
   response: Response,
 ): Promise<ClientResponse<T>> {
-  return await _toClientResponse(response, jsonDecoder<T>)
+  return await _toClientResponse(response, jsonDecoder<T>);
 }
 
 export async function toClientResponseBlob(
   response: Response,
 ): Promise<ClientResponse<Blob>> {
-  return await _toClientResponse(response, blobDecoder)
+  return await _toClientResponse(response, blobDecoder);
 }
 
 async function _toClientResponse<T>(

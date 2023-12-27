@@ -1,6 +1,13 @@
-import { DataSourceConnectionDocumentResponse, removeTrailingSlash } from "@repo/core";
+import {
+  DataSourceConnectionDocumentResponse,
+  removeTrailingSlash,
+} from "@repo/core";
 
-import { ClientResponse, toClientResponse, toClientResponseBlob } from "./client-response";
+import {
+  ClientResponse,
+  toClientResponse,
+  toClientResponseBlob,
+} from "./client-response";
 
 export class PaperlessNgxClient {
   private baseUrl: string;
@@ -16,9 +23,9 @@ export class PaperlessNgxClient {
     page,
     pageSize,
   }: {
-    query?: string,
-    page?: number,
-    pageSize?: number,
+    query?: string;
+    page?: number;
+    pageSize?: number;
   }): Promise<ClientResponse<DocumentsResponse>> {
     const url = new URL(`${this.baseUrl}/api/documents/`);
     if (query) {
@@ -40,7 +47,9 @@ export class PaperlessNgxClient {
     return await toClientResponse<DocumentsResponse>(resp);
   }
 
-  async getDocument(id: number | string): Promise<ClientResponse<DocumentResult>> {
+  async getDocument(
+    id: number | string,
+  ): Promise<ClientResponse<DocumentResult>> {
     const url = new URL(`${this.baseUrl}/api/documents/${id}/`);
 
     const resp = await fetch(url, {
@@ -79,13 +88,15 @@ interface DocumentResult {
   archived_file_name: string;
 }
 
-export function toDataSourceConnectionDocumentResponse(dr: DocumentResult): DataSourceConnectionDocumentResponse {
+export function toDataSourceConnectionDocumentResponse(
+  dr: DocumentResult,
+): DataSourceConnectionDocumentResponse {
   return {
     externalId: dr.id.toString(),
     name: dr.title,
     createdAt: new Date(dr.created).getTime(),
     metadata: {
       ...dr,
-    }
-  }
+    },
+  };
 }

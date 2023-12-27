@@ -11,7 +11,15 @@ import { DocumentToCollectionService } from "./document-to-collection-service";
 import { DocumentChunkService } from "./document-chunk-service";
 import { DataSourceConnectionService } from "./data-source-connection-service";
 
-import { Id, IdType, DocumentChunkMetadata, DocumentIndexingStatus, StreamChunkResponse, isEmpty, removeTrailingSlash } from "@repo/core";
+import {
+  Id,
+  IdType,
+  DocumentChunkMetadata,
+  DocumentIndexingStatus,
+  StreamChunkResponse,
+  isEmpty,
+  removeTrailingSlash,
+} from "@repo/core";
 import { Document, DocumentCollection } from "@repo/database";
 
 const logger = getLogger("indexing-service");
@@ -28,7 +36,7 @@ export class IndexingService {
   });
 
   // Indexes given document and yields statuses that can be streamed or logged.
-  async* index(
+  async *index(
     documentId: Id<IdType.Document>,
     collectionId: Id<IdType.DocumentCollection>,
     dataSourceConnectionId: Id<IdType.DataSourceConnection>,
@@ -39,34 +47,46 @@ export class IndexingService {
       throw new Error(`Document does not exist: ${documentId.toString()}`);
     }
 
-    const documentCollection = await this.documentCollectionService.get(collectionId);
+    const documentCollection =
+      await this.documentCollectionService.get(collectionId);
     if (!documentCollection) {
-      throw new Error(`Document collection does not exist: ${collectionId.toString()}`);
+      throw new Error(
+        `Document collection does not exist: ${collectionId.toString()}`,
+      );
     }
 
     // Check other document collections to see if this document has already been indexed!
-    const indexedDocumentToCollections = await this.documentToCollectionService.getAll({
-      where: {
-        documentId: documentId.toString(),
-        indexingStatus: DocumentIndexingStatus.INDEXED,
-        // Bound to same organization of the document collection
-        collection: {
-          organizationId: documentCollection.organizationId,
-        }
-      }
-    });
+    const indexedDocumentToCollections =
+      await this.documentToCollectionService.getAll({
+        where: {
+          documentId: documentId.toString(),
+          indexingStatus: DocumentIndexingStatus.INDEXED,
+          // Bound to same organization of the document collection
+          collection: {
+            organizationId: documentCollection.organizationId,
+          },
+        },
+      });
 
     if (indexedDocumentToCollections.length > 0) {
       // Document has already been indexed through some other collection; Reuse data from that indexing run!
-      yield* this.copyDocumentIndex(document, documentCollection, Id.from(indexedDocumentToCollections[0]!.collectionId));
+      yield* this.copyDocumentIndex(
+        document,
+        documentCollection,
+        Id.from(indexedDocumentToCollections[0]!.collectionId),
+      );
     } else {
       // Document has not yet been indexed! Compute embeddings and everything it!
-      yield* this.indexNewDocument(document, documentCollection, dataSourceConnectionId);
+      yield* this.indexNewDocument(
+        document,
+        documentCollection,
+        dataSourceConnectionId,
+      );
     }
   }
 
   // Indexes a document that hasn't been indexed yet! Not safe for an already indexed document.
-  private async* indexNewDocument(
+  private async *indexNewDocument(
     document: Document,
     documentCollection: DocumentCollection,
     dataSourceConnectionId: Id<IdType.DataSourceConnection>,
@@ -84,14 +104,22 @@ export class IndexingService {
       throw new Error(`MimeType not supported: ${document.mimeType}`);
     }
 
-    const dataSourceConnection = await this.dataSourceConnectionService.get(dataSourceConnectionId);
+    const dataSourceConnection = await this.dataSourceConnectionService.get(
+      dataSourceConnectionId,
+    );
     if (!dataSourceConnection) {
-      throw new Error(`invalid dataSourceConnectionId ${dataSourceConnectionId}`);
+      throw new Error(
+        `invalid dataSourceConnectionId ${dataSourceConnectionId}`,
+      );
     }
 
-    const blob = await this.documentService.read(document, dataSourceConnection);
+    const blob = await this.documentService.read(
+      document,
+      dataSourceConnection,
+    );
     const loader = new PDFLoader(blob);
-    const langchainDocuments: LangchainDocument[] = await loader.loadAndSplit(textSplitter);
+    const langchainDocuments: LangchainDocument[] =
+      await loader.loadAndSplit(textSplitter);
 
     const embeddingModel =
       this.modelProviderService.getEmbeddingModel(documentCollection);
@@ -106,7 +134,9 @@ export class IndexingService {
     yield { status: `Processing ${documentTextChunks.length} chunks` };
     let embeddings: number[][] = [];
     for (let i = 0; i < documentTextChunks.length; i++) {
-      yield { status: `Processing chunk ${i + 1} of ${documentTextChunks.length}` };
+      yield {
+        status: `Processing chunk ${i + 1} of ${documentTextChunks.length}`,
+      };
       const documentTextChunk = documentTextChunks[i];
       const chunkEmbedding = await embeddingModel.embedDocuments([
         documentTextChunk!,
@@ -118,7 +148,9 @@ export class IndexingService {
       name: documentCollection.internalName,
     });
 
-    const chunkIdsInVectorDb = embeddings.map((_, i) => toDocumentChunkId(document.id, i));
+    const chunkIdsInVectorDb = embeddings.map((_, i) =>
+      toDocumentChunkId(document.id, i),
+    );
     const addResponse = await vectorDbCollection.add({
       ids: chunkIdsInVectorDb,
       embeddings: embeddings,
@@ -148,28 +180,32 @@ export class IndexingService {
 
     // Insert document chunks into db!
     await this.documentChunkService.createMany(
-      chunkIdsInVectorDb.map(vid => {
+      chunkIdsInVectorDb.map((vid) => {
         return {
           vectorDbId: vid,
           documentId: documentId,
-        }
-      })
+        };
+      }),
     );
 
     yield { status: "Document processed successfully" };
   }
 
-  private async* copyDocumentIndex(
+  private async *copyDocumentIndex(
     document: Document,
     documentCollection: DocumentCollection,
     sourceDocumentCollectionId: Id<IdType.DocumentCollection>,
   ): AsyncGenerator<StreamChunkResponse> {
-    yield ({ status: "Document is already indexed. Copying index data" });
+    yield { status: "Document is already indexed. Copying index data" };
 
     // Get source vector db collection
-    const sourceDocumentCollection = await this.documentCollectionService.get(sourceDocumentCollectionId);
+    const sourceDocumentCollection = await this.documentCollectionService.get(
+      sourceDocumentCollectionId,
+    );
     if (!sourceDocumentCollection) {
-      throw new Error(`source document collection does not exist: ${sourceDocumentCollectionId.toString()}`);
+      throw new Error(
+        `source document collection does not exist: ${sourceDocumentCollectionId.toString()}`,
+      );
     }
     const sourceVectorDbCollection = await this.chromaClient.getCollection({
       name: sourceDocumentCollection.internalName,
@@ -179,27 +215,34 @@ export class IndexingService {
     const documentChunks = await this.documentChunkService.getAll({
       where: {
         documentId: document.id,
-      }
+      },
     });
     const getResponse = await sourceVectorDbCollection.get({
-      ids: documentChunks.map(dc => dc.vectorDbId),
-      include: [IncludeEnum.Embeddings, IncludeEnum.Documents, IncludeEnum.Metadatas],
+      ids: documentChunks.map((dc) => dc.vectorDbId),
+      include: [
+        IncludeEnum.Embeddings,
+        IncludeEnum.Documents,
+        IncludeEnum.Metadatas,
+      ],
     });
 
     if (getResponse.error) {
-      yield ({ error: `Could not get data from source collection. Received this error: ${getResponse.error}` });
+      yield {
+        error: `Could not get data from source collection. Received this error: ${getResponse.error}`,
+      };
       return;
     }
 
     // Add data into destination vector db collection
-    const destinationVectorDbCollection = await this.chromaClient.getOrCreateCollection({
-      name: documentCollection.internalName,
-    });
+    const destinationVectorDbCollection =
+      await this.chromaClient.getOrCreateCollection({
+        name: documentCollection.internalName,
+      });
     const addResponse = await destinationVectorDbCollection.add({
       ids: getResponse.ids,
       embeddings: getResponse.embeddings!,
-      documents: getResponse.documents.map(d => d!),
-      metadatas: getResponse.metadatas.map(m => m!),
+      documents: getResponse.documents.map((d) => d!),
+      metadatas: getResponse.metadatas.map((m) => m!),
     });
 
     if (!isEmpty(addResponse.error)) {

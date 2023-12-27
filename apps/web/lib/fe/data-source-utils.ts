@@ -33,8 +33,8 @@ export const createDataSourceConnection = async (
 };
 
 export const getLogoSrc = (dataSource: DataSource): string => {
-  return `/data-source-logos/${dataSource.toLowerCase()}.svg`
-}
+  return `/data-source-logos/${dataSource.toLowerCase()}.svg`;
+};
 
 export interface DataSourceRecord {
   dataSource: DataSource;
@@ -59,4 +59,4 @@ export const getDataSourceRecords = (
       connection: dataSourceConnectionsMap.get(ds),
     };
   });
-}
+};

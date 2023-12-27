@@ -27,11 +27,7 @@ export const Toasts = ({ toasts }: { toasts: ToastProps[] }) => {
   );
 };
 
-export const Toast = ({
-  type,
-  children,
-  onDismiss,
-}: ToastProps) => {
+export const Toast = ({ type, children, onDismiss }: ToastProps) => {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {

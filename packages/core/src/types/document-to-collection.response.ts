@@ -1,5 +1,8 @@
 import { DocumentToCollection } from "@repo/database";
-import { DocumentIndexingStatus, toDocumentIndexingStatus } from "./document-indexing-status";
+import {
+  DocumentIndexingStatus,
+  toDocumentIndexingStatus,
+} from "./document-indexing-status";
 
 export class DocumentToCollectionResponse {
   id!: string;

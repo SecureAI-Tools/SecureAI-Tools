@@ -6,7 +6,12 @@ import { OllamaEmbeddings } from "langchain/embeddings/ollama";
 import { Embeddings } from "langchain/dist/embeddings/base";
 
 import { getLogger } from "../logger";
-import { toModelType, ModelType, removeTrailingSlash, ModelProviderConfig } from "@repo/core";
+import {
+  toModelType,
+  ModelType,
+  removeTrailingSlash,
+  ModelProviderConfig,
+} from "@repo/core";
 
 const logger = getLogger("model-provider-service");
 
@@ -29,7 +34,10 @@ export class ModelProviderService {
       throw new Error(`could not get config for model-type = ${modelType}`);
     }
 
-    logger.debug("Instantiating chat model", { modelType: modelType, config: config });
+    logger.debug("Instantiating chat model", {
+      modelType: modelType,
+      config: config,
+    });
 
     switch (modelType) {
       case ModelType.OPENAI:
@@ -73,7 +81,10 @@ export class ModelProviderService {
       throw new Error(`could not get config for model-type = ${modelType}`);
     }
 
-    logger.debug("Instantiating embedding model", { modelType: modelType, config: config });
+    logger.debug("Instantiating embedding model", {
+      modelType: modelType,
+      config: config,
+    });
 
     switch (modelType) {
       case ModelType.OPENAI:

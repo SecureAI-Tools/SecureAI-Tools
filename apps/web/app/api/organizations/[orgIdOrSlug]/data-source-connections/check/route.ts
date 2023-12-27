@@ -5,14 +5,8 @@ import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { OrganizationService } from "lib/api/services/organization-service";
 import { getWebLogger } from "lib/api/core/logger";
 
-import {
-  DataSource,
-  dataSourceToReadableName,
-} from "@repo/core";
-import {
-  NextResponseErrors,
-  PaperlessNgxClient,
-} from "@repo/backend";
+import { DataSource, dataSourceToReadableName } from "@repo/core";
+import { NextResponseErrors, PaperlessNgxClient } from "@repo/backend";
 import { DataSourceConnectionCheckRequest } from "lib/types/api/data-source-connection-check.request";
 import { DataSourceConnectionCheckResponse } from "lib/types/api/data-source-connection-check.response";
 
@@ -89,6 +83,8 @@ export async function POST(
       dataSource: dataSource,
       baseUrl: baseUrl,
     });
-    return NextResponseErrors.internalServerError(`could not get documents from ${dataSource} @ ${baseUrl}`);
+    return NextResponseErrors.internalServerError(
+      `could not get documents from ${dataSource} @ ${baseUrl}`,
+    );
   }
 }

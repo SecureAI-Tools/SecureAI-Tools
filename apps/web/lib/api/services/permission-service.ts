@@ -4,15 +4,11 @@ import { NextResponse } from "next/server";
 import { ChatService } from "lib/api/services/chat-service";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 
-import {
-  Id,
-  OrgMembershipStatus,
-  IdType,
-} from "@repo/core";
+import { Id, OrgMembershipStatus, IdType } from "@repo/core";
 import {
   DataSourceConnectionService,
   DocumentCollectionService,
-  NextResponseErrors
+  NextResponseErrors,
 } from "@repo/backend";
 
 export class PermissionService {
@@ -73,15 +69,17 @@ export class PermissionService {
     dataSourceConnectionId: Id<IdType.DataSourceConnection>,
   ): Promise<[boolean, Response | undefined]> {
     // Only creator can access documents from DataSource connection
-    const dataSourceConnections = await this.dataSourceConnectionService.getAll({
-      where: {
-        id: dataSourceConnectionId.toString(),
-        membership: {
-          userId: userId.toString(),
-          status: OrgMembershipStatus.ACTIVE,
-        }
-      }
-    });
+    const dataSourceConnections = await this.dataSourceConnectionService.getAll(
+      {
+        where: {
+          id: dataSourceConnectionId.toString(),
+          membership: {
+            userId: userId.toString(),
+            status: OrgMembershipStatus.ACTIVE,
+          },
+        },
+      },
+    );
 
     if (dataSourceConnections.length < 1) {
       // No such data source connection exists!

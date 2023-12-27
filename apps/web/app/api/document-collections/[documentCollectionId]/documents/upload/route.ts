@@ -5,8 +5,22 @@ import { PermissionService } from "lib/api/services/permission-service";
 import { getDocumentObjectKey } from "lib/api/core/document.utils";
 import { IndexingMode } from "lib/types/core/indexing-mode";
 
-import { Id, DocumentResponse, DocumentIndexingStatus, DataSource, IdType } from "@repo/core";
-import { DocumentCollectionService, DocumentService, LocalObjectStorageService, NextResponseErrors, DataSourceConnectionService, generateDocumentUri, addToIndexingQueue } from "@repo/backend";
+import {
+  Id,
+  DocumentResponse,
+  DocumentIndexingStatus,
+  DataSource,
+  IdType,
+} from "@repo/core";
+import {
+  DocumentCollectionService,
+  DocumentService,
+  LocalObjectStorageService,
+  NextResponseErrors,
+  DataSourceConnectionService,
+  generateDocumentUri,
+  addToIndexingQueue,
+} from "@repo/backend";
 
 const permissionService = new PermissionService();
 const documentCollectionService = new DocumentCollectionService();
@@ -43,7 +57,9 @@ export async function POST(
 
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
-  const indexingMode = formData.get("indexingMode") as IndexingMode | null ?? IndexingMode.OFFLINE;
+  const indexingMode =
+    (formData.get("indexingMode") as IndexingMode | null) ??
+    IndexingMode.OFFLINE;
   if (!file) {
     return NextResponseErrors.badRequest("file is required.");
   }
@@ -79,7 +95,7 @@ export async function POST(
 
   const uri = generateDocumentUri({
     orgId: orgId,
-    dataSourceBaseUrl: 'upload',
+    dataSourceBaseUrl: "upload",
     guidInDataSource: documentObjectKey,
   });
   const document = await documentService.createOrLink({

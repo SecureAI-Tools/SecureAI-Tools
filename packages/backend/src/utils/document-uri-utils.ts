@@ -5,10 +5,10 @@ export function generateDocumentUri({
   dataSourceBaseUrl,
   guidInDataSource,
 }: {
-  orgId: Id<IdType.Organization>,
-  dataSourceBaseUrl: string,
+  orgId: Id<IdType.Organization>;
+  dataSourceBaseUrl: string;
   // Globally unique id of the document in data source instance
-  guidInDataSource: string,
+  guidInDataSource: string;
 }): string {
   return `${orgId.toString()}/${dataSourceBaseUrl}/${guidInDataSource}`;
 }

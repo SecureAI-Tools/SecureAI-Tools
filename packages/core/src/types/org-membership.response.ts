@@ -1,8 +1,5 @@
 import { OrgMembership, User } from "@repo/database";
-import {
-  OrgMembershipRole,
-  toOrgMembershipRole,
-} from "./org-membership-role";
+import { OrgMembershipRole, toOrgMembershipRole } from "./org-membership-role";
 import {
   OrgMembershipStatus,
   toOrgMembershipStatus,

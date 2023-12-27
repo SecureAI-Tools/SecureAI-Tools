@@ -120,15 +120,16 @@ const CreateDocumentCollections = ({ orgSlug }: { orgSlug: string }) => {
                   />
                 </div>
                 <div className={tw("mt-4 w-full")}>
-                  <Label
-                    value="Add documents"
-                    className={tw("text-xl")}
-                  />
+                  <Label value="Add documents" className={tw("text-xl")} />
                   <DocumentsDataSourceSelector
                     orgSlug={orgSlug}
                     selectedDocuments={selectedDocuments}
                     onDocumentsSelected={(dataSource, newSelection) => {
-                      setSelectedDocuments(new Map(selectedDocuments.set(dataSource, newSelection)));
+                      setSelectedDocuments(
+                        new Map(
+                          selectedDocuments.set(dataSource, newSelection),
+                        ),
+                      );
                     }}
                   />
                 </div>

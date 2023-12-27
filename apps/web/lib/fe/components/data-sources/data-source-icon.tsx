@@ -6,15 +6,9 @@ import { getLogoSrc } from "lib/fe/data-source-utils";
 
 import { DataSource, dataSourceToReadableName } from "@repo/core";
 
-export const DataSourceIcon = ({
-  dataSource,
-}: {
-  dataSource: DataSource;
-}) => {
+export const DataSourceIcon = ({ dataSource }: { dataSource: DataSource }) => {
   if (dataSource === DataSource.UPLOAD) {
-    return (
-      <HiOutlineCloudUpload className={tw("w-5 h-5")}/>
-    )
+    return <HiOutlineCloudUpload className={tw("w-5 h-5")} />;
   }
   // TODO: Handle WEB if/when adding it
 
@@ -25,6 +19,5 @@ export const DataSourceIcon = ({
       width={20}
       height={20}
     />
-  )
-}
-
+  );
+};

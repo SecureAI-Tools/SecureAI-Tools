@@ -161,7 +161,7 @@ export class ChatService {
         },
         data: {
           deletedAt: new Date(),
-        }
+        },
       });
     });
   }
@@ -176,7 +176,7 @@ export class ChatService {
         },
         data: {
           deletedAt: new Date(),
-        }
+        },
       });
     });
   }

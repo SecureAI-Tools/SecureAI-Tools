@@ -4,14 +4,14 @@ import { Tooltip as FlowbiteTooltip } from "flowbite-react";
 
 export const Tooltip = ({
   tipContent,
-  children
+  children,
 }: {
-  tipContent?: React.ReactNode
-  children: React.ReactNode
+  tipContent?: React.ReactNode;
+  children: React.ReactNode;
 }) => {
   return tipContent ? (
-    <FlowbiteTooltip content={tipContent}>
-      {children}
-    </FlowbiteTooltip>
-  ) : children;
+    <FlowbiteTooltip content={tipContent}>{children}</FlowbiteTooltip>
+  ) : (
+    children
+  );
 };

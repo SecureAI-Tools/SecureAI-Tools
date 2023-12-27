@@ -59,7 +59,9 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
     setIsSubmitting(true);
 
     try {
-      const selectedDocumentsList = Array.from(selectedDocuments.values()).flat();
+      const selectedDocumentsList = Array.from(
+        selectedDocuments.values(),
+      ).flat();
 
       const chatType: ChatType =
         selectedDocumentsList.length === 0
@@ -139,8 +141,10 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
     organizationResponse?.response.defaultModelType === ModelType.OLLAMA &&
     modelsResponse !== undefined &&
     modelsResponse.response.models.length <= 0;
-  
-  const modelEditDisabled = orgMembershipResponse === undefined || !isAdmin(orgMembershipResponse.response);
+
+  const modelEditDisabled =
+    orgMembershipResponse === undefined ||
+    !isAdmin(orgMembershipResponse.response);
 
   return (
     <>
@@ -154,23 +158,40 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
           <div className={tw("flex flex-col items-center mt-1.5")}>
             <div className={tw("rounded-lg border bg-gray-50 shadow-sm p-3")}>
               {organizationResponse ? (
-                <Dropdown label={
+                <Dropdown
+                  label={
                     <div className={tw("text-sm font-light mr-1")}>
-                      {organizationResponse.response.defaultModel} ({modelTypeToReadableName(organizationResponse.response.defaultModelType)})
+                      {organizationResponse.response.defaultModel} (
+                      {modelTypeToReadableName(
+                        organizationResponse.response.defaultModelType,
+                      )}
+                      )
                     </div>
                   }
                   inline
                 >
                   <Dropdown.Item
                     disabled={modelEditDisabled}
-                    href={modelEditDisabled ? undefined : `${FrontendRoutes.getOrgSettingsRoute(orgSlug)}?tab=ai`}
-                    className={tw(modelEditDisabled ? "cursor-not-allowed" : "")}
+                    href={
+                      modelEditDisabled
+                        ? undefined
+                        : `${FrontendRoutes.getOrgSettingsRoute(
+                            orgSlug,
+                          )}?tab=ai`
+                    }
+                    className={tw(
+                      modelEditDisabled ? "cursor-not-allowed" : "",
+                    )}
                   >
-                    <Tooltip tipContent={modelEditDisabled ? "Ask your organization admin to change AI settings" : undefined}>
+                    <Tooltip
+                      tipContent={
+                        modelEditDisabled
+                          ? "Ask your organization admin to change AI settings"
+                          : undefined
+                      }
+                    >
                       <div className={tw("text-left")}>
-                        <div>
-                          Change AI model
-                        </div>
+                        <div>Change AI model</div>
                         <div className={tw("text-xs font-light")}>
                           Use a different AI model by changing AI settings
                         </div>
@@ -228,7 +249,11 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
                     orgSlug={orgSlug}
                     selectedDocuments={selectedDocuments}
                     onDocumentsSelected={(dataSource, newSelection) => {
-                      setSelectedDocuments(new Map(selectedDocuments.set(dataSource, newSelection)));
+                      setSelectedDocuments(
+                        new Map(
+                          selectedDocuments.set(dataSource, newSelection),
+                        ),
+                      );
                     }}
                   />
                 </div>

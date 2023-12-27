@@ -8,7 +8,7 @@ import {
   DataSourceConnectionService,
   DocumentCollectionService,
   DocumentService,
-  NextResponseErrors
+  NextResponseErrors,
 } from "@repo/backend";
 
 const permissionService = new PermissionService();
@@ -48,25 +48,28 @@ export async function GET(
 
   // Get DataSourceConnection of DocumentCollection owner. It works because only document collection owner can
   // add documents into the collection right now.
-  // 
+  //
   // TODO: When allowing others to add documents to collection, capture "which connection was used to add document
   //       to collection" explicitly and use it here!
-  const documentCollection = await documentCollectionService.get(documentCollectionId);
+  const documentCollection =
+    await documentCollectionService.get(documentCollectionId);
   const dataSourceConnections = await dataSourceConnectionService.getAll({
     where: {
       documents: {
         some: {
           documentId: document.id,
-        }
+        },
       },
       membership: {
         userId: documentCollection!.ownerId,
         orgId: documentCollection!.organizationId,
-      }
-    }
+      },
+    },
   });
   if (dataSourceConnections.length < 1) {
-    return NextResponseErrors.internalServerError("no data source connections found!");
+    return NextResponseErrors.internalServerError(
+      "no data source connections found!",
+    );
   }
   const dataSourceConnection = dataSourceConnections[0]!;
 

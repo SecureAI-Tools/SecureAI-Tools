@@ -12,7 +12,13 @@ import { DocumentCollectionUpdateRequest } from "lib/types/api/document-collecti
 import { SelectedDocument } from "lib/fe/types/selected-document";
 import { DocumentCreateRequest } from "lib/types/api/document-create.request";
 
-import { DocumentCollectionResponse, Id, DocumentResponse, DataSource, IdType } from "@repo/core";
+import {
+  DocumentCollectionResponse,
+  Id,
+  DocumentResponse,
+  DataSource,
+  IdType,
+} from "@repo/core";
 
 export const createDocumentCollection = async (
   orgSlug: string,
@@ -44,7 +50,11 @@ export const createDocument = async (
   indexingMode: IndexingMode,
 ): Promise<DocumentResponse> => {
   if (selectedDocument.dataSource === DataSource.UPLOAD) {
-    return await uploadDocument(documentCollectionId, selectedDocument.file!, indexingMode);
+    return await uploadDocument(
+      documentCollectionId,
+      selectedDocument.file!,
+      indexingMode,
+    );
   }
 
   // Create doc
@@ -54,12 +64,13 @@ export const createDocument = async (
       {
         name: selectedDocument.name,
         externalId: selectedDocument.externalId!,
-        dataSourceConnectionId: selectedDocument.dataSourceConnectionId!.toString(),
+        dataSourceConnectionId:
+          selectedDocument.dataSourceConnectionId!.toString(),
         indexingMode: indexingMode,
       },
     )
   ).response;
-}
+};
 
 const uploadDocument = async (
   documentCollectionId: Id<IdType.DocumentCollection>,
@@ -70,13 +81,10 @@ const uploadDocument = async (
   formData.append("file", file);
   formData.append("indexingMode", indexingMode);
 
-  const res = await fetch(
-    uploadDocumentApiPath(documentCollectionId),
-    {
-      method: "POST",
-      body: formData,
-    },
-  );
+  const res = await fetch(uploadDocumentApiPath(documentCollectionId), {
+    method: "POST",
+    body: formData,
+  });
 
   if (!res.ok) {
     throw new FetchError(

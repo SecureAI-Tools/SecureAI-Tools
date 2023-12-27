@@ -31,7 +31,15 @@ import { CitationResponse } from "lib/types/api/citation-response";
 import { Link } from "lib/fe/components/link";
 import { ChatMessageRole } from "lib/types/core/chat-message-role";
 
-import { DocumentResponse, Id, DEFAULT_CHAT_TITLE, DocumentIndexingStatus, StreamChunkResponse, isEmpty, IdType } from "@repo/core";
+import {
+  DocumentResponse,
+  Id,
+  DEFAULT_CHAT_TITLE,
+  DocumentIndexingStatus,
+  StreamChunkResponse,
+  isEmpty,
+  IdType,
+} from "@repo/core";
 
 export interface DocumentsWithIndexingStatus extends DocumentResponse {
   indexingStatus: DocumentIndexingStatus;
@@ -273,7 +281,9 @@ export function Chat({
     });
   };
 
-  const indexDocuments = async (docs: DocumentsWithIndexingStatus[]): Promise<boolean> => {
+  const indexDocuments = async (
+    docs: DocumentsWithIndexingStatus[],
+  ): Promise<boolean> => {
     try {
       // TODO: See if we can parallelize this in batches!
       for (let i = 0; i < docs.length; i++) {
@@ -458,7 +468,7 @@ export function Chat({
               {isLoading ? (
                 <Spinner aria-label="generating response..." />
               ) : (
-                <MdSend className={tw("h-6 w-6")}/>
+                <MdSend className={tw("h-6 w-6")} />
               )}
             </Button>
           </div>
@@ -485,7 +495,7 @@ const indexDocument = async ({
   doc,
   onGeneratedChunk,
 }: {
-  collectionId: Id<IdType.DocumentCollection>,
+  collectionId: Id<IdType.DocumentCollection>;
   doc: DocumentsWithIndexingStatus;
   onGeneratedChunk: (chunk: StreamChunkResponse) => void;
 }): Promise<void> => {

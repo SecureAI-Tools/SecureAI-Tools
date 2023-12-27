@@ -7,9 +7,7 @@ export const metadata: Metadata = {
 };
 
 const Page = ({ params }: { params: { orgSlug: string } }) => {
-  return (
-    <ChatHistory orgSlug={params.orgSlug} />
-  );
+  return <ChatHistory orgSlug={params.orgSlug} />;
 };
 
 export default Page;

@@ -1,2 +1,1 @@
-export class DocumentChunkResponse {
-}
+export class DocumentChunkResponse {}

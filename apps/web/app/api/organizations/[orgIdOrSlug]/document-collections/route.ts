@@ -6,8 +6,18 @@ import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { OrganizationService } from "lib/api/services/organization-service";
 import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
 
-import { removeTrailingSlash, Id, toModelType, ModelType, DocumentCollectionResponse } from "@repo/core";
-import { DocumentCollectionService, NextResponseErrors, API } from "@repo/backend";
+import {
+  removeTrailingSlash,
+  Id,
+  toModelType,
+  ModelType,
+  DocumentCollectionResponse,
+} from "@repo/core";
+import {
+  DocumentCollectionService,
+  NextResponseErrors,
+  API,
+} from "@repo/backend";
 
 const orgMembershipService = new OrgMembershipService();
 const orgService = new OrganizationService();
@@ -112,7 +122,7 @@ export async function GET(
   const count = await documentCollectionService.count(where);
 
   return NextResponse.json(
-    documentCollections.map(dc => DocumentCollectionResponse.fromEntity(dc)),
+    documentCollections.map((dc) => DocumentCollectionResponse.fromEntity(dc)),
     {
       headers: API.createResponseHeaders({
         pagination: {

@@ -6,7 +6,12 @@ import useSWR from "swr";
 import { tw } from "twind";
 import ReactTimeAgo from "react-time-ago";
 import { useSession } from "next-auth/react";
-import { HiOutlineExclamationCircle, HiOutlinePlus, HiOutlineDocumentText, HiOutlineChatAlt } from "react-icons/hi";
+import {
+  HiOutlineExclamationCircle,
+  HiOutlinePlus,
+  HiOutlineDocumentText,
+  HiOutlineChatAlt,
+} from "react-icons/hi";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -104,7 +109,9 @@ export default function ChatHistory({ orgSlug }: { orgSlug: string }) {
         )}
       >
         <div>
-          <div className={tw("flex flex-row text-base font-normal items-center")}>
+          <div
+            className={tw("flex flex-row text-base font-normal items-center")}
+          >
             {item.type === ChatType.CHAT_WITH_DOCS ? (
               <HiOutlineDocumentText className={tw("mr-4 h-8 w-8")} />
             ) : (
@@ -297,9 +304,7 @@ function RowActionItem({
   );
 }
 
-async function deleteChat(
-  id: Id<IdType.Chat>
-): Promise<ChatResponse> {
+async function deleteChat(id: Id<IdType.Chat>): Promise<ChatResponse> {
   return (await delete_<ChatResponse>(chatApiPath(id))).response;
 }
 

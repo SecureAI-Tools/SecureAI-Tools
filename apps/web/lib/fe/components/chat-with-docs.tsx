@@ -25,7 +25,12 @@ import { Chat } from "lib/fe/components/chat";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import { CitationResponse } from "lib/types/api/citation-response";
 
-import { Id, DocumentResponse, DocumentToCollectionResponse, IdType } from "@repo/core";
+import {
+  Id,
+  DocumentResponse,
+  DocumentToCollectionResponse,
+  IdType,
+} from "@repo/core";
 
 export function ChatWithDocs({
   chat,
@@ -74,7 +79,9 @@ export function ChatWithDocs({
     },
   );
 
-  const shouldFetchDocumentToCollections = collectionDocumentsResponse && collectionDocumentsResponse.response.length > 0;
+  const shouldFetchDocumentToCollections =
+    collectionDocumentsResponse &&
+    collectionDocumentsResponse.response.length > 0;
   const {
     data: documentToCollectionsResponse,
     error: documentToCollectionsFetchError,
@@ -82,7 +89,9 @@ export function ChatWithDocs({
     shouldFetchDocumentToCollections
       ? getDocumentToCollections({
           documentCollectionId: documentCollectionId,
-          documentIds: collectionDocumentsResponse!.response.map(d => Id.from(d.id)),
+          documentIds: collectionDocumentsResponse!.response.map((d) =>
+            Id.from(d.id),
+          ),
         })
       : null,
     createFetcher<DocumentToCollectionResponse[]>(),
@@ -120,8 +129,16 @@ export function ChatWithDocs({
     setPreviewDocumentId(docId);
   }
 
-  if (fetchCollectionDocumentsError || fetchCitationsError || documentToCollectionsFetchError) {
-    return renderErrors(fetchCollectionDocumentsError, fetchCitationsError, documentToCollectionsFetchError);
+  if (
+    fetchCollectionDocumentsError ||
+    fetchCitationsError ||
+    documentToCollectionsFetchError
+  ) {
+    return renderErrors(
+      fetchCollectionDocumentsError,
+      fetchCitationsError,
+      documentToCollectionsFetchError,
+    );
   }
 
   // Loading spinner for various doc preview elements
@@ -138,13 +155,18 @@ export function ChatWithDocs({
     ? map.get(previewDocumentId)
     : undefined;
 
-  const shouldRenderLoadingSpinner = 
+  const shouldRenderLoadingSpinner =
     !collectionDocumentsResponse ||
     !citationsResponse ||
     !documentToCollectionsResponse ||
     !previewDocument;
 
-  const docIdToIndexingStatusMap = new Map(documentToCollectionsResponse?.response.map(d2c => [d2c.documentId, d2c.indexingStatus]));
+  const docIdToIndexingStatusMap = new Map(
+    documentToCollectionsResponse?.response.map((d2c) => [
+      d2c.documentId,
+      d2c.indexingStatus,
+    ]),
+  );
 
   return (
     <div className={tw("flex flex-col w-full")}>
@@ -237,11 +259,11 @@ export function ChatWithDocs({
             <Chat
               chat={chat}
               chatMessages={chatMessages}
-              documents={collectionDocumentsResponse.response.map(d => {
+              documents={collectionDocumentsResponse.response.map((d) => {
                 return {
                   ...d,
                   indexingStatus: docIdToIndexingStatusMap.get(d.id)!,
-                }
+                };
               })}
               citations={citationsResponse?.response}
               onJumpToPage={(docId: string, pageIndex: number) => {

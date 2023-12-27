@@ -1,7 +1,9 @@
 import { IndexingQueueMessage } from "@repo/core";
 import { getAMQPChannel } from "../amqp-client";
 
-export async function addToIndexingQueue(msg: IndexingQueueMessage): Promise<void> {
+export async function addToIndexingQueue(
+  msg: IndexingQueueMessage,
+): Promise<void> {
   const amqpServerUrl = process.env.AMQP_SERVER_URL;
   if (!amqpServerUrl) {
     throw new Error("Invalid AMQP_SERVER_URL");

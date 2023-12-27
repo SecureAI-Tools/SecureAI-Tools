@@ -2,7 +2,13 @@ import { API } from "../utils/api.utils";
 import { LocalObjectStorageService } from "./local-object-storage-service";
 import { PaperlessNgxClient } from "../clients/paperless-ngx-client";
 
-import { DataSourceConnection, Document, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
+import {
+  DataSourceConnection,
+  Document,
+  Prisma,
+  TxPrismaClient,
+  prismaClient,
+} from "@repo/database";
 import { Id, IdType, DocumentIndexingStatus, DataSource } from "@repo/core";
 
 export interface DocumentCreateInput {
@@ -161,9 +167,9 @@ export class DocumentService {
     collectionId,
     indexingStatus,
   }: {
-    documentId: Id<IdType.Document>,
-    collectionId: Id<IdType.DocumentCollection>,
-    indexingStatus: DocumentIndexingStatus,
+    documentId: Id<IdType.Document>;
+    collectionId: Id<IdType.DocumentCollection>;
+    indexingStatus: DocumentIndexingStatus;
   }): Promise<void> {
     await prismaClient.$transaction(async (tx: TxPrismaClient) => {
       await tx.documentToCollection.updateMany({
@@ -173,7 +179,7 @@ export class DocumentService {
         },
         data: {
           indexingStatus: indexingStatus,
-        }
+        },
       });
     });
   }
@@ -184,18 +190,27 @@ export class DocumentService {
   ): Promise<Blob> {
     switch (dataSourceConnection.dataSource) {
       case DataSource.UPLOAD:
-        const fileBuffer = await this.objectStorageService.get(document.externalId);
+        const fileBuffer = await this.objectStorageService.get(
+          document.externalId,
+        );
         return new Blob([fileBuffer]);
       case DataSource.PAPERLESS_NGX:
-        const paperlessNgxClient = new PaperlessNgxClient(dataSourceConnection.baseUrl!, dataSourceConnection.accessToken!);
-        const resp = await paperlessNgxClient.downloadDocument(document.externalId);
+        const paperlessNgxClient = new PaperlessNgxClient(
+          dataSourceConnection.baseUrl!,
+          dataSourceConnection.accessToken!,
+        );
+        const resp = await paperlessNgxClient.downloadDocument(
+          document.externalId,
+        );
         if (!resp.ok) {
-          throw new Error(`could not download document ${document.id} from ${dataSourceConnection.dataSource} (${dataSourceConnection.baseUrl}); Received ${resp.statusText} (${resp.status})`);
+          throw new Error(
+            `could not download document ${document.id} from ${dataSourceConnection.dataSource} (${dataSourceConnection.baseUrl}); Received ${resp.statusText} (${resp.status})`,
+          );
         }
 
         return resp.data!;
       default:
-        throw new Error(`${dataSourceConnection.dataSource} not supported`)
+        throw new Error(`${dataSourceConnection.dataSource} not supported`);
     }
   }
 }

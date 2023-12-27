@@ -7,7 +7,13 @@ import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { OrganizationUpdateRequest } from "lib/types/api/organization-update.request";
 
 import { OrganizationResponse, ErrorResponse } from "@repo/core";
-import { sendUnsupportedMethodError, API, sendBadRequestError, sendNotFoundError, sendForbiddenError } from "@repo/backend";
+import {
+  sendUnsupportedMethodError,
+  API,
+  sendBadRequestError,
+  sendNotFoundError,
+  sendForbiddenError,
+} from "@repo/backend";
 
 const organizationService = new OrganizationService();
 const orgMembershipService = new OrgMembershipService();

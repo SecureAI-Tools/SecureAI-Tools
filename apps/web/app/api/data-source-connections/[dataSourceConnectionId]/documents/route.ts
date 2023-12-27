@@ -11,11 +11,7 @@ import {
   PaperlessNgxClient,
   toDataSourceConnectionDocumentResponse,
 } from "@repo/backend";
-import {
-  DataSource,
-  Id,
-  IdType,
-} from "@repo/core";
+import { DataSource, Id, IdType } from "@repo/core";
 
 const permissionService = new PermissionService();
 const dataSourceConnectionService = new DataSourceConnectionService();
@@ -38,27 +34,37 @@ export async function GET(
   const query = searchParams.get("query");
 
   // Check permissions
-  const dataSourceConnectionId = Id.from<IdType.DataSourceConnection>(params.dataSourceConnectionId);
-  const [hasPermissions, resp] = await permissionService.hasReadDocumentsFromDataSourceConnectionPermission(
-    authUserId!,
-    dataSourceConnectionId,
+  const dataSourceConnectionId = Id.from<IdType.DataSourceConnection>(
+    params.dataSourceConnectionId,
   );
+  const [hasPermissions, resp] =
+    await permissionService.hasReadDocumentsFromDataSourceConnectionPermission(
+      authUserId!,
+      dataSourceConnectionId,
+    );
   if (!hasPermissions) {
     return resp;
   }
 
-  const dataSourceConnection = await dataSourceConnectionService.get(dataSourceConnectionId);
+  const dataSourceConnection = await dataSourceConnectionService.get(
+    dataSourceConnectionId,
+  );
   if (!dataSourceConnection) {
     return NextResponseErrors.notFound();
   }
 
   // TODO: Make this more dynamic when adding support for more data sources!
   if (dataSourceConnection.dataSource !== DataSource.PAPERLESS_NGX) {
-    return NextResponseErrors.badRequest(`${dataSourceConnection.dataSource} data sources aren't supported`)
+    return NextResponseErrors.badRequest(
+      `${dataSourceConnection.dataSource} data sources aren't supported`,
+    );
   }
 
   const paginationParams = API.PaginationParams.from(searchParams);
-  const paperlessNgxClient = new PaperlessNgxClient(dataSourceConnection.baseUrl!, dataSourceConnection.accessToken!);
+  const paperlessNgxClient = new PaperlessNgxClient(
+    dataSourceConnection.baseUrl!,
+    dataSourceConnection.accessToken!,
+  );
   try {
     const documentsSearchResponse = await paperlessNgxClient.getDocuments({
       query: query ?? undefined,
@@ -68,12 +74,14 @@ export async function GET(
 
     if (!documentsSearchResponse.ok) {
       return NextResponseErrors.internalServerError(
-        `could not search documents from ${dataSourceConnection.dataSource} at ${dataSourceConnection.baseUrl}. Received "${documentsSearchResponse.statusText}" (${documentsSearchResponse.status})`
+        `could not search documents from ${dataSourceConnection.dataSource} at ${dataSourceConnection.baseUrl}. Received "${documentsSearchResponse.statusText}" (${documentsSearchResponse.status})`,
       );
     }
 
     return NextResponse.json(
-      documentsSearchResponse.data!.results.map((r) => toDataSourceConnectionDocumentResponse(r)),
+      documentsSearchResponse.data!.results.map((r) =>
+        toDataSourceConnectionDocumentResponse(r),
+      ),
       {
         headers: API.createResponseHeaders({
           pagination: {
@@ -83,10 +91,15 @@ export async function GET(
       },
     );
   } catch (error) {
-    logger.error(`could not fetch documents from ${dataSourceConnection.dataSource}`, {
-      error: error,
-      dataSourceConnectionId: dataSourceConnection.id,
-    });
-    return NextResponseErrors.internalServerError(`could not get documents from ${dataSourceConnection.dataSource}`);
+    logger.error(
+      `could not fetch documents from ${dataSourceConnection.dataSource}`,
+      {
+        error: error,
+        dataSourceConnectionId: dataSourceConnection.id,
+      },
+    );
+    return NextResponseErrors.internalServerError(
+      `could not get documents from ${dataSourceConnection.dataSource}`,
+    );
   }
 }

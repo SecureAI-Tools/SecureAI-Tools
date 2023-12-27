@@ -1,4 +1,11 @@
-import { Alert, Button, Checkbox, Modal, TextInput, Tooltip } from "flowbite-react";
+import {
+  Alert,
+  Button,
+  Checkbox,
+  Modal,
+  TextInput,
+  Tooltip,
+} from "flowbite-react";
 import { tw } from "twind";
 import { ChangeEvent, useEffect, useState } from "react";
 import useSWR from "swr";
@@ -13,7 +20,15 @@ import useDebounce from "lib/fe/hooks/use-debounce";
 import { formatDateTime } from "lib/core/date-format";
 import { SelectedDocument } from "lib/fe/types/selected-document";
 
-import { DataSource, DataSourceConnectionDocumentResponse, Id, IdType, PAGINATION_DEFAULT_PAGE_SIZE, PAGINATION_STARTING_PAGE_NUMBER, dataSourceToReadableName } from "@repo/core";
+import {
+  DataSource,
+  DataSourceConnectionDocumentResponse,
+  Id,
+  IdType,
+  PAGINATION_DEFAULT_PAGE_SIZE,
+  PAGINATION_STARTING_PAGE_NUMBER,
+  dataSourceToReadableName,
+} from "@repo/core";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;
 
@@ -25,15 +40,19 @@ export const DocumentsSelectorModal = ({
   onDocumentsSelected,
   onClose,
 }: {
-  dataSource: DataSource,
-  dataSourceConnectionId: Id<IdType.DataSourceConnection>,
-  selectedDocuments: SelectedDocument[],
-  show: boolean,
-  onDocumentsSelected: (dataSource: DataSource, newSelection: SelectedDocument[]) => void;
-  onClose: (() => void)
+  dataSource: DataSource;
+  dataSourceConnectionId: Id<IdType.DataSourceConnection>;
+  selectedDocuments: SelectedDocument[];
+  show: boolean;
+  onDocumentsSelected: (
+    dataSource: DataSource,
+    newSelection: SelectedDocument[],
+  ) => void;
+  onClose: () => void;
 }) => {
   const [tableState, setTableState] = useTableState();
-  const [currentlySelectedDocuments, setCurrentlySelectedDocuments] = useState<SelectedDocument[]>(selectedDocuments);
+  const [currentlySelectedDocuments, setCurrentlySelectedDocuments] =
+    useState<SelectedDocument[]>(selectedDocuments);
   const [searchQueryInput, setSearchQueryInput] = useState<string>("");
   const debouncedSearchQuery = useDebounce(searchQueryInput);
 
@@ -79,8 +98,12 @@ export const DocumentsSelectorModal = ({
     }));
   };
 
-  const selectedExternalIds = new Set(currentlySelectedDocuments.map(d => d.externalId!));
-  const renderCells: RenderCellsFn<DataSourceConnectionDocumentResponse> = ({ item }) => {
+  const selectedExternalIds = new Set(
+    currentlySelectedDocuments.map((d) => d.externalId!),
+  );
+  const renderCells: RenderCellsFn<DataSourceConnectionDocumentResponse> = ({
+    item,
+  }) => {
     return [
       <div>
         <Checkbox
@@ -88,32 +111,31 @@ export const DocumentsSelectorModal = ({
             const checked = e.currentTarget.checked;
             if (checked) {
               // Add document to selection
-              setCurrentlySelectedDocuments(old => {
-                return [...old, {
-                  dataSource: dataSource,
-                  externalId: item.externalId,
-                  name: item.name,
-                  dataSourceConnectionId: dataSourceConnectionId,
-                }]
-              })
+              setCurrentlySelectedDocuments((old) => {
+                return [
+                  ...old,
+                  {
+                    dataSource: dataSource,
+                    externalId: item.externalId,
+                    name: item.name,
+                    dataSourceConnectionId: dataSourceConnectionId,
+                  },
+                ];
+              });
             } else {
               // Remove document from selection
-              setCurrentlySelectedDocuments(old => {
-                return [...old.filter(i => i.externalId !== item.externalId)];
-              })
+              setCurrentlySelectedDocuments((old) => {
+                return [...old.filter((i) => i.externalId !== item.externalId)];
+              });
             }
           }}
           checked={selectedExternalIds.has(item.externalId)}
         />
       </div>,
-      <div>
-        {item.name}
-      </div>,
-      <div>
-        {formatDateTime(item.createdAt)}
-      </div>,
+      <div>{item.name}</div>,
+      <div>{formatDateTime(item.createdAt)}</div>,
     ];
-  }
+  };
 
   const onPageCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!dataSourceDocumentsResponse) {
@@ -123,9 +145,9 @@ export const DocumentsSelectorModal = ({
     const checked = e.currentTarget.checked;
     if (checked) {
       // Add all documents from current page to selection
-      setCurrentlySelectedDocuments(old => {
+      setCurrentlySelectedDocuments((old) => {
         const newItems: SelectedDocument[] = [];
-        dataSourceDocumentsResponse.response.forEach(d => {
+        dataSourceDocumentsResponse.response.forEach((d) => {
           if (!selectedExternalIds.has(d.externalId)) {
             newItems.push({
               dataSource: dataSource,
@@ -134,19 +156,25 @@ export const DocumentsSelectorModal = ({
               dataSourceConnectionId: dataSourceConnectionId,
             });
           }
-        })
+        });
         return [...old, ...newItems];
       });
     } else {
       // Remove all documents from current page to selection
-      setCurrentlySelectedDocuments(old => {
-        const currentPageExternalIds = new Set(dataSourceDocumentsResponse.response.map(d => d.externalId));
-        return [...old.filter(i => !currentPageExternalIds.has(i.externalId!))];
+      setCurrentlySelectedDocuments((old) => {
+        const currentPageExternalIds = new Set(
+          dataSourceDocumentsResponse.response.map((d) => d.externalId),
+        );
+        return [
+          ...old.filter((i) => !currentPageExternalIds.has(i.externalId!)),
+        ];
       });
     }
-  }
+  };
 
-  const pageCheckboxChecked = dataSourceDocumentsResponse?.response.every(d => selectedExternalIds.has(d.externalId));
+  const pageCheckboxChecked = dataSourceDocumentsResponse?.response.every((d) =>
+    selectedExternalIds.has(d.externalId),
+  );
   const readableName = dataSourceToReadableName(dataSource);
   return (
     <Modal
@@ -166,9 +194,13 @@ export const DocumentsSelectorModal = ({
               className={tw("mb-3")}
             >
               <div>
-                <h1 className={tw("text font-semibold mb-1")}>Could not get documents!</h1>
+                <h1 className={tw("text font-semibold mb-1")}>
+                  Could not get documents!
+                </h1>
                 <div className={tw("text-xs")}>
-                  Encountered an unexpected error while fetching documents from {readableName}. This could be due to {readableName} being temporarily unavailable.
+                  Encountered an unexpected error while fetching documents from{" "}
+                  {readableName}. This could be due to {readableName} being
+                  temporarily unavailable.
                 </div>
                 <Button
                   onClick={() => {
@@ -202,13 +234,20 @@ export const DocumentsSelectorModal = ({
             data={dataSourceDocumentsResponse?.response}
             columns={[
               <Tooltip
-                content={pageCheckboxChecked ? "Unselect all documents from current page" : "Select all documents from current page"}
+                content={
+                  pageCheckboxChecked
+                    ? "Unselect all documents from current page"
+                    : "Select all documents from current page"
+                }
                 className={tw("normal-case")}
               >
-                <Checkbox onChange={onPageCheckboxChange} checked={pageCheckboxChecked} />
+                <Checkbox
+                  onChange={onPageCheckboxChange}
+                  checked={pageCheckboxChecked}
+                />
               </Tooltip>,
               "Document",
-              "Created Date"
+              "Created Date",
             ]}
             renderCells={renderCells}
             page={tableState.pagination.currentPage}
@@ -229,13 +268,10 @@ export const DocumentsSelectorModal = ({
         >
           Continue
         </Button>
-        <Button
-          onClick={onClose}
-          outline
-        >
+        <Button onClick={onClose} outline>
           Cancel
         </Button>
       </Modal.Footer>
     </Modal>
   );
-}
+};

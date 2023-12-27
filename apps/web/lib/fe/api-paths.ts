@@ -1,11 +1,6 @@
 import { OrderingParams, PaginationParams } from "lib/fe/api-params";
 
-import {
-  Id,
-  IdType,
-  isEmpty,
-  DataSource,
-} from "@repo/core";
+import { Id, IdType, isEmpty, DataSource } from "@repo/core";
 
 export const userApiPath = (userId: Id<IdType.User>): string => {
   return `/api/users/${userId}`;
@@ -59,7 +54,6 @@ export const postDocumentApiPath = (
   return `/api/document-collections/${documentCollectionId}/documents`;
 };
 
-
 export const getDocumentCollectionDocumentsApiPath = ({
   documentCollectionId,
   ordering,
@@ -79,7 +73,9 @@ export const getDocumentToCollections = ({
   documentCollectionId: Id<IdType.DocumentCollection>;
   documentIds: Id<IdType.Document>[];
 }): string => {
-  return `/api/document-collections/${documentCollectionId}/documents/document-to-collection?documentIds=${documentIds.join(",")}`;
+  return `/api/document-collections/${documentCollectionId}/documents/document-to-collection?documentIds=${documentIds.join(
+    ",",
+  )}`;
 };
 
 export const documentCollectionDocumentApiPath = (
@@ -289,5 +285,7 @@ export const getDataSourceConnetionDocumentsApiPath = ({
   query: string;
   pagination: PaginationParams;
 }): string => {
-  return `/api/data-source-connections/${connectionId}/documents?query=${encodeURIComponent(query)}&page=${pagination.page}&pageSize=${pagination.pageSize}`;
+  return `/api/data-source-connections/${connectionId}/documents?query=${encodeURIComponent(
+    query,
+  )}&page=${pagination.page}&pageSize=${pagination.pageSize}`;
 };

@@ -26,7 +26,11 @@ import {
   DataSource,
   dataSourceToReadableName,
 } from "@repo/core";
-import { DataSourceRecord, getDataSourceRecords, getLogoSrc } from "lib/fe/data-source-utils";
+import {
+  DataSourceRecord,
+  getDataSourceRecords,
+  getLogoSrc,
+} from "lib/fe/data-source-utils";
 
 const DataSourcesListPage = ({ orgSlug }: { orgSlug: string }) => {
   const [dataSourceRecords, setDataSourceRecords] = useState<
@@ -64,7 +68,9 @@ const DataSourcesListPage = ({ orgSlug }: { orgSlug: string }) => {
       return;
     }
 
-    const dataSourceRecords = getDataSourceRecords(dataSourceConnectionsResponse.response);
+    const dataSourceRecords = getDataSourceRecords(
+      dataSourceConnectionsResponse.response,
+    );
 
     // Remove implicit data sources like upload and web
     const filteredDataSources = dataSourceRecords.filter(

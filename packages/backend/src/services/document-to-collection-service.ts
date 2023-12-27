@@ -1,4 +1,9 @@
-import { DocumentToCollection, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
+import {
+  DocumentToCollection,
+  Prisma,
+  TxPrismaClient,
+  prismaClient,
+} from "@repo/database";
 
 export class DocumentToCollectionService {
   async getAll({

@@ -5,8 +5,22 @@ import { PermissionService } from "lib/api/services/permission-service";
 import { DocumentCreateRequest } from "lib/types/api/document-create.request";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 
-import { Id, DocumentResponse, DataSource, DocumentIndexingStatus, IdType } from "@repo/core";
-import { DocumentService, NextResponseErrors, API, DataSourceConnectionService, generateDocumentUri, PaperlessNgxClient, addToIndexingQueue } from "@repo/backend";
+import {
+  Id,
+  DocumentResponse,
+  DataSource,
+  DocumentIndexingStatus,
+  IdType,
+} from "@repo/core";
+import {
+  DocumentService,
+  NextResponseErrors,
+  API,
+  DataSourceConnectionService,
+  generateDocumentUri,
+  PaperlessNgxClient,
+  addToIndexingQueue,
+} from "@repo/backend";
 import { IndexingMode } from "lib/types/core/indexing-mode";
 
 const permissionService = new PermissionService();
@@ -40,9 +54,9 @@ export async function GET(
   const where = {
     collections: {
       some: {
-        collectionId: documentCollectionId.toString()
-      }
-    }
+        collectionId: documentCollectionId.toString(),
+      },
+    },
   };
   const documents = await documentService.getAll({
     where: where,
@@ -89,38 +103,53 @@ export async function POST(
     return resp;
   }
 
-  const documentCreateRequest =
-    (await req.json()) as DocumentCreateRequest;
+  const documentCreateRequest = (await req.json()) as DocumentCreateRequest;
 
   // Check if user has permission to use data source connection
-  const dataSourceConnectionId = Id.from<IdType.DataSourceConnection>(documentCreateRequest.dataSourceConnectionId);
-  const [hasPermissions, permissionResp] = await permissionService.hasReadDocumentsFromDataSourceConnectionPermission(
-    userId!,
-    dataSourceConnectionId,
+  const dataSourceConnectionId = Id.from<IdType.DataSourceConnection>(
+    documentCreateRequest.dataSourceConnectionId,
   );
+  const [hasPermissions, permissionResp] =
+    await permissionService.hasReadDocumentsFromDataSourceConnectionPermission(
+      userId!,
+      dataSourceConnectionId,
+    );
   if (!hasPermissions) {
     return permissionResp;
   }
 
-  const dataSourceConnection = await dataSourceConnectionService.get(dataSourceConnectionId);
+  const dataSourceConnection = await dataSourceConnectionService.get(
+    dataSourceConnectionId,
+  );
   if (!dataSourceConnection) {
     return NextResponseErrors.notFound();
   }
 
-  const orgMembership = await orgMembershipService.get(Id.from(dataSourceConnection.membershipId));
+  const orgMembership = await orgMembershipService.get(
+    Id.from(dataSourceConnection.membershipId),
+  );
   if (!orgMembership) {
     return NextResponseErrors.notFound();
   }
 
   if (dataSourceConnection.dataSource !== DataSource.PAPERLESS_NGX) {
-    return NextResponseErrors.badRequest(`Unsupported data source ${dataSourceConnection.dataSource}`);
+    return NextResponseErrors.badRequest(
+      `Unsupported data source ${dataSourceConnection.dataSource}`,
+    );
   }
 
   // Check whether data-source-connection can read externalId doc in data source.
-  const paperlessNgxClient = new PaperlessNgxClient(dataSourceConnection.baseUrl!, dataSourceConnection.accessToken!);
-  const docResp = await paperlessNgxClient.getDocument(documentCreateRequest.externalId);
+  const paperlessNgxClient = new PaperlessNgxClient(
+    dataSourceConnection.baseUrl!,
+    dataSourceConnection.accessToken!,
+  );
+  const docResp = await paperlessNgxClient.getDocument(
+    documentCreateRequest.externalId,
+  );
   if (!docResp.ok) {
-    return NextResponseErrors.badRequest(`Data source connection could not access doc (id = ${documentCreateRequest.externalId}). Received ${docResp.statusText} (${docResp.status})`);
+    return NextResponseErrors.badRequest(
+      `Data source connection could not access doc (id = ${documentCreateRequest.externalId}). Received ${docResp.statusText} (${docResp.status})`,
+    );
   }
 
   const uri = generateDocumentUri({

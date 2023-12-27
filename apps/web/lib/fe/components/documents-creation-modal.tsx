@@ -18,7 +18,9 @@ export const DocumentsCreationModal = ({
   selectedDocuments: SelectedDocument[];
   onSuccess: () => void;
 }) => {
-  const [creationState, setCreationState] = useState<"in-progress" | "failed">("in-progress");
+  const [creationState, setCreationState] = useState<"in-progress" | "failed">(
+    "in-progress",
+  );
   const [createdCount, setCreatedCount] = useState(0);
 
   const createDocuments = async (startIndex: number) => {
@@ -26,7 +28,11 @@ export const DocumentsCreationModal = ({
     try {
       for (let i = startIndex; i < selectedDocuments.length; i++) {
         const selectedDocument = selectedDocuments[i]!;
-        await createDocument(collectionId, selectedDocument, IndexingMode.OFFLINE);
+        await createDocument(
+          collectionId,
+          selectedDocument,
+          IndexingMode.OFFLINE,
+        );
         setCreatedCount(i + 1);
       }
       onSuccess();
