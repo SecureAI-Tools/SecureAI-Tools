@@ -1,20 +1,13 @@
-import { ChatResponse } from "lib/types/api/chat.response";
 import { OrderingParams, PaginationParams } from "lib/fe/api-params";
-import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 
 import {
-  DocumentCollectionResponse,
-  DocumentResponse,
   Id,
-  OrganizationResponse,
-  UserResponse,
+  IdType,
   isEmpty,
-  OrgMembershipResponse,
   DataSource,
-  DataSourceConnectionResponse,
 } from "@repo/core";
 
-export const userApiPath = (userId: Id<UserResponse>): string => {
+export const userApiPath = (userId: Id<IdType.User>): string => {
   return `/api/users/${userId}`;
 };
 
@@ -44,24 +37,24 @@ export const chatsApiPath = ({
   );
 };
 
-export const chatApiPath = (chatId: Id<ChatResponse>): string => {
+export const chatApiPath = (chatId: Id<IdType.Chat>): string => {
   return `/api/chats/${chatId}`;
 };
 
 export const getDocumentCollectionApiPath = (
-  documentCollectionId: Id<DocumentCollectionResponse>,
+  documentCollectionId: Id<IdType.DocumentCollection>,
 ): string => {
   return `/api/document-collections/${documentCollectionId}`;
 };
 
 export const uploadDocumentApiPath = (
-  documentCollectionId: Id<DocumentCollectionResponse>,
+  documentCollectionId: Id<IdType.DocumentCollection>,
 ): string => {
   return `/api/document-collections/${documentCollectionId}/documents/upload`;
 };
 
 export const postDocumentApiPath = (
-  documentCollectionId: Id<DocumentCollectionResponse>,
+  documentCollectionId: Id<IdType.DocumentCollection>,
 ): string => {
   return `/api/document-collections/${documentCollectionId}/documents`;
 };
@@ -72,7 +65,7 @@ export const getDocumentCollectionDocumentsApiPath = ({
   ordering,
   pagination,
 }: {
-  documentCollectionId: Id<DocumentCollectionResponse>;
+  documentCollectionId: Id<IdType.DocumentCollection>;
   ordering: OrderingParams;
   pagination: PaginationParams;
 }): string => {
@@ -83,38 +76,38 @@ export const getDocumentToCollections = ({
   documentCollectionId,
   documentIds,
 }: {
-  documentCollectionId: Id<DocumentCollectionResponse>;
-  documentIds: Id<DocumentResponse>[];
+  documentCollectionId: Id<IdType.DocumentCollection>;
+  documentIds: Id<IdType.Document>[];
 }): string => {
   return `/api/document-collections/${documentCollectionId}/documents/document-to-collection?documentIds=${documentIds.join(",")}`;
 };
 
 export const documentCollectionDocumentApiPath = (
-  documentCollectionId: Id<DocumentCollectionResponse>,
-  documentId: Id<DocumentResponse>,
+  documentCollectionId: Id<IdType.DocumentCollection>,
+  documentId: Id<IdType.Document>,
 ): string => {
   return `/api/document-collections/${documentCollectionId}/documents/${documentId}`;
 };
 
 export const documentCollectionDocumentIndexApiPath = (
-  documentCollectionId: Id<DocumentCollectionResponse>,
-  documentId: Id<DocumentResponse>,
+  documentCollectionId: Id<IdType.DocumentCollection>,
+  documentId: Id<IdType.Document>,
 ): string => {
   return `/api/document-collections/${documentCollectionId}/documents/${documentId}/index`;
 };
 
 export const getDocumentCollectionStatsApiPath = (
-  documentCollectionId: Id<DocumentCollectionResponse>,
+  documentCollectionId: Id<IdType.DocumentCollection>,
 ): string => {
   return `/api/document-collections/${documentCollectionId}/stats`;
 };
 
-export const postChatMessagesApiPath = (chatId: Id<ChatResponse>): string => {
+export const postChatMessagesApiPath = (chatId: Id<IdType.Chat>): string => {
   return `/api/chats/${chatId}/messages`;
 };
 
 export const postChatMessagesGenerateApiPath = (
-  chatId: Id<ChatResponse>,
+  chatId: Id<IdType.Chat>,
 ): string => {
   return `/api/chats/${chatId}/messages/generate`;
 };
@@ -130,14 +123,14 @@ export const getChatMessagesApiPath = ({
     pageSize: 10,
   },
 }: {
-  chatId: Id<ChatResponse>;
+  chatId: Id<IdType.Chat>;
   ordering?: OrderingParams;
   pagination?: PaginationParams;
 }): string => {
   return `/api/chats/${chatId}/messages?orderBy=${ordering.orderBy}&order=${ordering.order}&page=${pagination.page}&pageSize=${pagination.pageSize}`;
 };
 
-export const chatTitleApiPath = (chatId: Id<ChatResponse>): string => {
+export const chatTitleApiPath = (chatId: Id<IdType.Chat>): string => {
   return `/api/chats/${chatId}/title`;
 };
 
@@ -145,8 +138,8 @@ export const getChatMessageCitationsApiPath = ({
   chatId,
   chatMessageIds,
 }: {
-  chatId: Id<ChatResponse>;
-  chatMessageIds: Id<ChatMessageResponse>[];
+  chatId: Id<IdType.Chat>;
+  chatMessageIds: Id<IdType.ChatMessage>[];
 }): string => {
   return `/api/chats/${chatId}/messages/citations?chatMessageIds=${chatMessageIds.join(
     ",",
@@ -187,7 +180,7 @@ export const getOrganizationsIdOrSlugDocumentCollectionApiPath = ({
   pagination,
 }: {
   orgIdOrSlug: string;
-  userId: Id<UserResponse>;
+  userId: Id<IdType.User>;
   ordering: OrderingParams;
   pagination: PaginationParams;
 }): string => {
@@ -202,7 +195,7 @@ export const getOrganizationsIdOrSlugDataSourceConnectionsApiPath = ({
   dataSources,
 }: {
   orgIdOrSlug: string;
-  userId: Id<UserResponse>;
+  userId: Id<IdType.User>;
   ordering: OrderingParams;
   pagination: PaginationParams;
   dataSources?: DataSource[];
@@ -228,7 +221,7 @@ export const postDataSourceConnectionsApiPath = (
 };
 
 export const getOrgMembershipsApiPath = (
-  orgId: Id<OrganizationResponse>,
+  orgId: Id<IdType.Organization>,
   // filters and ordering
   {
     nameOrEmailLike,
@@ -258,23 +251,23 @@ export const getOrgMembershipsApiPath = (
 };
 
 export const postOrgMembershipsApiPath = (
-  orgId: Id<OrganizationResponse>,
+  orgId: Id<IdType.Organization>,
 ): string => {
   return `/api/organizations/${orgId}/memberships`;
 };
 
 export const orgMembershipApiPath = (
-  membershipId: Id<OrgMembershipResponse>,
+  membershipId: Id<IdType.OrgMembership>,
 ): string => {
   return `/api/org-memberships/${membershipId}`;
 };
 
-export const userPasswordApiPath = (userId: Id<UserResponse>): string => {
+export const userPasswordApiPath = (userId: Id<IdType.User>): string => {
   return `/api/users/${userId}/password`;
 };
 
 export const userForcePasswordResetApiPath = (
-  userId: Id<UserResponse>,
+  userId: Id<IdType.User>,
 ): string => {
   return `${userApiPath(userId)}/password/force-reset`;
 };
@@ -292,7 +285,7 @@ export const getDataSourceConnetionDocumentsApiPath = ({
   query,
   pagination,
 }: {
-  connectionId: Id<DataSourceConnectionResponse>;
+  connectionId: Id<IdType.DataSourceConnection>;
   query: string;
   pagination: PaginationParams;
 }): string => {

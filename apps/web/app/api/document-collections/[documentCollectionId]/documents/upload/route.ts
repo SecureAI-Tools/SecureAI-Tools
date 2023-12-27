@@ -5,7 +5,7 @@ import { PermissionService } from "lib/api/services/permission-service";
 import { getDocumentObjectKey } from "lib/api/core/document.utils";
 import { IndexingMode } from "lib/types/core/indexing-mode";
 
-import { Id, DocumentCollectionResponse, DocumentResponse, DocumentIndexingStatus, DataSource, OrganizationResponse } from "@repo/core";
+import { Id, DocumentResponse, DocumentIndexingStatus, DataSource, IdType } from "@repo/core";
 import { DocumentCollectionService, DocumentService, LocalObjectStorageService, NextResponseErrors, DataSourceConnectionService, generateDocumentUri, addToIndexingQueue } from "@repo/backend";
 
 const permissionService = new PermissionService();
@@ -29,7 +29,7 @@ export async function POST(
   }
 
   // Check permissions
-  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+  const documentCollectionId = Id.from<IdType.DocumentCollection>(
     params.documentCollectionId,
   );
   const [permission, resp] =
@@ -57,8 +57,8 @@ export async function POST(
     return NextResponseErrors.notFound();
   }
 
-  const documentId = Id.generate(DocumentResponse);
-  const orgId = Id.from<OrganizationResponse>(documentCollection.organizationId);
+  const documentId = Id.generate<IdType.Document>();
+  const orgId = Id.from<IdType.Organization>(documentCollection.organizationId);
   const documentObjectKey = getDocumentObjectKey({
     orgId: orgId,
     documentCollectionId: documentCollectionId,

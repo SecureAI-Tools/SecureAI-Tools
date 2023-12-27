@@ -6,8 +6,7 @@ import ChatInput from "lib/fe/components/chat-input";
 import { ChatType } from "lib/types/core/chat-type";
 import { postChat, postChatMessage } from "lib/fe/chat-utils";
 
-import { Id, DocumentCollectionResponse, isEmpty } from "@repo/core";
-import { ChatResponse } from "lib/types/api/chat.response";
+import { Id, IdType, isEmpty } from "@repo/core";
 
 const ChatCreationModal = ({
   show,
@@ -18,9 +17,9 @@ const ChatCreationModal = ({
   onClose,
 }: {
   show: boolean;
-  documentCollectionId: Id<DocumentCollectionResponse>;
+  documentCollectionId: Id<IdType.DocumentCollection>;
   orgSlug: string;
-  onSuccess: (chatId: Id<ChatResponse>) => void;
+  onSuccess: (chatId: Id<IdType.Chat>) => void;
   onError: (e: unknown) => void;
   onClose: () => void;
 }) => {
@@ -34,7 +33,7 @@ const ChatCreationModal = ({
         type: ChatType.CHAT_WITH_DOCS,
         documentCollectionId: documentCollectionId?.toString(),
       });
-      const chatId = Id.from<ChatResponse>(chatResponse.id);
+      const chatId = Id.from<IdType.Chat>(chatResponse.id);
 
       const chatMessageResponse = await postChatMessage(chatId, {
         message: {

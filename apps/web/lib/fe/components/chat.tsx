@@ -31,7 +31,7 @@ import { CitationResponse } from "lib/types/api/citation-response";
 import { Link } from "lib/fe/components/link";
 import { ChatMessageRole } from "lib/types/core/chat-message-role";
 
-import { DocumentResponse, Id, DEFAULT_CHAT_TITLE, DocumentIndexingStatus, StreamChunkResponse, isEmpty, DocumentCollectionResponse } from "@repo/core";
+import { DocumentResponse, Id, DEFAULT_CHAT_TITLE, DocumentIndexingStatus, StreamChunkResponse, isEmpty, IdType } from "@repo/core";
 
 export interface DocumentsWithIndexingStatus extends DocumentResponse {
   indexingStatus: DocumentIndexingStatus;
@@ -162,7 +162,7 @@ export function Chat({
   citations?: CitationResponse[];
   onJumpToPage?: (docId: string, pageIndex: number) => void;
 }) {
-  const chatId = Id.from<ChatResponse>(chat.id);
+  const chatId = Id.from<IdType.Chat>(chat.id);
 
   const [title, setTitle] = useState<string | undefined>(DEFAULT_CHAT_TITLE);
   const [isTitleGenerating, setIsTitleGenerating] = useState<boolean>(false);
@@ -469,7 +469,7 @@ export function Chat({
 }
 
 const postChatMessage = async (
-  chatId: Id<ChatResponse>,
+  chatId: Id<IdType.Chat>,
   req: ChatMessageCreateRequest,
 ): Promise<ChatMessageResponse> => {
   return (
@@ -485,7 +485,7 @@ const indexDocument = async ({
   doc,
   onGeneratedChunk,
 }: {
-  collectionId: Id<DocumentCollectionResponse>,
+  collectionId: Id<IdType.DocumentCollection>,
   doc: DocumentsWithIndexingStatus;
   onGeneratedChunk: (chunk: StreamChunkResponse) => void;
 }): Promise<void> => {

@@ -1,4 +1,4 @@
-import { DataSource, DataSourceConnectionResponse, Id } from "@repo/core";
+import { DataSource, Id, IdType } from "@repo/core";
 
 // Selected document could either be a local file,  or a remote-file from a data-source
 export interface SelectedDocument {
@@ -12,5 +12,5 @@ export interface SelectedDocument {
   // Present for a remote dataSource
   externalId?: string;
 
-  dataSourceConnectionId?: Id<DataSourceConnectionResponse>;
+  dataSourceConnectionId?: Id<IdType.DataSourceConnection>;
 }

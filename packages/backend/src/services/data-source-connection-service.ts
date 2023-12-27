@@ -6,11 +6,8 @@ import {
 } from "@repo/database";
 import {
   Id,
-  DataSourceConnectionResponse,
-  UserResponse,
-  OrganizationResponse,
+  IdType,
   DataSource,
-  OrgMembershipResponse,
 } from "@repo/core";
 
 import { API } from "../utils/api.utils";
@@ -20,7 +17,7 @@ export interface DataSourceConnectionCreateInput {
   baseUrl: string;
   accessToken?: string;
   accessTokenExpiresAt?: number;
-  membershipId: Id<OrgMembershipResponse>;
+  membershipId: Id<IdType.OrgMembership>;
 }
 
 export class DataSourceConnectionService {
@@ -38,7 +35,7 @@ export class DataSourceConnectionService {
   ): Promise<DataSourceConnection> {
     return prisma.dataSourceConnection.create({
       data: {
-        id: Id.generate(DataSourceConnectionResponse).toString(),
+        id: Id.generate<IdType.DataSourceConnection>().toString(),
         dataSource: i.dataSource,
         baseUrl: i.baseUrl,
         accessToken: i.accessToken,
@@ -96,7 +93,7 @@ export class DataSourceConnectionService {
     });
   }
 
-  async get(id: Id<DataSourceConnectionResponse>): Promise<DataSourceConnection | null> {
+  async get(id: Id<IdType.DataSourceConnection>): Promise<DataSourceConnection | null> {
     return await prismaClient.$transaction(
       async (prisma: TxPrismaClient): Promise<DataSourceConnection | null> => {
         return await prisma.dataSourceConnection.findUnique({
@@ -108,8 +105,8 @@ export class DataSourceConnectionService {
   }
 
   async getOrCreate(
-    userId: Id<UserResponse>,
-    orgId: Id<OrganizationResponse>,
+    userId: Id<IdType.User>,
+    orgId: Id<IdType.Organization>,
     dataSource: DataSource,
   ): Promise<DataSourceConnection> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
@@ -146,7 +143,7 @@ export class DataSourceConnectionService {
       // Create a new one
       return await tx.dataSourceConnection.create({
         data: {
-          id: Id.generate(DataSourceConnectionResponse).toString(),
+          id: Id.generate<IdType.DataSourceConnection>().toString(),
           dataSource: dataSource,
           membershipId: membership.id,
         },

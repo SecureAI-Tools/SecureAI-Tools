@@ -40,6 +40,7 @@ import { ModelSetupAlert } from "lib/fe/components/model-setup-alert";
 import {
   PAGINATION_DEFAULT_PAGE_SIZE,
   Id,
+  IdType,
   DocumentCollectionResponse,
   DEFAULT_DOCUMENT_COLLECTION_NAME,
   isEmpty,
@@ -376,7 +377,7 @@ function RowActionItem({
 }
 
 const deleteDocumentCollection = async (
-  documentCollectionId: Id<DocumentCollectionResponse>,
+  documentCollectionId: Id<IdType.DocumentCollection>,
 ): Promise<{}> => {
   return (await delete_<{}>(getDocumentCollectionApiPath(documentCollectionId)))
     .response;

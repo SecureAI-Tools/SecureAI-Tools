@@ -13,8 +13,8 @@ import {
 } from "@repo/backend";
 import {
   DataSource,
-  DataSourceConnectionResponse,
   Id,
+  IdType,
 } from "@repo/core";
 
 const permissionService = new PermissionService();
@@ -38,7 +38,7 @@ export async function GET(
   const query = searchParams.get("query");
 
   // Check permissions
-  const dataSourceConnectionId = Id.from<DataSourceConnectionResponse>(params.dataSourceConnectionId);
+  const dataSourceConnectionId = Id.from<IdType.DataSourceConnection>(params.dataSourceConnectionId);
   const [hasPermissions, resp] = await permissionService.hasReadDocumentsFromDataSourceConnectionPermission(
     authUserId!,
     dataSourceConnectionId,

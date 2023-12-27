@@ -8,7 +8,7 @@ import {
 import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.request";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 
-import { Id } from "@repo/core";
+import { Id, IdType } from "@repo/core";
 
 export const postChat = async (
   orgIdOrSlug: string,
@@ -23,7 +23,7 @@ export const postChat = async (
 };
 
 export const postChatMessage = async (
-  chatId: Id<ChatResponse>,
+  chatId: Id<IdType.Chat>,
   req: ChatMessageCreateRequest,
 ): Promise<ChatMessageResponse> => {
   return (

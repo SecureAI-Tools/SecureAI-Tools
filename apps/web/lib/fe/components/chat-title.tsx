@@ -10,7 +10,7 @@ import { ChatUpdateRequest } from "lib/types/api/chat-update.request";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { chatApiPath } from "lib/fe/api-paths";
 
-import { DEFAULT_CHAT_TITLE, Id, ModelType, modelTypeToReadableName } from "@repo/core";
+import { DEFAULT_CHAT_TITLE, Id, IdType, ModelType, modelTypeToReadableName } from "@repo/core";
 
 const DefaultChatTitle = () => (
   <div className={tw("italic text-gray-600")}>{DEFAULT_CHAT_TITLE}</div>
@@ -24,7 +24,7 @@ export const ChatTitle = ({
   model,
 }: {
   title: string | undefined;
-  chatId: Id<ChatResponse>;
+  chatId: Id<IdType.Chat>;
   isGenerating: boolean;
   modelType: ModelType;
   model: string;
@@ -130,7 +130,7 @@ export const ChatTitle = ({
 };
 
 const updateChat = async (
-  chatId: Id<ChatResponse>,
+  chatId: Id<IdType.Chat>,
   req: ChatUpdateRequest,
 ): Promise<ResponseWithHeaders<ChatResponse>> => {
   return await patch<ChatUpdateRequest, ChatResponse>(chatApiPath(chatId), req);

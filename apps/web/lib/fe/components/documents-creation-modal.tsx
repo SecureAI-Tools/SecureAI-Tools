@@ -7,14 +7,14 @@ import { createDocument } from "lib/fe/document-utils";
 import { IndexingMode } from "lib/types/core/indexing-mode";
 import { SelectedDocument } from "lib/fe/types/selected-document";
 
-import { Id, DocumentCollectionResponse } from "@repo/core";
+import { Id, IdType } from "@repo/core";
 
 export const DocumentsCreationModal = ({
   collectionId,
   selectedDocuments,
   onSuccess,
 }: {
-  collectionId: Id<DocumentCollectionResponse>;
+  collectionId: Id<IdType.DocumentCollection>;
   selectedDocuments: SelectedDocument[];
   onSuccess: () => void;
 }) => {

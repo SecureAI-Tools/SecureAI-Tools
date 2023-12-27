@@ -1,4 +1,3 @@
-import { ChatResponse } from "lib/types/api/chat.response";
 import { ChatType } from "lib/types/core/chat-type";
 
 import {
@@ -9,13 +8,13 @@ import {
   prismaClient,
 } from "@repo/database";
 import { API } from "@repo/backend";
-import { Id, UserResponse } from "@repo/core";
+import { Id, IdType } from "@repo/core";
 
 export interface ChatCreateInput {
   title: string | undefined;
   type: ChatType;
   orgIdOrSlug: string;
-  creatorId: Id<UserResponse>;
+  creatorId: Id<IdType.User>;
   documentCollectionId?: string | undefined;
 }
 
@@ -46,7 +45,7 @@ export class ChatService {
 
     return await prisma.chat.create({
       data: {
-        id: Id.generate(ChatResponse).toString(),
+        id: Id.generate<IdType.Chat>().toString(),
         title: i.title,
         type: i.type,
         membershipId: orgMembership.id,
@@ -59,7 +58,7 @@ export class ChatService {
     });
   }
 
-  async get(id: Id<ChatResponse>): Promise<Chat | null> {
+  async get(id: Id<IdType.Chat>): Promise<Chat | null> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
       return await this.getWithTxn(tx, id);
     });
@@ -67,7 +66,7 @@ export class ChatService {
 
   async getWithTxn(
     prisma: TxPrismaClient,
-    id: Id<ChatResponse>,
+    id: Id<IdType.Chat>,
   ): Promise<Chat | null> {
     return await prisma.chat.findFirst({
       where: {
@@ -116,7 +115,7 @@ export class ChatService {
     });
   }
 
-  async update(id: Id<ChatResponse>, i: Prisma.ChatUpdateInput): Promise<Chat> {
+  async update(id: Id<IdType.Chat>, i: Prisma.ChatUpdateInput): Promise<Chat> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
       return await this.updateWithTxn(tx, id, i);
     });
@@ -124,7 +123,7 @@ export class ChatService {
 
   async updateWithTxn(
     prisma: TxPrismaClient,
-    id: Id<ChatResponse>,
+    id: Id<IdType.Chat>,
     i: Prisma.ChatUpdateInput,
   ): Promise<Chat> {
     return await prisma.chat.update({
@@ -135,7 +134,7 @@ export class ChatService {
     });
   }
 
-  async getOrganization(id: Id<ChatResponse>): Promise<Organization | null> {
+  async getOrganization(id: Id<IdType.Chat>): Promise<Organization | null> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
       const chatWithOrg = await tx.chat.findUnique({
         where: {
@@ -154,7 +153,7 @@ export class ChatService {
     });
   }
 
-  async delete(id: Id<ChatResponse>): Promise<Chat | null> {
+  async delete(id: Id<IdType.Chat>): Promise<Chat | null> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
       return await tx.chat.update({
         where: {
@@ -167,7 +166,7 @@ export class ChatService {
     });
   }
 
-  async deleteMany(ids: Id<ChatResponse>[]): Promise<Prisma.BatchPayload> {
+  async deleteMany(ids: Id<IdType.Chat>[]): Promise<Prisma.BatchPayload> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
       return await tx.chat.updateMany({
         where: {

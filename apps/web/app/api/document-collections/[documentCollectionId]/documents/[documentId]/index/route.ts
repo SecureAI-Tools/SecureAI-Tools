@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
 
-import { Id, DocumentCollectionResponse, DocumentResponse, StreamChunkResponse, OrgMembershipStatus } from "@repo/core";
+import { Id, StreamChunkResponse, OrgMembershipStatus, IdType } from "@repo/core";
 import { DocumentCollectionService, IndexingService, NextResponseErrors } from "@repo/backend";
 import { prismaClient } from "@repo/database";
 
@@ -26,7 +26,7 @@ export async function POST(
   }
 
   // Check permissions
-  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+  const documentCollectionId = Id.from<IdType.DocumentCollection>(
     params.documentCollectionId,
   );
   const [permission, resp] =
@@ -45,7 +45,7 @@ export async function POST(
 
   // This only works for the document collection owner.
   // TODO: Expand this if/when needed!
-  const documentId = Id.from<DocumentResponse>(params.documentId);
+  const documentId = Id.from<IdType.Document>(params.documentId);
   const documentToDataSources = await prismaClient.documentToDataSource.findMany({
     where: {
       documentId: documentId.toString(),

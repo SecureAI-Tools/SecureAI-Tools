@@ -5,7 +5,7 @@ import { withLogging } from "lib/api/core/with-logging";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { OrgMembershipUpdateRequest } from "lib/types/api/org-membership-update.request";
 
-import { ErrorResponse, Id, OrgMembershipResponse } from "@repo/core";
+import { ErrorResponse, Id, IdType, OrgMembershipResponse } from "@repo/core";
 import {
   sendUnsupportedMethodError,
   API,
@@ -42,7 +42,7 @@ async function handlePatchOrgMembership(
     return sendBadRequestError(res);
   }
 
-  const membershipId = Id.from<OrgMembershipResponse>(membershipIdRaw);
+  const membershipId = Id.from<IdType.OrgMembership>(membershipIdRaw);
   const orgMembership = await orgMembershipService.get(membershipId);
 
   if (!orgMembership) {

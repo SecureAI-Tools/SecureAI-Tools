@@ -1,5 +1,4 @@
 import { StreamingTextResponse, LangChainStream } from "ai";
-import { ChatOllama } from "langchain/chat_models/ollama";
 import { HumanMessage, SystemMessage } from "langchain/schema";
 import { NextRequest } from "next/server";
 
@@ -7,10 +6,9 @@ import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
 import { ChatTitleRequest } from "lib/types/api/chat-title.request";
 import { ChatService } from "lib/api/services/chat-service";
-import { ChatResponse } from "lib/types/api/chat.response";
 
 import { ModelProviderService, NextResponseErrors } from "@repo/backend";
-import { Id } from "@repo/core";
+import { Id, IdType } from "@repo/core";
 
 const permissionService = new PermissionService();
 const chatService = new ChatService();
@@ -39,7 +37,7 @@ export async function POST(
   }
 
   // Check permissions
-  const chatId = Id.from<ChatResponse>(params.chatId);
+  const chatId = Id.from<IdType.Chat>(params.chatId);
   const [permission, resp] = await permissionService.hasWritePermission(
     userId!,
     chatId,

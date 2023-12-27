@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
 
-import { Id, DocumentCollectionResponse } from "@repo/core";
+import { Id, DocumentCollectionResponse, IdType } from "@repo/core";
 import { DocumentCollectionService, NextResponseErrors } from "@repo/backend";
 import { DocumentCollectionUpdateRequest } from "lib/types/api/document-collection-update.request";
 
@@ -20,7 +20,7 @@ export async function GET(
   }
 
   // Check permissions
-  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+  const documentCollectionId = Id.from<IdType.DocumentCollection>(
     params.documentCollectionId,
   );
   const [permission, resp] =
@@ -52,7 +52,7 @@ export async function DELETE(
   }
 
   // Check permissions
-  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+  const documentCollectionId = Id.from<IdType.DocumentCollection>(
     params.documentCollectionId,
   );
   const [permission, resp] =
@@ -82,7 +82,7 @@ export async function PATCH(
   }
 
   // Check permissions
-  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+  const documentCollectionId = Id.from<IdType.DocumentCollection>(
     params.documentCollectionId,
   );
   const [permission, resp] =

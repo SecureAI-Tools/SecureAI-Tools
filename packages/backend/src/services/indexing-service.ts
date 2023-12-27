@@ -11,7 +11,7 @@ import { DocumentToCollectionService } from "./document-to-collection-service";
 import { DocumentChunkService } from "./document-chunk-service";
 import { DataSourceConnectionService } from "./data-source-connection-service";
 
-import { DataSourceConnectionResponse, DocumentChunkMetadata, DocumentCollectionResponse, DocumentIndexingStatus, DocumentResponse, Id, StreamChunkResponse, isEmpty, removeTrailingSlash } from "@repo/core";
+import { Id, IdType, DocumentChunkMetadata, DocumentIndexingStatus, StreamChunkResponse, isEmpty, removeTrailingSlash } from "@repo/core";
 import { Document, DocumentCollection } from "@repo/database";
 
 const logger = getLogger("indexing-service");
@@ -29,9 +29,9 @@ export class IndexingService {
 
   // Indexes given document and yields statuses that can be streamed or logged.
   async* index(
-    documentId: Id<DocumentResponse>,
-    collectionId: Id<DocumentCollectionResponse>,
-    dataSourceConnectionId: Id<DataSourceConnectionResponse>,
+    documentId: Id<IdType.Document>,
+    collectionId: Id<IdType.DocumentCollection>,
+    dataSourceConnectionId: Id<IdType.DataSourceConnection>,
   ): AsyncGenerator<StreamChunkResponse> {
     const document = await this.documentService.get(documentId);
 
@@ -69,7 +69,7 @@ export class IndexingService {
   private async* indexNewDocument(
     document: Document,
     documentCollection: DocumentCollection,
-    dataSourceConnectionId: Id<DataSourceConnectionResponse>,
+    dataSourceConnectionId: Id<IdType.DataSourceConnection>,
   ): AsyncGenerator<StreamChunkResponse> {
     const textSplitter = new RecursiveCharacterTextSplitter({
       chunkSize: process.env.DOCS_INDEXING_CHUNK_SIZE
@@ -138,7 +138,7 @@ export class IndexingService {
       return;
     }
 
-    const documentId = Id.from<DocumentResponse>(document.id);
+    const documentId = Id.from<IdType.Document>(document.id);
 
     await this.documentService.updateIndexingStatus({
       documentId: documentId,
@@ -162,7 +162,7 @@ export class IndexingService {
   private async* copyDocumentIndex(
     document: Document,
     documentCollection: DocumentCollection,
-    sourceDocumentCollectionId: Id<DocumentCollectionResponse>,
+    sourceDocumentCollectionId: Id<IdType.DocumentCollection>,
   ): AsyncGenerator<StreamChunkResponse> {
     yield ({ status: "Document is already indexed. Copying index data" });
 

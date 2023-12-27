@@ -1,7 +1,7 @@
 import { hashPassword } from "lib/api/core/password.utils";
 
 import { Prisma, User, TxPrismaClient, prismaClient } from "@repo/database";
-import { Id, UserResponse } from "@repo/core";
+import { Id, IdType } from "@repo/core";
 
 export class UserCreateInput {
   email!: string;
@@ -24,7 +24,7 @@ export class UserService {
   ): Promise<User> {
     const newUser = await prisma.user.create({
       data: {
-        id: Id.generate(UserResponse).toString(),
+        id: Id.generate<IdType.User>().toString(),
         email: u.email,
         firstName: u.firstName,
         lastName: u.lastName,
@@ -53,7 +53,7 @@ export class UserService {
     });
   }
 
-  async get(id: Id<UserResponse>): Promise<User | null> {
+  async get(id: Id<IdType.User>): Promise<User | null> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
       return await this.getWithTxn(tx, id);
     });
@@ -61,7 +61,7 @@ export class UserService {
 
   async getWithTxn(
     prisma: TxPrismaClient,
-    id: Id<UserResponse>,
+    id: Id<IdType.User>,
   ): Promise<User | null> {
     return await prisma.user.findUnique({
       where: {
@@ -71,7 +71,7 @@ export class UserService {
   }
 
   async updatePassword(
-    id: Id<UserResponse>,
+    id: Id<IdType.User>,
     newPassword: string,
   ): Promise<User> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
@@ -89,7 +89,7 @@ export class UserService {
   }
 
   async update(
-    id: Id<UserResponse>,
+    id: Id<IdType.User>,
     input: Prisma.UserUpdateInput,
   ): Promise<User> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {

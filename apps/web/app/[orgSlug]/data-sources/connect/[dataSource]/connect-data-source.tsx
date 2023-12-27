@@ -19,8 +19,8 @@ import {
   DataSource,
   DataSourceConnectionResponse,
   Id,
+  IdType,
   PAGINATION_STARTING_PAGE_NUMBER,
-  UserResponse,
   dataSourceToReadableName,
   toDataSource,
 } from "@repo/core";
@@ -85,7 +85,7 @@ const ConnectDataSource = ({
       );
     }
 
-    const userId = Id.from<UserResponse>(tokenUser.id);
+    const userId = Id.from<IdType.User>(tokenUser.id);
 
     switch (dataSource) {
       case DataSource.PAPERLESS_NGX:

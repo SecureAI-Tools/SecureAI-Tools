@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
 
-import { Id, DocumentCollectionResponse, DocumentToCollectionResponse } from "@repo/core";
+import { Id, DocumentToCollectionResponse, IdType } from "@repo/core";
 import { NextResponseErrors, DocumentToCollectionService } from "@repo/backend";
 
 const permissionService = new PermissionService();
@@ -19,7 +19,7 @@ export async function GET(
   }
 
   // Check permission
-  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+  const documentCollectionId = Id.from<IdType.DocumentCollection>(
     params.documentCollectionId,
   );
   const [permission, resp] =

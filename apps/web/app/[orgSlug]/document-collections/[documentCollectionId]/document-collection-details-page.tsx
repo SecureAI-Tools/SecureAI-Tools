@@ -51,6 +51,7 @@ import {
   DocumentIndexingStatus,
   isEmpty,
   DocumentToCollectionResponse,
+  IdType,
 } from "@repo/core";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;
@@ -104,7 +105,7 @@ const DocumentCollectionDetailsPage = ({
     });
   }, [tableState]);
 
-  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+  const documentCollectionId = Id.from<IdType.DocumentCollection>(
     documentCollectionIdRaw,
   );
 

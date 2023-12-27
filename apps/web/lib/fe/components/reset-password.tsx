@@ -16,7 +16,7 @@ import { TokenUser } from "lib/types/core/token-user";
 import { FetchError } from "lib/fe/types/fetch-error";
 import { PageTitle } from "./page-title";
 
-import { Id, UserResponse, isEmpty } from "@repo/core";
+import { Id, IdType, UserResponse, isEmpty } from "@repo/core";
 
 export const ResetPassword = ({
   onResetPasswordSuccess,
@@ -24,7 +24,7 @@ export const ResetPassword = ({
   onResetPasswordSuccess?: () => void;
 }) => {
   const { data: session, status: sessionStatus } = useSession();
-  const [userId, setUserId] = useState<Id<UserResponse> | undefined>();
+  const [userId, setUserId] = useState<Id<IdType.User> | undefined>();
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
@@ -182,7 +182,7 @@ const renderPasswordMatchHelperText = (
 };
 
 const updatePassword = async (
-  userId: Id<UserResponse>,
+  userId: Id<IdType.User>,
   req: PasswordUpdateRequest,
 ): Promise<ResponseWithHeaders<UserResponse>> => {
   return await patch<PasswordUpdateRequest, UserResponse>(

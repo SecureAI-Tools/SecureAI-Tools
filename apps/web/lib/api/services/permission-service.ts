@@ -11,6 +11,7 @@ import {
   DocumentCollectionResponse,
   OrgMembershipStatus,
   DataSourceConnectionResponse,
+  IdType,
 } from "@repo/core";
 import {
   DataSourceConnectionService,
@@ -26,8 +27,8 @@ export class PermissionService {
 
   // TODO: Rename to hasReadChatPermission
   async hasReadPermission(
-    userId: Id<UserResponse>,
-    chatId: Id<ChatResponse>,
+    userId: Id<IdType.User>,
+    chatId: Id<IdType.Chat>,
   ): Promise<[boolean, Response | undefined]> {
     // Only chat creators can read a chat for now.
     //
@@ -38,8 +39,8 @@ export class PermissionService {
   // Checks whether userId has write permission to given chat!
   // TODO: Rename to hasWriteChatPermission
   async hasWritePermission(
-    userId: Id<UserResponse>,
-    chatId: Id<ChatResponse>,
+    userId: Id<IdType.User>,
+    chatId: Id<IdType.Chat>,
   ): Promise<[boolean, Response | undefined]> {
     // Only chat creators can write to a chat for now.
     //
@@ -48,8 +49,8 @@ export class PermissionService {
   }
 
   async hasWriteDocumentCollectionPermission(
-    userId: Id<UserResponse>,
-    documentCollectionId: Id<DocumentCollectionResponse>,
+    userId: Id<IdType.User>,
+    documentCollectionId: Id<IdType.DocumentCollection>,
   ): Promise<[boolean, Response | undefined]> {
     // Only chat creators can write to document collection for now.
     //
@@ -61,8 +62,8 @@ export class PermissionService {
   }
 
   async hasReadDocumentCollectionPermission(
-    userId: Id<UserResponse>,
-    documentCollectionId: Id<DocumentCollectionResponse>,
+    userId: Id<IdType.User>,
+    documentCollectionId: Id<IdType.DocumentCollection>,
   ): Promise<[boolean, Response | undefined]> {
     // Only chat creators can read to document collection for now.
     //
@@ -74,8 +75,8 @@ export class PermissionService {
   }
 
   async hasReadDocumentsFromDataSourceConnectionPermission(
-    userId: Id<UserResponse>,
-    dataSourceConnectionId: Id<DataSourceConnectionResponse>,
+    userId: Id<IdType.User>,
+    dataSourceConnectionId: Id<IdType.DataSourceConnection>,
   ): Promise<[boolean, Response | undefined]> {
     // Only creator can access documents from DataSource connection
     const dataSourceConnections = await this.dataSourceConnectionService.getAll({
@@ -98,8 +99,8 @@ export class PermissionService {
   }
 
   private async isChatCreatorWithActiveMembership(
-    userId: Id<UserResponse>,
-    chatId: Id<ChatResponse>,
+    userId: Id<IdType.User>,
+    chatId: Id<IdType.Chat>,
   ): Promise<[boolean, Response | undefined]> {
     const chat = await this.chatService.get(chatId);
     if (!chat) {
@@ -125,8 +126,8 @@ export class PermissionService {
   }
 
   private async isDocumentCollectionCreatorWithActiveMembership(
-    userId: Id<UserResponse>,
-    documentCollectionId: Id<DocumentCollectionResponse>,
+    userId: Id<IdType.User>,
+    documentCollectionId: Id<IdType.DocumentCollection>,
   ): Promise<[boolean, Response | undefined]> {
     const collection =
       await this.documentCollectionService.get(documentCollectionId);

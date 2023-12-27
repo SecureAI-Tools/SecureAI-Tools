@@ -18,14 +18,14 @@ import { Sidebar } from "lib/fe/components/side-bar";
 import { DocumentsDataSourceSelector } from "lib/fe/components/data-sources/documents-data-source-selector";
 import { SelectedDocument } from "lib/fe/types/selected-document";
 
-import { Id, DocumentCollectionResponse, isEmpty, DataSource } from "@repo/core";
+import { Id, IdType, isEmpty, DataSource } from "@repo/core";
 
 const CreateDocumentCollections = ({ orgSlug }: { orgSlug: string }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [documentCollectionId, setDocumentCollectionId] = useState<
-    Id<DocumentCollectionResponse> | undefined
+    Id<IdType.DocumentCollection> | undefined
   >();
   const [selectedDocuments, setSelectedDocuments] = useState<
     Map<DataSource, SelectedDocument[]>

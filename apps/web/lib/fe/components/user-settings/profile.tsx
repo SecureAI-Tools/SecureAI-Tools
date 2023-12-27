@@ -10,7 +10,7 @@ import { Toasts } from "lib/fe/components/toasts";
 import useToasts from "lib/fe/hooks/use-toasts";
 import { UserUpdateRequest } from "lib/types/api/user-update-request";
 
-import { Id, UserResponse } from "@repo/core";
+import { Id, IdType, UserResponse } from "@repo/core";
 
 const UserProfileSettings = () => {
   const {
@@ -124,7 +124,7 @@ const UserProfileSettings = () => {
 export default UserProfileSettings;
 
 const updateUser = async (
-  userId: Id<UserResponse>,
+  userId: Id<IdType.User>,
   req: UserUpdateRequest,
 ): Promise<ResponseWithHeaders<UserResponse>> => {
   return await patch<UserUpdateRequest, UserResponse>(userApiPath(userId), req);

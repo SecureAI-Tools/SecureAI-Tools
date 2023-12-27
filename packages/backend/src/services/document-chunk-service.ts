@@ -1,8 +1,8 @@
 import { DocumentChunk, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
-import { Id, DocumentResponse, DocumentChunkResponse } from "@repo/core";
+import { Id, IdType } from "@repo/core";
 
 export interface DocumentChunkCreateInput {
-  documentId: Id<DocumentResponse>;
+  documentId: Id<IdType.Document>;
   vectorDbId: string;
 }
 
@@ -11,7 +11,7 @@ export class DocumentChunkService {
     return await prismaClient.documentChunk.createMany({
       data: inputs.map(i => {
         return {
-          id: Id.generate(DocumentChunkResponse).toString(),
+          id: Id.generate<IdType.DocumentChunk>().toString(),
           documentId: i.documentId.toString(),
           vectorDbId: i.vectorDbId,
         }

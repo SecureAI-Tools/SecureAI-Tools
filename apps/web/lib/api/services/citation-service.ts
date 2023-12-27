@@ -1,14 +1,12 @@
-import { ChatMessageResponse } from "lib/types/api/chat-message.response";
-
 import { Citation, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
 import { API } from "@repo/backend";
-import { Id, DocumentResponse } from "@repo/core";
+import { Id, IdType } from "@repo/core";
 
 export interface CitationCreateInput {
   documentChunkId: string;
   score: number;
-  chatMessageId: Id<ChatMessageResponse>;
-  documentId: Id<DocumentResponse>;
+  chatMessageId: Id<IdType.ChatMessage>;
+  documentId: Id<IdType.Document>;
 }
 
 export class CitationService {
@@ -24,7 +22,7 @@ export class CitationService {
   ): Promise<Citation> {
     return await prisma.citation.create({
       data: {
-        id: Id.generate(ChatMessageResponse).toString(),
+        id: Id.generate<IdType.ChatMessage>().toString(),
         documentChunkId: i.documentChunkId,
         score: i.score,
         chatMessageId: i.chatMessageId.toString(),

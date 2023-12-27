@@ -14,8 +14,7 @@ import {
 import { API } from "@repo/backend";
 import {
   Id,
-  UserResponse,
-  OrgMembershipResponse,
+  IdType,
   OrgMembershipRole,
   OrgMembershipStatus,
 } from "@repo/core";
@@ -102,7 +101,7 @@ export class OrgMembershipService {
         // no membership -- create one
         const createdMembership = await prisma.orgMembership.create({
           data: {
-            id: Id.generate(OrgMembershipResponse).toString(),
+            id: Id.generate<IdType.OrgMembership>().toString(),
             userId: dbUser.id,
             orgId: org.id,
             role: req.role,
@@ -122,7 +121,7 @@ export class OrgMembershipService {
     return await Promise.all(orgMembershipPromises);
   }
 
-  async get(id: Id<OrgMembershipResponse>): Promise<OrgMembership | null> {
+  async get(id: Id<IdType.OrgMembership>): Promise<OrgMembership | null> {
     return await prismaClient.$transaction(async (prisma: TxPrismaClient) => {
       return await this.getTxn(prisma, id);
     });
@@ -130,7 +129,7 @@ export class OrgMembershipService {
 
   async getTxn(
     prisma: TxPrismaClient,
-    id: Id<OrgMembershipResponse>,
+    id: Id<IdType.OrgMembership>,
   ): Promise<OrgMembership | null> {
     return await prisma.orgMembership.findUnique({
       where: {
@@ -204,7 +203,7 @@ export class OrgMembershipService {
   }
 
   async isActiveMember(
-    userId: Id<UserResponse>,
+    userId: Id<IdType.User>,
     orgIdOrSlug: string,
   ): Promise<boolean> {
     return this.hasPermission(userId, orgIdOrSlug, [
@@ -217,7 +216,7 @@ export class OrgMembershipService {
   //
   // The user must be either an ADMIN or a USER of that organization
   async hasReadPermission(
-    userId: Id<UserResponse>,
+    userId: Id<IdType.User>,
     orgIdOrSlug: string,
   ): Promise<boolean> {
     return this.hasPermission(userId, orgIdOrSlug, [
@@ -228,14 +227,14 @@ export class OrgMembershipService {
 
   // Checks if given userId has admin permission to orgId
   async hasAdminPermission(
-    userId: Id<UserResponse>,
+    userId: Id<IdType.User>,
     orgIdOrSlug: string,
   ): Promise<boolean> {
     return this.hasPermission(userId, orgIdOrSlug, [OrgMembershipRole.ADMIN]);
   }
 
   async hasPermission(
-    userId: Id<UserResponse>,
+    userId: Id<IdType.User>,
     orgIdOrSlug: string,
     roles: OrgMembershipRole[],
   ): Promise<boolean> {
@@ -254,7 +253,7 @@ export class OrgMembershipService {
   }
 
   async update(
-    id: Id<OrgMembershipResponse>,
+    id: Id<IdType.OrgMembership>,
     req: OrgMembershipUpdateRequest,
   ): Promise<OrgMembership | null> {
     return await prismaClient.$transaction(async (prisma: TxPrismaClient) => {

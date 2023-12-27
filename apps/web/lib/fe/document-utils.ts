@@ -12,7 +12,7 @@ import { DocumentCollectionUpdateRequest } from "lib/types/api/document-collecti
 import { SelectedDocument } from "lib/fe/types/selected-document";
 import { DocumentCreateRequest } from "lib/types/api/document-create.request";
 
-import { DocumentCollectionResponse, Id, DocumentResponse, DataSource } from "@repo/core";
+import { DocumentCollectionResponse, Id, DocumentResponse, DataSource, IdType } from "@repo/core";
 
 export const createDocumentCollection = async (
   orgSlug: string,
@@ -27,7 +27,7 @@ export const createDocumentCollection = async (
 };
 
 export const updateDocumentCollection = async (
-  documentCollectionId: Id<DocumentCollectionResponse>,
+  documentCollectionId: Id<IdType.DocumentCollection>,
   req: DocumentCollectionUpdateRequest,
 ): Promise<DocumentCollectionResponse> => {
   return (
@@ -39,7 +39,7 @@ export const updateDocumentCollection = async (
 };
 
 export const createDocument = async (
-  documentCollectionId: Id<DocumentCollectionCreateRequest>,
+  documentCollectionId: Id<IdType.DocumentCollection>,
   selectedDocument: SelectedDocument,
   indexingMode: IndexingMode,
 ): Promise<DocumentResponse> => {
@@ -62,7 +62,7 @@ export const createDocument = async (
 }
 
 const uploadDocument = async (
-  documentCollectionId: Id<DocumentCollectionCreateRequest>,
+  documentCollectionId: Id<IdType.DocumentCollection>,
   file: File,
   indexingMode: IndexingMode,
 ): Promise<DocumentResponse> => {

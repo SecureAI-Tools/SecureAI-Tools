@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
 
-import { Id, DocumentCollectionResponse } from "@repo/core";
+import { Id, IdType } from "@repo/core";
 import {
   DataSourceConnectionService,
   DocumentCollectionService,
@@ -29,7 +29,7 @@ export async function GET(
     return NextResponseErrors.badRequest();
   }
 
-  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+  const documentCollectionId = Id.from<IdType.DocumentCollection>(
     params.documentCollectionId,
   );
   const [permission, resp] =

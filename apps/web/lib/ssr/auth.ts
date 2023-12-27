@@ -9,11 +9,11 @@ import { ParsedUrlQuery } from "querystring";
 import { FrontendRoutes } from "lib/fe/routes";
 import { TokenUser } from "lib/types/core/token-user";
 
-import { Id, UserResponse } from "@repo/core";
+import { Id, IdType } from "@repo/core";
 
 export async function isAuthenticated<P>(
   context: GetServerSidePropsContext<ParsedUrlQuery, PreviewData>,
-): Promise<[boolean, Id<UserResponse> | undefined]> {
+): Promise<[boolean, Id<IdType.User> | undefined]> {
   const token = await getToken({ req: context.req });
 
   if (
@@ -30,7 +30,7 @@ export async function isAuthenticated<P>(
 export async function isAuthenticatedWithRedirect<P>(
   context: GetServerSidePropsContext<ParsedUrlQuery, PreviewData>,
 ): Promise<
-  [GetServerSidePropsResult<P> | undefined, Id<UserResponse> | undefined]
+  [GetServerSidePropsResult<P> | undefined, Id<IdType.User> | undefined]
 > {
   const [authenticated, userId] = await isAuthenticated(context);
 

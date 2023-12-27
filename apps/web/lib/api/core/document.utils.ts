@@ -1,7 +1,7 @@
 import path from "path";
 import sanitize from "sanitize-filename";
 
-import { Id, OrganizationResponse, DocumentCollectionResponse, DocumentResponse } from "@repo/core";
+import { Id, IdType } from "@repo/core";
 
 export function getDocumentObjectKey({
   orgId,
@@ -9,9 +9,9 @@ export function getDocumentObjectKey({
   documentId,
   file,
 }: {
-  orgId: Id<OrganizationResponse>;
-  documentCollectionId: Id<DocumentCollectionResponse>;
-  documentId: Id<DocumentResponse>;
+  orgId: Id<IdType.Organization>;
+  documentCollectionId: Id<IdType.DocumentCollection>;
+  documentId: Id<IdType.Document>;
   file: File;
 }): string {
   return path.join(

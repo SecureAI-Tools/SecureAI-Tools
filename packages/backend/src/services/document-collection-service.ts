@@ -9,17 +9,15 @@ import { customAlphabet } from "nanoid";
 import { API } from "../utils/api.utils";
 import {
   Id,
-  OrganizationResponse,
+  IdType,
   ModelType,
-  DocumentCollectionResponse,
-  UserResponse,
 } from "@repo/core";
 
 export interface DocumentCollectionCreateInput {
   name?: string;
   description?: string;
-  ownerId: Id<UserResponse>;
-  orgId: Id<OrganizationResponse>;
+  ownerId: Id<IdType.User>;
+  orgId: Id<IdType.Organization>;
   model: string;
   modelType: ModelType;
 }
@@ -37,7 +35,7 @@ export class DocumentCollectionService {
   ): Promise<DocumentCollection> {
     return prisma.documentCollection.create({
       data: {
-        id: Id.generate(DocumentCollectionResponse).toString(),
+        id: Id.generate<IdType.DocumentCollection>().toString(),
         name: i.name,
         description: i.description,
         internalName: generateInternalName(),
@@ -50,7 +48,7 @@ export class DocumentCollectionService {
   }
 
   async get(
-    id: Id<DocumentCollectionResponse>,
+    id: Id<IdType.DocumentCollection>,
   ): Promise<DocumentCollection | null> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
       return await this.getWithTxn(tx, id);
@@ -59,7 +57,7 @@ export class DocumentCollectionService {
 
   async getWithTxn(
     prisma: TxPrismaClient,
-    id: Id<DocumentCollectionResponse>,
+    id: Id<IdType.DocumentCollection>,
   ): Promise<DocumentCollection | null> {
     return await prisma.documentCollection.findFirst({
       where: {
@@ -118,7 +116,7 @@ export class DocumentCollectionService {
   }
 
   async delete(
-    id: Id<DocumentCollectionResponse>,
+    id: Id<IdType.DocumentCollection>,
   ): Promise<DocumentCollection | null> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
       return await this.deleteWithTxn(tx, id);
@@ -127,7 +125,7 @@ export class DocumentCollectionService {
 
   async deleteWithTxn(
     prisma: TxPrismaClient,
-    id: Id<DocumentCollectionResponse>,
+    id: Id<IdType.DocumentCollection>,
   ): Promise<DocumentCollection | null> {
     return await prisma.documentCollection.update({
       where: {
@@ -140,7 +138,7 @@ export class DocumentCollectionService {
   }
 
   async update(
-    id: Id<DocumentCollectionResponse>,
+    id: Id<IdType.DocumentCollection>,
     data: Prisma.DocumentCollectionUpdateInput,
   ): Promise<DocumentCollection | null> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
@@ -150,7 +148,7 @@ export class DocumentCollectionService {
 
   async updateWithTxn(
     prisma: TxPrismaClient,
-    id: Id<DocumentCollectionResponse>,
+    id: Id<IdType.DocumentCollection>,
     data: Prisma.DocumentCollectionUpdateInput,
   ): Promise<DocumentCollection | null> {
     return await prisma.documentCollection.update({

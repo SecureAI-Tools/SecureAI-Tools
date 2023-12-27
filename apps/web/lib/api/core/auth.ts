@@ -5,7 +5,7 @@ import { NextRequest } from "next/server";
 import { TokenUser } from "lib/types/core/token-user";
 import { UserService } from "lib/api/services/user.service";
 
-import { ErrorResponse, Id, UserResponse } from "@repo/core";
+import { ErrorResponse, Id, IdType } from "@repo/core";
 import { sendUnauthorizedError } from "@repo/backend";
 
 const userService = new UserService();
@@ -13,11 +13,11 @@ const userService = new UserService();
 export async function isAuthenticated<T>(
   req: NextApiRequest | NextRequest,
   res?: NextApiResponse<T | ErrorResponse> | undefined,
-): Promise<[boolean, Id<UserResponse> | undefined]> {
+): Promise<[boolean, Id<IdType.User> | undefined]> {
   const token = await getToken({ req });
 
   if (token) {
-    const userId = Id.from<UserResponse>((token.user as TokenUser).id);
+    const userId = Id.from<IdType.User>((token.user as TokenUser).id);
     const user = await userService.get(userId);
     if (user) {
       return [true, userId];

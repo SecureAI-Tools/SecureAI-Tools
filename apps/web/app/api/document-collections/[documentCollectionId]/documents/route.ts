@@ -5,7 +5,7 @@ import { PermissionService } from "lib/api/services/permission-service";
 import { DocumentCreateRequest } from "lib/types/api/document-create.request";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 
-import { Id, DocumentCollectionResponse, DocumentResponse, DataSourceConnectionResponse, DataSource, DocumentIndexingStatus } from "@repo/core";
+import { Id, DocumentResponse, DataSource, DocumentIndexingStatus, IdType } from "@repo/core";
 import { DocumentService, NextResponseErrors, API, DataSourceConnectionService, generateDocumentUri, PaperlessNgxClient, addToIndexingQueue } from "@repo/backend";
 import { IndexingMode } from "lib/types/core/indexing-mode";
 
@@ -24,7 +24,7 @@ export async function GET(
   }
 
   // Check permission
-  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+  const documentCollectionId = Id.from<IdType.DocumentCollection>(
     params.documentCollectionId,
   );
   const [permission, resp] =
@@ -77,7 +77,7 @@ export async function POST(
   }
 
   // Check permissions
-  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+  const documentCollectionId = Id.from<IdType.DocumentCollection>(
     params.documentCollectionId,
   );
   const [permission, resp] =
@@ -93,7 +93,7 @@ export async function POST(
     (await req.json()) as DocumentCreateRequest;
 
   // Check if user has permission to use data source connection
-  const dataSourceConnectionId = Id.from<DataSourceConnectionResponse>(documentCreateRequest.dataSourceConnectionId);
+  const dataSourceConnectionId = Id.from<IdType.DataSourceConnection>(documentCreateRequest.dataSourceConnectionId);
   const [hasPermissions, permissionResp] = await permissionService.hasReadDocumentsFromDataSourceConnectionPermission(
     userId!,
     dataSourceConnectionId,
@@ -129,7 +129,7 @@ export async function POST(
     guidInDataSource: documentCreateRequest.externalId,
   });
   const document = await documentService.createOrLink({
-    id: Id.generate(DocumentResponse),
+    id: Id.generate<IdType.Document>(),
     name: documentCreateRequest.name,
     mimeType: "application/pdf",
     indexingStatus: DocumentIndexingStatus.NOT_INDEXED,

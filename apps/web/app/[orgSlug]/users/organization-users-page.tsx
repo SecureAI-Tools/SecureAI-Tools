@@ -40,6 +40,7 @@ import {
   OrgMembershipResponse,
   OrgMembershipRole,
   OrgMembershipStatus,
+  IdType,
 } from "@repo/core";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;
@@ -52,7 +53,7 @@ const getOrganization = async (slug: string): Promise<OrganizationResponse> => {
 };
 
 const getOrgMemberships = async (
-  orgId: Id<OrganizationResponse>,
+  orgId: Id<IdType.Organization>,
   page: number,
   search?: string,
   userId?: string,
@@ -75,7 +76,7 @@ const getOrgMemberships = async (
 };
 
 const updateMembership = async (
-  membershipId: Id<OrgMembershipResponse>,
+  membershipId: Id<IdType.OrgMembership>,
   req: OrgMembershipUpdateRequest,
 ): Promise<OrgMembershipResponse> => {
   return (
@@ -162,7 +163,7 @@ export const OrganizationUsersPage = ({
     });
   }, [tableState, organization]);
 
-  const getCurrentUsersMembership = (orgId: Id<OrganizationResponse>) => {
+  const getCurrentUsersMembership = (orgId: Id<IdType.Organization>) => {
     if (!session) {
       return;
     }
@@ -186,7 +187,7 @@ export const OrganizationUsersPage = ({
   };
 
   const fetchOrgMembershipPage = (
-    orgId: Id<OrganizationResponse>,
+    orgId: Id<IdType.Organization>,
     search: string,
     page: number,
   ) => {

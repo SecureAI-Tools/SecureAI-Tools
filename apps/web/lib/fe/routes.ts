@@ -1,6 +1,4 @@
-import { ChatResponse } from "lib/types/api/chat.response";
-
-import { Id, DocumentCollectionResponse, DataSource } from "@repo/core";
+import { Id, DataSource, IdType } from "@repo/core";
 
 export namespace FrontendRoutes {
   export const INDEX = "/";
@@ -17,7 +15,7 @@ export namespace FrontendRoutes {
 
   export const getChatRoute = (
     orgSlug: string,
-    chatId: Id<ChatResponse>,
+    chatId: Id<IdType.Chat>,
   ): string => `/${orgSlug}/chat/${chatId}`;
 
   export const getOrgHomeRoute = (orgSlug: string): string => `/${orgSlug}`;
@@ -42,7 +40,7 @@ export namespace FrontendRoutes {
 
   export const getDocumentCollectionRoute = (
     orgSlug: string,
-    documentCollectionId: Id<DocumentCollectionResponse>,
+    documentCollectionId: Id<IdType.DocumentCollection>,
   ): string =>
     `${getOrgHomeRoute(orgSlug)}/document-collections/${documentCollectionId}`;
 

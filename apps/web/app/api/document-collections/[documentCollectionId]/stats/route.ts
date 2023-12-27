@@ -4,7 +4,7 @@ import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
 import { DocumentCollectionStatsResponse } from "lib/types/api/document-collection-stats.response";
 
-import { Id, DocumentCollectionResponse, DocumentIndexingStatus } from "@repo/core";
+import { Id, DocumentIndexingStatus, IdType } from "@repo/core";
 import { DocumentToCollectionService, NextResponseErrors } from "@repo/backend";
 
 const permissionService = new PermissionService();
@@ -20,7 +20,7 @@ export async function GET(
   }
 
   // Check permission
-  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+  const documentCollectionId = Id.from<IdType.DocumentCollection>(
     params.documentCollectionId,
   );
   const [permission, resp] =

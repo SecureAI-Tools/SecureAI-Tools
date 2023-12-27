@@ -22,6 +22,7 @@ import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
 import {
   OrganizationResponse,
   Id,
+  IdType,
   MAX_ADD_USERS_CSV_ROWS,
   isEmpty,
   OrgMembershipResponse,
@@ -36,7 +37,7 @@ const getOrganization = async (slug: string): Promise<OrganizationResponse> => {
 };
 
 const postMemberships = async (
-  orgId: Id<OrganizationResponse>,
+  orgId: Id<IdType.Organization>,
   inputs: UserInput[],
 ): Promise<OrgMembershipResponse[]> => {
   return (

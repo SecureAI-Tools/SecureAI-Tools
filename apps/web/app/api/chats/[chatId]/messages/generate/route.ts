@@ -13,14 +13,12 @@ import { ChatMessageRole } from "lib/types/core/chat-message-role";
 import { ChatMessagesRequest } from "lib/types/api/chat-messages.request";
 import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
-import { ChatResponse } from "lib/types/api/chat.response";
 import { ChatService } from "lib/api/services/chat-service";
 import { ChatType } from "lib/types/core/chat-type";
 import { CitationService } from "lib/api/services/citation-service";
-import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import { getWebLogger } from "lib/api/core/logger";
 
-import { Id, DocumentCollectionResponse, DocumentChunkMetadata } from "@repo/core";
+import { Id, DocumentChunkMetadata, IdType } from "@repo/core";
 import { DocumentCollectionService, ModelProviderService, NextResponseErrors } from "@repo/backend";
 
 const chatMessageService = new ChatMessageService();
@@ -47,7 +45,7 @@ export async function POST(
   }
 
   // Check permissions
-  const chatId = Id.from<ChatResponse>(params.chatId);
+  const chatId = Id.from<IdType.Chat>(params.chatId);
   const [permission, resp] = await permissionService.hasWritePermission(
     userId!,
     chatId,
@@ -118,7 +116,7 @@ async function generateChatWithDocs(
   }
 
   const documentCollection = await documentCollectionService.get(
-    Id.from<DocumentCollectionResponse>(chat.documentCollectionId),
+    Id.from<IdType.DocumentCollection>(chat.documentCollectionId),
   );
   if (!documentCollection) {
     return NextResponseErrors.notFound();
@@ -177,7 +175,7 @@ async function generateChatWithDocs(
             chatId: chat.id,
           });
 
-          const chatMessageId = Id.from<ChatMessageResponse>(chatMessage.id);
+          const chatMessageId = Id.from<IdType.ChatMessage>(chatMessage.id);
           const promises = sourcesWithScores.map(async (s) => {
             const [lcDoc, score] = s;
             const meta = lcDoc.metadata as DocumentChunkMetadata;

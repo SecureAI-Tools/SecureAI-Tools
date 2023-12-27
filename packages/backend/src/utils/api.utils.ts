@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { Prisma } from "@repo/database";
 import { sendBadRequestError } from "./utils";
 
-import { getFirst, ErrorResponse, Id, PAGINATION_STARTING_PAGE_NUMBER, PAGINATION_DEFAULT_PAGE_SIZE, ResponseHeaders, HEADER_PAGINATION_TOTAL_COUNT } from "@repo/core";
+import { getFirst, ErrorResponse, PAGINATION_STARTING_PAGE_NUMBER, PAGINATION_DEFAULT_PAGE_SIZE, ResponseHeaders, HEADER_PAGINATION_TOTAL_COUNT } from "@repo/core";
 
 export namespace API {
   export function getFirstQueryParam(
@@ -48,29 +48,6 @@ export namespace API {
       sendBadRequestError(res, "invalid request body");
       return undefined;
     }
-  }
-
-  export function validateAndGetPathInput<T, R>(
-    param: string,
-    req: NextApiRequest,
-    res: NextApiResponse<R | ErrorResponse>,
-    ctor: new () => T,
-  ): Id<T> | undefined;
-  export function validateAndGetPathInput<T>(
-    param: string,
-    req: NextApiRequest,
-    res: NextApiResponse<T | ErrorResponse>,
-    ctor: new () => T,
-  ): Id<T> | undefined {
-    const inputValue = getFirstQueryParam(req, param);
-
-    if (inputValue) {
-      return Id.from(inputValue);
-    }
-
-    sendBadRequestError(res, "Must specify a valid token parameter");
-
-    return undefined;
   }
 
   export class PaginationParams {

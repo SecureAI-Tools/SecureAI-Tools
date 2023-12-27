@@ -25,7 +25,7 @@ import { Chat } from "lib/fe/components/chat";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import { CitationResponse } from "lib/types/api/citation-response";
 
-import { Id, DocumentCollectionResponse, DocumentResponse, DocumentToCollectionResponse } from "@repo/core";
+import { Id, DocumentResponse, DocumentToCollectionResponse, IdType } from "@repo/core";
 
 export function ChatWithDocs({
   chat,
@@ -47,7 +47,7 @@ export function ChatWithDocs({
   const pageNavigationPluginInstance = pageNavigationPlugin();
   const { jumpToPage } = pageNavigationPluginInstance;
 
-  const documentCollectionId = Id.from<DocumentCollectionResponse>(
+  const documentCollectionId = Id.from<IdType.DocumentCollection>(
     chat.documentCollectionId!,
   );
 

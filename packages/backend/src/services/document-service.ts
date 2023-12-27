@@ -3,17 +3,17 @@ import { LocalObjectStorageService } from "./local-object-storage-service";
 import { PaperlessNgxClient } from "../clients/paperless-ngx-client";
 
 import { DataSourceConnection, Document, Prisma, TxPrismaClient, prismaClient } from "@repo/database";
-import { Id, DocumentResponse, DocumentIndexingStatus, DocumentCollectionResponse, DocumentToCollectionResponse, DataSourceConnectionResponse, DataSource } from "@repo/core";
+import { Id, IdType, DocumentIndexingStatus, DataSource } from "@repo/core";
 
 export interface DocumentCreateInput {
-  id: Id<DocumentResponse>;
+  id: Id<IdType.Document>;
   name: string;
   mimeType: string;
   uri: string;
   externalId: string;
   indexingStatus: DocumentIndexingStatus;
-  collectionId: Id<DocumentCollectionResponse>;
-  connectionId: Id<DataSourceConnectionResponse>;
+  collectionId: Id<IdType.DocumentCollection>;
+  connectionId: Id<IdType.DataSourceConnection>;
 }
 
 export class DocumentService {
@@ -34,7 +34,7 @@ export class DocumentService {
     // Create corresponding DocumentToCollection
     await prisma.documentToCollection.create({
       data: {
-        id: Id.generate(DocumentToCollectionResponse).toString(),
+        id: Id.generate<IdType.DocumentToCollection>().toString(),
         documentId: document.id,
         collectionId: i.collectionId.toString(),
         indexingStatus: i.indexingStatus,
@@ -44,7 +44,7 @@ export class DocumentService {
     // Create corresponding DocumentToDataSource
     await prisma.documentToDataSource.create({
       data: {
-        id: Id.generate(DocumentToCollectionResponse).toString(),
+        id: Id.generate<IdType.DocumentToDataSource>().toString(),
         documentId: document.id,
         dataSourceId: i.connectionId.toString(),
       },
@@ -79,7 +79,7 @@ export class DocumentService {
     });
   }
 
-  async get(id: Id<DocumentResponse>): Promise<Document | null> {
+  async get(id: Id<IdType.Document>): Promise<Document | null> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
       return await this.getWithTxn(tx, id);
     });
@@ -87,7 +87,7 @@ export class DocumentService {
 
   async getWithTxn(
     prisma: TxPrismaClient,
-    id: Id<DocumentResponse>,
+    id: Id<IdType.Document>,
   ): Promise<Document | null> {
     return await prisma.document.findUnique({
       where: {
@@ -146,7 +146,7 @@ export class DocumentService {
     });
   }
 
-  async delete(id: Id<DocumentResponse>): Promise<Document | null> {
+  async delete(id: Id<IdType.Document>): Promise<Document | null> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
       return await tx.document.delete({
         where: {
@@ -161,8 +161,8 @@ export class DocumentService {
     collectionId,
     indexingStatus,
   }: {
-    documentId: Id<DocumentResponse>,
-    collectionId: Id<DocumentCollectionResponse>,
+    documentId: Id<IdType.Document>,
+    collectionId: Id<IdType.DocumentCollection>,
     indexingStatus: DocumentIndexingStatus,
   }): Promise<void> {
     await prismaClient.$transaction(async (tx: TxPrismaClient) => {

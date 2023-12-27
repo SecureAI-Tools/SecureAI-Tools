@@ -7,7 +7,7 @@ import { ChatService } from "lib/api/services/chat-service";
 import { ChatResponse } from "lib/types/api/chat.response";
 import { ChatUpdateRequest } from "lib/types/api/chat-update.request";
 
-import { Id } from "@repo/core";
+import { Id, IdType } from "@repo/core";
 import { NextResponseErrors } from "@repo/backend";
 
 const permissionService = new PermissionService();
@@ -23,7 +23,7 @@ export async function GET(
   }
 
   // Check permissions
-  const chatId = Id.from<ChatResponse>(params.chatId);
+  const chatId = Id.from<IdType.Chat>(params.chatId);
   const [permission, resp] = await permissionService.hasReadPermission(
     userId!,
     chatId,
@@ -49,7 +49,7 @@ export async function DELETE(
   }
 
   // Check permissions
-  const chatId = Id.from<ChatResponse>(params.chatId);
+  const chatId = Id.from<IdType.Chat>(params.chatId);
   const [permission, resp] = await permissionService.hasWritePermission(
     userId!,
     chatId,
@@ -75,7 +75,7 @@ export async function PATCH(
   }
 
   // Check permissions
-  const chatId = Id.from<ChatResponse>(params.chatId);
+  const chatId = Id.from<IdType.Chat>(params.chatId);
   const [permission, resp] = await permissionService.hasWritePermission(
     userId!,
     chatId,

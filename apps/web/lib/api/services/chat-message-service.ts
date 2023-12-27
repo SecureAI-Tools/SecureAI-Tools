@@ -1,4 +1,3 @@
-import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import { ChatMessageRole } from "lib/types/core/chat-message-role";
 
 import {
@@ -7,7 +6,7 @@ import {
   TxPrismaClient,
   prismaClient,
 } from "@repo/database";
-import { Id } from "@repo/core";
+import { Id, IdType } from "@repo/core";
 import { API } from "@repo/backend";
 
 export interface ChatMessageCreateInput {
@@ -29,7 +28,7 @@ export class ChatMessageService {
   ): Promise<ChatMessage> {
     return await prisma.chatMessage.create({
       data: {
-        id: Id.generate(ChatMessageResponse).toString(),
+        id: Id.generate<IdType.ChatMessage>().toString(),
         role: i.role,
         content: i.content,
         chatId: i.chatId,

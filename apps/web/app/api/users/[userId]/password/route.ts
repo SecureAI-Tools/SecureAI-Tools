@@ -5,7 +5,7 @@ import { PasswordUpdateRequest } from "lib/types/api/password-update.request";
 import { UserService } from "lib/api/services/user.service";
 import { comparePasswords } from "lib/api/core/password.utils";
 
-import { Id, UserResponse } from "@repo/core";
+import { Id, IdType, UserResponse } from "@repo/core";
 import { NextResponseErrors } from "@repo/backend";
 
 const userService = new UserService();
@@ -20,7 +20,7 @@ export async function PATCH(
   }
 
   // Check permissions
-  const userId = Id.from<UserResponse>(params.userId);
+  const userId = Id.from<IdType.User>(params.userId);
   if (!userId.equals(authenticatedUserId!)) {
     return NextResponseErrors.forbidden();
   }

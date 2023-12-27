@@ -13,7 +13,6 @@ import { FrontendRoutes } from "lib/fe/routes";
 import ChatInput from "lib/fe/components/chat-input";
 import { Toasts } from "lib/fe/components/toasts";
 import { ChatType } from "lib/types/core/chat-type";
-import { DocumentCollectionCreateRequest } from "lib/types/api/document-collection-create.request";
 import {
   createDocument,
   createDocumentCollection,
@@ -34,7 +33,6 @@ import { Tooltip } from "lib/fe/components/tooltip";
 
 import {
   Id,
-  DocumentCollectionResponse,
   DocumentResponse,
   OrganizationResponse,
   ModelType,
@@ -42,6 +40,7 @@ import {
   modelTypeToReadableName,
   OrgMembershipResponse,
   DataSource,
+  IdType,
 } from "@repo/core";
 import { DocumentsDataSourceSelector } from "./data-sources/documents-data-source-selector";
 import { SelectedDocument } from "../types/selected-document";
@@ -67,7 +66,7 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
           ? ChatType.CHAT_WITH_LLM
           : ChatType.CHAT_WITH_DOCS;
 
-      let documentCollectionId: Id<DocumentCollectionResponse> | undefined =
+      let documentCollectionId: Id<IdType.DocumentCollection> | undefined =
         undefined;
       if (chatType === ChatType.CHAT_WITH_DOCS) {
         const documentCollection = await createDocumentCollection(orgSlug, {});
@@ -251,7 +250,7 @@ export default function NewChat({ orgSlug }: { orgSlug: string }) {
 }
 
 const createDocuments = async (
-  documentCollectionId: Id<DocumentCollectionCreateRequest>,
+  documentCollectionId: Id<IdType.DocumentCollection>,
   selectedDocuments: SelectedDocument[],
 ): Promise<DocumentResponse[]> => {
   const promises = selectedDocuments.map((sd) => {

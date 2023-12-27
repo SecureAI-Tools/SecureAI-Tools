@@ -33,6 +33,7 @@ import { ChatType } from "lib/types/core/chat-type";
 import {
   DEFAULT_CHAT_TITLE,
   Id,
+  IdType,
   isEmpty,
   PAGINATION_DEFAULT_PAGE_SIZE,
 } from "@repo/core";
@@ -296,7 +297,9 @@ function RowActionItem({
   );
 }
 
-async function deleteChat(id: Id<ChatResponse>): Promise<ChatResponse> {
+async function deleteChat(
+  id: Id<IdType.Chat>
+): Promise<ChatResponse> {
   return (await delete_<ChatResponse>(chatApiPath(id))).response;
 }
 

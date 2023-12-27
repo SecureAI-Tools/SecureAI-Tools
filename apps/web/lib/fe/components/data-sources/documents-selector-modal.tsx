@@ -13,7 +13,7 @@ import useDebounce from "lib/fe/hooks/use-debounce";
 import { formatDateTime } from "lib/core/date-format";
 import { SelectedDocument } from "lib/fe/types/selected-document";
 
-import { DataSource, DataSourceConnectionDocumentResponse, DataSourceConnectionResponse, Id, PAGINATION_DEFAULT_PAGE_SIZE, PAGINATION_STARTING_PAGE_NUMBER, dataSourceToReadableName } from "@repo/core";
+import { DataSource, DataSourceConnectionDocumentResponse, Id, IdType, PAGINATION_DEFAULT_PAGE_SIZE, PAGINATION_STARTING_PAGE_NUMBER, dataSourceToReadableName } from "@repo/core";
 
 const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;
 
@@ -26,7 +26,7 @@ export const DocumentsSelectorModal = ({
   onClose,
 }: {
   dataSource: DataSource,
-  dataSourceConnectionId: Id<DataSourceConnectionResponse>,
+  dataSourceConnectionId: Id<IdType.DataSourceConnection>,
   selectedDocuments: SelectedDocument[],
   show: boolean,
   onDocumentsSelected: (dataSource: DataSource, newSelection: SelectedDocument[]) => void;

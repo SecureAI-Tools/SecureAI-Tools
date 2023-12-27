@@ -4,11 +4,10 @@ import { ChatMessageService } from "lib/api/services/chat-message-service";
 import { toChatMessageRole } from "lib/types/core/chat-message-role";
 import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
-import { ChatResponse } from "lib/types/api/chat.response";
 import { ChatMessageResponse } from "lib/types/api/chat-message.response";
 import { ChatMessageCreateRequest } from "lib/types/api/chat-message-create.request";
 
-import { Id } from "@repo/core";
+import { Id, IdType } from "@repo/core";
 import { NextResponseErrors, API } from "@repo/backend";
 
 const chatMessageService = new ChatMessageService();
@@ -35,7 +34,7 @@ export async function POST(
   }
 
   // Check permissions
-  const chatId = Id.from<ChatResponse>(params.chatId);
+  const chatId = Id.from<IdType.Chat>(params.chatId);
   const [permission, resp] = await permissionService.hasWritePermission(
     userId!,
     chatId,
@@ -63,7 +62,7 @@ export async function GET(
     return NextResponseErrors.unauthorized();
   }
 
-  const chatId = Id.from<ChatResponse>(params.chatId);
+  const chatId = Id.from<IdType.Chat>(params.chatId);
   const [permission, resp] = await permissionService.hasReadPermission(
     userId!,
     chatId,

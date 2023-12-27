@@ -4,7 +4,7 @@ import { isAuthenticated } from "lib/api/core/auth";
 import { UserService } from "lib/api/services/user.service";
 import { UserUpdateRequest } from "lib/types/api/user-update-request";
 
-import { Id, UserResponse } from "@repo/core";
+import { Id, IdType, UserResponse } from "@repo/core";
 import { NextResponseErrors } from "@repo/backend";
 
 const userService = new UserService();
@@ -19,7 +19,7 @@ export async function PATCH(
   }
 
   // Check permissions
-  const userId = Id.from<UserResponse>(params.userId);
+  const userId = Id.from<IdType.User>(params.userId);
   if (!userId.equals(authenticatedUserId!)) {
     return NextResponseErrors.forbidden();
   }

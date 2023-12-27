@@ -16,14 +16,14 @@ import { FrontendRoutes } from "lib/fe/routes";
 import { SuccessModal } from "lib/fe/components/success-modal";
 import { DataSourceConnectionCheckResponse } from "lib/types/api/data-source-connection-check.response";
 
-import { DataSource, Id, UserResponse, isEmpty } from "@repo/core";
+import { DataSource, Id, IdType, isEmpty } from "@repo/core";
 
 export const PaperlessNgxConnector = ({
   orgSlug,
   userId,
 }: {
   orgSlug: string;
-  userId: Id<UserResponse>;
+  userId: Id<IdType.User>;
 }) => {
   const [authTokenInput, setAuthTokenInput] = useState("");
   const [urlInput, setUrlInput] = useState("");

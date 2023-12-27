@@ -2,14 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { ChromaClient } from "chromadb";
 
 import { isAuthenticated } from "lib/api/core/auth";
-import { ChatResponse } from "lib/types/api/chat.response";
 import { PermissionService } from "lib/api/services/permission-service";
 import { CitationService } from "lib/api/services/citation-service";
 import { CitationResponse } from "lib/types/api/citation-response";
 import { ChatService } from "lib/api/services/chat-service";
 import { ChatType } from "lib/types/core/chat-type";
 
-import { removeTrailingSlash, Id, DocumentCollectionResponse, DocumentChunkMetadata } from "@repo/core";
+import { removeTrailingSlash, Id, DocumentChunkMetadata, IdType } from "@repo/core";
 import { DocumentCollectionService, NextResponseErrors } from "@repo/backend";
 
 const chatService = new ChatService();
@@ -30,7 +29,7 @@ export async function GET(
     return NextResponseErrors.unauthorized();
   }
 
-  const chatId = Id.from<ChatResponse>(params.chatId);
+  const chatId = Id.from<IdType.Chat>(params.chatId);
   const [permission, resp] = await permissionService.hasReadPermission(
     authUserId!,
     chatId,
@@ -57,7 +56,7 @@ export async function GET(
   }
 
   const documentCollection = await documentCollectionService.get(
-    Id.from<DocumentCollectionResponse>(chat.documentCollectionId),
+    Id.from<IdType.DocumentCollection>(chat.documentCollectionId),
   );
   if (!documentCollection) {
     return NextResponseErrors.notFound();
