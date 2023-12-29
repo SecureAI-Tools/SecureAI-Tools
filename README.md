@@ -101,6 +101,9 @@ A set of features on our todo list (in no particular order).
 * ✅ Support for OpenAI, Claude etc APIs
 * ✅ Reusable document collections
 * ✅ Offline document processing
+* ✅ Integration with Paperless-ngx
+* ✅ Integration with Google Drive
+* Support more file types (Google Doc, Docx, Markdown etc)
 * Support for markdown rendering
 * Chat sharing
 * Mobile friendly UI
