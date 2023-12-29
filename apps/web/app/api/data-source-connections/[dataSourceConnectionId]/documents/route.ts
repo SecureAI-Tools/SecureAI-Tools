@@ -10,12 +10,16 @@ import {
   DataSourceConnectionService,
   PaperlessNgxClient,
   toDataSourceConnectionDocumentResponse,
+  GoogleDriveClient,
 } from "@repo/backend";
-import { DataSource, Id, IdType } from "@repo/core";
+import { DataSource, DataSourceConnectionDocumentResponse, Id, IdType } from "@repo/core";
+import { DataSourceConnection } from "@repo/database";
 
 const permissionService = new PermissionService();
 const dataSourceConnectionService = new DataSourceConnectionService();
 const logger = getWebLogger();
+
+const QUERY_PARAM = "query";
 
 export async function GET(
   req: NextRequest,
@@ -31,7 +35,6 @@ export async function GET(
   }
 
   const { searchParams } = new URL(req.url);
-  const query = searchParams.get("query");
 
   // Check permissions
   const dataSourceConnectionId = Id.from<IdType.DataSourceConnection>(
@@ -52,45 +55,12 @@ export async function GET(
   if (!dataSourceConnection) {
     return NextResponseErrors.notFound();
   }
-
-  // TODO: Make this more dynamic when adding support for more data sources!
-  if (dataSourceConnection.dataSource !== DataSource.PAPERLESS_NGX) {
-    return NextResponseErrors.badRequest(
-      `${dataSourceConnection.dataSource} data sources aren't supported`,
-    );
-  }
-
-  const paginationParams = API.PaginationParams.from(searchParams);
-  const paperlessNgxClient = new PaperlessNgxClient(
-    dataSourceConnection.baseUrl!,
-    dataSourceConnection.accessToken!,
-  );
   try {
-    const documentsSearchResponse = await paperlessNgxClient.getDocuments({
-      query: query ?? undefined,
-      page: paginationParams.page,
-      pageSize: paginationParams.pageSize,
-    });
+    const updatedDataSourceConnection = await dataSourceConnectionService.refreshAccessTokenIfExpired(dataSourceConnection);
 
-    if (!documentsSearchResponse.ok) {
-      return NextResponseErrors.internalServerError(
-        `could not search documents from ${dataSourceConnection.dataSource} at ${dataSourceConnection.baseUrl}. Received "${documentsSearchResponse.statusText}" (${documentsSearchResponse.status})`,
-      );
-    }
-
-    return NextResponse.json(
-      documentsSearchResponse.data!.results.map((r) =>
-        toDataSourceConnectionDocumentResponse(r),
-      ),
-      {
-        headers: API.createResponseHeaders({
-          pagination: {
-            totalCount: documentsSearchResponse.data!.count,
-          },
-        }),
-      },
-    );
+    return await getDocuments(updatedDataSourceConnection, searchParams);
   } catch (error) {
+    console.log("error = ", error);
     logger.error(
       `could not fetch documents from ${dataSourceConnection.dataSource}`,
       {
@@ -102,4 +72,95 @@ export async function GET(
       `could not get documents from ${dataSourceConnection.dataSource}`,
     );
   }
+
+}
+
+async function getDocuments(
+  dataSourceConnection: DataSourceConnection,
+  searchParams: URLSearchParams,
+): Promise<Response> {
+  switch (dataSourceConnection.dataSource) {
+    case DataSource.PAPERLESS_NGX:
+      return await getDocumentsFromPaperlessNgx(dataSourceConnection, searchParams);
+    case DataSource.GOOGLE_DRIVE:
+      return await getDocumentsFromGoogleDrive(dataSourceConnection, searchParams);
+    default:
+      return NextResponseErrors.badRequest(
+        `${dataSourceConnection.dataSource} data source is not supported`,
+      );
+  }
+}
+
+async function getDocumentsFromPaperlessNgx(
+  dataSourceConnection: DataSourceConnection,
+  searchParams: URLSearchParams,
+): Promise<Response> {
+  const query = searchParams.get(QUERY_PARAM);
+  const paginationParams = API.PaginationParams.from(searchParams);
+  const paperlessNgxClient = new PaperlessNgxClient(
+    dataSourceConnection.baseUrl!,
+    dataSourceConnection.accessToken!,
+  );
+  const documentsSearchResponse = await paperlessNgxClient.getDocuments({
+    query: query ?? undefined,
+    page: paginationParams.page,
+    pageSize: paginationParams.pageSize,
+  });
+
+  if (!documentsSearchResponse.ok) {
+    return NextResponseErrors.internalServerError(
+      `could not search documents from ${dataSourceConnection.dataSource} at ${dataSourceConnection.baseUrl}. Received "${documentsSearchResponse.statusText}" (${documentsSearchResponse.status})`,
+    );
+  }
+
+  return NextResponse.json(
+    documentsSearchResponse.data!.results.map((r) =>
+      toDataSourceConnectionDocumentResponse(r),
+    ),
+    {
+      headers: API.createResponseHeaders({
+        pagination: {
+          totalCount: documentsSearchResponse.data!.count,
+        },
+      }),
+    },
+  );
+}
+
+async function getDocumentsFromGoogleDrive(
+  dataSourceConnection: DataSourceConnection,
+  searchParams: URLSearchParams,
+): Promise<Response> {
+  const query = searchParams.get(QUERY_PARAM);
+  const paginationParams = API.PaginationParams.from(searchParams);
+  const googleDriveClient = new GoogleDriveClient(dataSourceConnection.accessToken!);
+
+  // Reference: https://developers.google.com/drive/api/guides/search-files#examples
+  const nameQuery = query ? `name contains '${query}' and` : "";
+  const queryWithMimeFilter = `${nameQuery} mimeType = 'application/pdf'`;
+  const documentsSearchResponse = await googleDriveClient.getDocuments({
+    query: queryWithMimeFilter,
+    pageSize: paginationParams.pageSize,
+    fields: "files(id,createdTime,mimeType,name),nextPageToken",
+  });
+
+  if (!documentsSearchResponse.ok) {
+    return NextResponseErrors.internalServerError(
+      `could not search documents from ${dataSourceConnection.dataSource} at ${dataSourceConnection.baseUrl}. Received "${documentsSearchResponse.statusText}" (${documentsSearchResponse.status})`,
+    );
+  }
+
+  return NextResponse.json(
+    documentsSearchResponse.data!.files?.map((f): DataSourceConnectionDocumentResponse => {
+      return {
+        externalId: f.id!,
+        name: f.name!,
+        createdAt: Date.parse(f.createdTime!),
+        mimeType: f.mimeType!,
+        metadata: {
+          ...f,
+        }
+      }
+    })
+  );
 }

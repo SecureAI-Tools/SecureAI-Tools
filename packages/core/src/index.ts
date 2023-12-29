@@ -21,3 +21,4 @@ export * from "./types/org-membership.response";
 export * from "./types/org-membership-role";
 export * from "./types/org-membership-status";
 export * from "./utils/string-utils";
+export * from "./types/oauth-authorize-url.response";

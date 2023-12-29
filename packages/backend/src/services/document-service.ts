@@ -1,6 +1,9 @@
 import { API } from "../utils/api.utils";
 import { LocalObjectStorageService } from "./local-object-storage-service";
 import { PaperlessNgxClient } from "../clients/paperless-ngx-client";
+import { GoogleDriveClient } from "../clients/google-drive-client";
+import { DataSourceConnectionService } from "./data-source-connection-service";
+import { ClientResponse } from "../clients/client-response";
 
 import {
   DataSourceConnection,
@@ -24,6 +27,7 @@ export interface DocumentCreateInput {
 
 export class DocumentService {
   private objectStorageService = new LocalObjectStorageService();
+  private dataSourceConnectionService = new DataSourceConnectionService();
 
   async createOrLink(i: DocumentCreateInput): Promise<Document> {
     return await prismaClient.$transaction(async (tx: TxPrismaClient) => {
@@ -188,29 +192,44 @@ export class DocumentService {
     document: Document,
     dataSourceConnection: DataSourceConnection,
   ): Promise<Blob> {
-    switch (dataSourceConnection.dataSource) {
-      case DataSource.UPLOAD:
-        const fileBuffer = await this.objectStorageService.get(
-          document.externalId,
-        );
-        return new Blob([fileBuffer]);
+    const connection = await this.dataSourceConnectionService.refreshAccessTokenIfExpired(dataSourceConnection);
+
+    if (connection.dataSource === DataSource.UPLOAD) {
+      const fileBuffer = await this.objectStorageService.get(
+        document.externalId,
+      );
+      return new Blob([fileBuffer]);
+    }
+
+    let resp: ClientResponse<Blob>;
+    switch (connection.dataSource) {
       case DataSource.PAPERLESS_NGX:
         const paperlessNgxClient = new PaperlessNgxClient(
-          dataSourceConnection.baseUrl!,
-          dataSourceConnection.accessToken!,
+          connection.baseUrl!,
+          connection.accessToken!,
         );
-        const resp = await paperlessNgxClient.downloadDocument(
+        resp = await paperlessNgxClient.downloadDocument(
           document.externalId,
         );
-        if (!resp.ok) {
-          throw new Error(
-            `could not download document ${document.id} from ${dataSourceConnection.dataSource} (${dataSourceConnection.baseUrl}); Received ${resp.statusText} (${resp.status})`,
-          );
-        }
+        break;
+      case DataSource.GOOGLE_DRIVE:
+        const googleDriveClient = new GoogleDriveClient(
+          connection.accessToken!,
+        );
 
-        return resp.data!;
+        resp = await googleDriveClient.downloadDocument(
+          document.externalId,
+        )
+        break;
       default:
-        throw new Error(`${dataSourceConnection.dataSource} not supported`);
+        throw new Error(`${connection.dataSource} not supported`);
     }
+
+    if (!resp.ok) {
+      throw new Error(
+        `could not download document ${document.id} from ${connection.dataSource} (${connection.baseUrl}); Received ${resp.statusText} (${resp.status})`,
+      );
+    }
+    return resp.data!;
   }
 }

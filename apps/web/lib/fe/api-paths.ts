@@ -289,3 +289,16 @@ export const getDataSourceConnetionDocumentsApiPath = ({
     query,
   )}&page=${pagination.page}&pageSize=${pagination.pageSize}`;
 };
+
+export const getDataSourceAuthorizeUrlApiPath = (
+  dataSource: DataSource,
+  redirectUri: string,
+  scopes: string[],
+): string => {
+  return `/api/data-sources/${dataSource}/oauth/authorize-url?redirectUri=${encodeURIComponent(redirectUri)}`
+    + scopes.map(s => `&scope=${encodeURIComponent(s)}`).join("");
+};
+
+export const getDataSourcesApiPath = (): string => {
+  return `/api/data-sources`;
+};

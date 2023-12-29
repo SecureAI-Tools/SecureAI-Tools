@@ -4,6 +4,7 @@ import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
 import { DocumentCreateRequest } from "lib/types/api/document-create.request";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
+import { IndexingMode } from "lib/types/core/indexing-mode";
 
 import {
   Id,
@@ -11,6 +12,7 @@ import {
   DataSource,
   DocumentIndexingStatus,
   IdType,
+  toDataSource,
 } from "@repo/core";
 import {
   DocumentService,
@@ -18,10 +20,13 @@ import {
   API,
   DataSourceConnectionService,
   generateDocumentUri,
-  PaperlessNgxClient,
   addToIndexingQueue,
 } from "@repo/backend";
-import { IndexingMode } from "lib/types/core/indexing-mode";
+
+const SUPPORTED_DATA_SOURCES = new Set<DataSource>([
+  DataSource.PAPERLESS_NGX,
+  DataSource.GOOGLE_DRIVE,
+]);
 
 const permissionService = new PermissionService();
 const documentService = new DocumentService();
@@ -105,6 +110,11 @@ export async function POST(
 
   const documentCreateRequest = (await req.json()) as DocumentCreateRequest;
 
+  // TODO: Expand this when supporting more document types!
+  if (documentCreateRequest.mimeType !== "application/pdf") {
+    return NextResponseErrors.badRequest(`unsupported mimeType ${documentCreateRequest.mimeType}`);
+  }
+
   // Check if user has permission to use data source connection
   const dataSourceConnectionId = Id.from<IdType.DataSourceConnection>(
     documentCreateRequest.dataSourceConnectionId,
@@ -132,23 +142,9 @@ export async function POST(
     return NextResponseErrors.notFound();
   }
 
-  if (dataSourceConnection.dataSource !== DataSource.PAPERLESS_NGX) {
+  if (!SUPPORTED_DATA_SOURCES.has(toDataSource(dataSourceConnection.dataSource))) {
     return NextResponseErrors.badRequest(
       `Unsupported data source ${dataSourceConnection.dataSource}`,
-    );
-  }
-
-  // Check whether data-source-connection can read externalId doc in data source.
-  const paperlessNgxClient = new PaperlessNgxClient(
-    dataSourceConnection.baseUrl!,
-    dataSourceConnection.accessToken!,
-  );
-  const docResp = await paperlessNgxClient.getDocument(
-    documentCreateRequest.externalId,
-  );
-  if (!docResp.ok) {
-    return NextResponseErrors.badRequest(
-      `Data source connection could not access doc (id = ${documentCreateRequest.externalId}). Received ${docResp.statusText} (${docResp.status})`,
     );
   }
 
@@ -160,7 +156,7 @@ export async function POST(
   const document = await documentService.createOrLink({
     id: Id.generate<IdType.Document>(),
     name: documentCreateRequest.name,
-    mimeType: "application/pdf",
+    mimeType: documentCreateRequest.mimeType,
     indexingStatus: DocumentIndexingStatus.NOT_INDEXED,
     uri: uri,
     externalId: documentCreateRequest.externalId,

@@ -67,6 +67,7 @@ export const createDocument = async (
         dataSourceConnectionId:
           selectedDocument.dataSourceConnectionId!.toString(),
         indexingMode: indexingMode,
+        mimeType: selectedDocument.mimeType,
       },
     )
   ).response;

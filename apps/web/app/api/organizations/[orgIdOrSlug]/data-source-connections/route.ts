@@ -4,21 +4,26 @@ import { isAuthenticated } from "lib/api/core/auth";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { OrganizationService } from "lib/api/services/organization-service";
 import { DataSourceConnectionCreateRequest } from "lib/types/api/data-source-connection-create.request";
+import { isOAuthDataSource } from "lib/api/core/data-source.utils";
 
 import {
   NextResponseErrors,
   API,
   DataSourceConnectionService,
+  DataSourceConnectionCreateInput,
+  OAuthService,
 } from "@repo/backend";
 import {
   DataSourceConnectionResponse,
   Id,
   OrgMembershipStatus,
+  isEmpty,
 } from "@repo/core";
 
 const orgMembershipService = new OrgMembershipService();
 const orgService = new OrganizationService();
 const dataSourceConnectionService = new DataSourceConnectionService();
+const oauthService = new OAuthService();
 
 export async function GET(
   req: NextRequest,
@@ -133,14 +138,43 @@ export async function POST(
   const dataSourceConnectionCreateRequest =
     (await req.json()) as DataSourceConnectionCreateRequest;
 
-  const connection = await dataSourceConnectionService.create({
-    dataSource: dataSourceConnectionCreateRequest.dataSource,
-    baseUrl: dataSourceConnectionCreateRequest.baseUrl,
-    accessToken: dataSourceConnectionCreateRequest.accessToken,
-    accessTokenExpiresAt:
-      dataSourceConnectionCreateRequest.accessTokenExpiresAt,
-    membershipId: Id.from(orgMemberships[0]!.id),
-  });
+  const { dataSource, baseUrl, authorizationCode, redirectUri } = dataSourceConnectionCreateRequest;
+    
+  let input: DataSourceConnectionCreateInput;
+  if (isOAuthDataSource(dataSource)) {
+    if(isEmpty(authorizationCode) || isEmpty(redirectUri)) {
+      return NextResponseErrors.badRequest(
+        `authorizationCode and redirectUri are required for ${dataSource}`
+      );
+    }
+
+    // Exchange authorization code for access token!
+    const tokens = await oauthService.getAccessToken(
+      dataSource,
+      authorizationCode!,
+      redirectUri!,
+    );
+
+    input = {
+      dataSource: dataSource,
+      baseUrl: dataSourceConnectionCreateRequest.baseUrl,
+      accessToken: tokens.accessToken,
+      accessTokenExpiresAt: tokens.accessTokenExpiresAt,
+      refreshToken: tokens.refreshToken,
+      membershipId: Id.from(orgMemberships[0]!.id),
+    };
+  } else {
+    input = {
+      dataSource: dataSource,
+      baseUrl: baseUrl,
+      accessToken: dataSourceConnectionCreateRequest.accessToken,
+      accessTokenExpiresAt:
+        dataSourceConnectionCreateRequest.accessTokenExpiresAt,
+      membershipId: Id.from(orgMemberships[0]!.id),
+    };
+  }
+
+  const connection = await dataSourceConnectionService.create(input);
 
   return NextResponse.json(DataSourceConnectionResponse.fromEntity(connection));
 }

@@ -5,6 +5,7 @@ export interface DataSourceConnectionDocumentResponse {
   name: string;
   // Created-at timestamp from DataSource
   createdAt: number;
+  mimeType: string;
 
   // DataSource specific metadata
   metadata?: any;

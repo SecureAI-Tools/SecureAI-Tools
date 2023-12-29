@@ -6,6 +6,8 @@ export interface SelectedDocument {
 
   name: string;
 
+  mimeType: string;
+
   // Present if dataSource is UPLOAD
   file?: File;
 

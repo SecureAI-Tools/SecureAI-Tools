@@ -95,6 +95,7 @@ export function toDataSourceConnectionDocumentResponse(
     externalId: dr.id.toString(),
     name: dr.title,
     createdAt: new Date(dr.created).getTime(),
+    mimeType: "application/pdf",
     metadata: {
       ...dr,
     },

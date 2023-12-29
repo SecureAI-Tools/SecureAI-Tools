@@ -13,7 +13,6 @@ import { HiOutlineExclamation } from "react-icons/hi";
 
 import useTableState from "lib/fe/hooks/use-table-state";
 import { RenderCellsFn, Table } from "lib/fe/components/table";
-import { numberOfPages } from "lib/core/pagination-utils";
 import { getDataSourceConnetionDocumentsApiPath } from "lib/fe/api-paths";
 import { createFetcher } from "lib/fe/api";
 import useDebounce from "lib/fe/hooks/use-debounce";
@@ -25,12 +24,9 @@ import {
   DataSourceConnectionDocumentResponse,
   Id,
   IdType,
-  PAGINATION_DEFAULT_PAGE_SIZE,
   PAGINATION_STARTING_PAGE_NUMBER,
   dataSourceToReadableName,
 } from "@repo/core";
-
-const pageSize = PAGINATION_DEFAULT_PAGE_SIZE;
 
 export const DocumentsSelectorModal = ({
   dataSource,
@@ -66,8 +62,11 @@ export const DocumentsSelectorModal = ({
       connectionId: dataSourceConnectionId,
       query: tableState.filter.searchQuery,
       pagination: {
-        page: tableState.pagination.currentPage,
-        pageSize: pageSize,
+        // Hackity hack!
+        // TODO: Convert this into proper infinite scroll (that's the only one that works with Google Drive API)!
+        page: 1,
+        // 999 because Google Drive has max limit of 1000!
+        pageSize: 999,
       },
     }),
     createFetcher<DataSourceConnectionDocumentResponse[]>(),
@@ -118,6 +117,7 @@ export const DocumentsSelectorModal = ({
                     dataSource: dataSource,
                     externalId: item.externalId,
                     name: item.name,
+                    mimeType: item.mimeType,
                     dataSourceConnectionId: dataSourceConnectionId,
                   },
                 ];
@@ -153,6 +153,7 @@ export const DocumentsSelectorModal = ({
               dataSource: dataSource,
               externalId: d.externalId,
               name: d.name,
+              mimeType: d.mimeType,
               dataSourceConnectionId: dataSourceConnectionId,
             });
           }
@@ -172,9 +173,11 @@ export const DocumentsSelectorModal = ({
     }
   };
 
-  const pageCheckboxChecked = dataSourceDocumentsResponse?.response.every((d) =>
-    selectedExternalIds.has(d.externalId),
-  );
+  const pageCheckboxChecked =
+    (dataSourceDocumentsResponse?.response?.length ?? 0) > 0 &&
+    dataSourceDocumentsResponse?.response.every((d) =>
+      selectedExternalIds.has(d.externalId),
+    );
   const readableName = dataSourceToReadableName(dataSource);
   return (
     <Modal
@@ -250,11 +253,8 @@ export const DocumentsSelectorModal = ({
               "Created Date",
             ]}
             renderCells={renderCells}
-            page={tableState.pagination.currentPage}
-            totalPages={numberOfPages(
-              dataSourceDocumentsResponse?.headers.pagination?.totalCount ?? 0,
-              pageSize,
-            )}
+            page={1}
+            totalPages={1}
             onPageChange={onPageChange}
           />
         </div>
