@@ -4,19 +4,26 @@ import {
   TxPrismaClient,
   prismaClient,
 } from "@repo/database";
-import { Id, IdType, DataSource } from "@repo/core";
+import { Id, IdType, DataSource, toDataSource, isEmpty } from "@repo/core";
 
 import { API } from "../utils/api.utils";
+import { OAuthService } from "./oauth-service";
+import { getLogger } from "../logger";
 
 export interface DataSourceConnectionCreateInput {
   dataSource: DataSource;
   baseUrl: string;
   accessToken?: string;
   accessTokenExpiresAt?: number;
+  refreshToken?: string;
   membershipId: Id<IdType.OrgMembership>;
 }
 
+const logger = getLogger("data-source-connections-service");
+
 export class DataSourceConnectionService {
+  private oauthService: OAuthService = new OAuthService();
+
   async create(
     i: DataSourceConnectionCreateInput,
   ): Promise<DataSourceConnection> {
@@ -38,6 +45,7 @@ export class DataSourceConnectionService {
         accessTokenExpiresAt: i.accessTokenExpiresAt
           ? new Date(i.accessTokenExpiresAt)
           : undefined,
+        refreshToken: i.refreshToken,
         membershipId: i.membershipId.toString(),
       },
     });
@@ -148,5 +156,37 @@ export class DataSourceConnectionService {
         },
       });
     });
+  }
+
+  async refreshAccessTokenIfExpired(
+    connection: DataSourceConnection,
+  ): Promise<DataSourceConnection> {
+    // Refresh token if either it is already expired, or if it is expiring within next 5 minutes!
+    if (!connection.accessTokenExpiresAt || !connection.refreshToken || connection.accessTokenExpiresAt.getTime() > (Date.now() + 5 * 60 * 1000)) {
+      // token is not expired
+      return connection;
+    }
+
+    logger.info("Refreshing access token", {
+      connectionId: connection.id,
+      dataSource: connection.dataSource,
+    });
+
+    const tokens = await this.oauthService.refreshAccessToken(toDataSource(connection.dataSource), connection.refreshToken);
+
+    if (isEmpty(tokens.accessToken)) {
+      throw new Error("something went wrong during token refresh; Received empty access token during refresh!");
+    }
+
+    return await prismaClient.dataSourceConnection.update({
+      where: {
+        id: connection.id,
+      },
+      data: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        accessTokenExpiresAt: tokens.accessTokenExpiresAt ? new Date(tokens.accessTokenExpiresAt) : undefined,
+      }
+    })
   }
 }

@@ -7,6 +7,7 @@ import {
 } from "lib/fe/api-paths";
 import { DataSourceConnectionCreateRequest } from "lib/types/api/data-source-connection-create.request";
 import { DataSource, DataSourceConnectionResponse } from "@repo/core";
+import { DataSourcesResponse } from "lib/types/api/data-sources.response";
 
 export const checkDataSourceConnection = async (
   orgSlug: string,
@@ -43,12 +44,13 @@ export interface DataSourceRecord {
 
 export const getDataSourceRecords = (
   dataSourceConnections: DataSourceConnectionResponse[],
+  dataSourcesResponse: DataSourcesResponse,
 ): DataSourceRecord[] => {
   var dataSourceConnectionsMap = new Map(
     dataSourceConnections.map((dsc) => [dsc.dataSource, dsc]),
   );
 
-  const dataSources = Object.values(DataSource);
+  const dataSources = dataSourcesResponse.enabledDataSources;
 
   // Sort alphabetically
   dataSources.sort();

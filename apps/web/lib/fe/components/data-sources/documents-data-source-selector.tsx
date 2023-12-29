@@ -10,7 +10,7 @@ import {
   DataSourceRecord,
   getDataSourceRecords,
 } from "lib/fe/data-source-utils";
-import { getOrganizationsIdOrSlugDataSourceConnectionsApiPath } from "lib/fe/api-paths";
+import { getDataSourcesApiPath, getOrganizationsIdOrSlugDataSourceConnectionsApiPath } from "lib/fe/api-paths";
 import { TokenUser } from "lib/types/core/token-user";
 import { createFetcher } from "lib/fe/api";
 import { DataSourceIcon } from "lib/fe/components/data-sources/data-source-icon";
@@ -18,6 +18,7 @@ import { Tooltip } from "lib/fe/components/tooltip";
 import { FrontendRoutes } from "lib/fe/routes";
 import { DocumentsSelectorModal } from "lib/fe/components/data-sources/documents-selector-modal";
 import { SelectedDocument } from "lib/fe/types/selected-document";
+import { DataSourcesResponse } from "lib/types/api/data-sources.response";
 
 import {
   DataSource,
@@ -43,6 +44,18 @@ export const DocumentsDataSourceSelector = ({
   const [dataSourceRecords, setDataSourceRecords] = useState<
     DataSourceRecord[] | undefined
   >(undefined);
+
+  const shouldFetchDataSources =
+    sessionStatus === "authenticated" && session;
+  const {
+    data: dataSourcesResponse,
+    error: dataSourcesFetchError,
+  } = useSWR(
+    shouldFetchDataSources
+      ? getDataSourcesApiPath()
+      : null,
+    createFetcher<DataSourcesResponse>(),
+  );
 
   // Fetch ALL connections
   const shouldFetchDataSourceConnections =
@@ -70,15 +83,16 @@ export const DocumentsDataSourceSelector = ({
   );
 
   useEffect(() => {
-    if (!dataSourceConnectionsResponse) {
+    if (!dataSourceConnectionsResponse || !dataSourcesResponse) {
       return;
     }
 
     const newDataSourceRecords = getDataSourceRecords(
       dataSourceConnectionsResponse.response,
+      dataSourcesResponse.response,
     );
     setDataSourceRecords([...newDataSourceRecords]);
-  }, [dataSourceConnectionsResponse]);
+  }, [dataSourceConnectionsResponse, dataSourcesResponse]);
 
   // TODO: Add coming soon ones as well somehow
 
@@ -134,6 +148,7 @@ const DataSourceCard = ({
                 dataSource: DataSource.UPLOAD,
                 file: f,
                 name: f.name,
+                mimeType: f.type,
               };
             }),
           ];

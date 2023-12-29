@@ -79,7 +79,7 @@ export async function GET(
   headers.append("Content-Type", document.mimeType);
 
   // Send read data as document with appropriate mime-type response header!
-  return new Response(blob, {
+  return new Response(blob.stream(), {
     headers,
   });
 }

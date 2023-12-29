@@ -13,11 +13,12 @@ import { Sidebar } from "lib/fe/components/side-bar";
 import { PageTitle } from "lib/fe/components/page-title";
 import { FrontendRoutes } from "lib/fe/routes";
 import { RenderCellsFn, Table } from "lib/fe/components/table";
-import { getOrganizationsIdOrSlugDataSourceConnectionsApiPath } from "lib/fe/api-paths";
+import { getDataSourcesApiPath, getOrganizationsIdOrSlugDataSourceConnectionsApiPath } from "lib/fe/api-paths";
 import { TokenUser } from "lib/types/core/token-user";
 import { createFetcher } from "lib/fe/api";
 import { renderErrors } from "lib/fe/components/generic-error";
 import { formatDateTime } from "lib/core/date-format";
+import { DataSourcesResponse } from "lib/types/api/data-sources.response";
 
 import {
   PAGINATION_STARTING_PAGE_NUMBER,
@@ -37,6 +38,18 @@ const DataSourcesListPage = ({ orgSlug }: { orgSlug: string }) => {
     DataSourceRecord[] | undefined
   >(undefined);
   const { data: session, status: sessionStatus } = useSession();
+
+  const shouldFetchDataSources =
+    sessionStatus === "authenticated" && session;
+  const {
+    data: dataSourcesResponse,
+    error: dataSourcesFetchError,
+  } = useSWR(
+    shouldFetchDataSources
+      ? getDataSourcesApiPath()
+      : null,
+    createFetcher<DataSourcesResponse>(),
+  );
 
   // Fetch ALL connections
   const shouldFetchDataSourceConnections =
@@ -64,12 +77,13 @@ const DataSourcesListPage = ({ orgSlug }: { orgSlug: string }) => {
   );
 
   useEffect(() => {
-    if (!dataSourceConnectionsResponse) {
+    if (!dataSourceConnectionsResponse || !dataSourcesResponse) {
       return;
     }
 
     const dataSourceRecords = getDataSourceRecords(
       dataSourceConnectionsResponse.response,
+      dataSourcesResponse.response,
     );
 
     // Remove implicit data sources like upload and web
@@ -78,7 +92,7 @@ const DataSourcesListPage = ({ orgSlug }: { orgSlug: string }) => {
     );
 
     setDataSourceRecords([...filteredDataSources]);
-  }, [dataSourceConnectionsResponse]);
+  }, [dataSourceConnectionsResponse, dataSourcesResponse]);
 
   const renderCells: RenderCellsFn<DataSourceRecord> = ({ item }) => {
     return [

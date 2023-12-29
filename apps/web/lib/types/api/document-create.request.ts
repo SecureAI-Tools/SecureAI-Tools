@@ -5,4 +5,5 @@ export class DocumentCreateRequest {
   externalId!: string;
   dataSourceConnectionId!: string;
   indexingMode!: IndexingMode;
+  mimeType!: string;
 }
