@@ -12,7 +12,7 @@ import {
   toDataSourceConnectionDocumentResponse,
   GoogleDriveClient,
 } from "@repo/backend";
-import { DataSource, DataSourceConnectionDocumentResponse, Id, IdType } from "@repo/core";
+import { DataSource, DataSourceConnectionDocumentResponse, Id, IdType, MimeType, toMimeType } from "@repo/core";
 import { DataSourceConnection } from "@repo/database";
 
 const permissionService = new PermissionService();
@@ -137,7 +137,7 @@ async function getDocumentsFromGoogleDrive(
 
   // Reference: https://developers.google.com/drive/api/guides/search-files#examples
   const nameQuery = query ? `name contains '${query}' and` : "";
-  const queryWithMimeFilter = `${nameQuery} mimeType = 'application/pdf'`;
+  const queryWithMimeFilter = `${nameQuery} mimeType = '${MimeType.PDF}'`;
   const documentsSearchResponse = await googleDriveClient.getDocuments({
     query: queryWithMimeFilter,
     pageSize: paginationParams.pageSize,
@@ -156,7 +156,7 @@ async function getDocumentsFromGoogleDrive(
         externalId: f.id!,
         name: f.name!,
         createdAt: Date.parse(f.createdTime!),
-        mimeType: f.mimeType!,
+        mimeType: toMimeType(f.mimeType!),
         metadata: {
           ...f,
         }

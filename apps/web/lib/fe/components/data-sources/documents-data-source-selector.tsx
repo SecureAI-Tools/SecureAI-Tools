@@ -26,6 +26,7 @@ import {
   Id,
   PAGINATION_STARTING_PAGE_NUMBER,
   dataSourceToReadableName,
+  toMimeType,
 } from "@repo/core";
 
 export const DocumentsDataSourceSelector = ({
@@ -148,7 +149,7 @@ const DataSourceCard = ({
                 dataSource: DataSource.UPLOAD,
                 file: f,
                 name: f.name,
-                mimeType: f.type,
+                mimeType: toMimeType(f.type),
               };
             }),
           ];

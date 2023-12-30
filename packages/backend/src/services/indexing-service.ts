@@ -19,6 +19,7 @@ import {
   StreamChunkResponse,
   isEmpty,
   removeTrailingSlash,
+  MimeType,
 } from "@repo/core";
 import { Document, DocumentCollection } from "@repo/database";
 
@@ -100,7 +101,7 @@ export class IndexingService {
         : 200,
     });
 
-    if (document.mimeType !== "application/pdf") {
+    if (document.mimeType !== MimeType.PDF) {
       throw new Error(`MimeType not supported: ${document.mimeType}`);
     }
 

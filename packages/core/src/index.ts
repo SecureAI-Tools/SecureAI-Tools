@@ -8,6 +8,7 @@ export * from "./types/error.response";
 export * from "./types/id";
 export * from "./types/indexing-queue-message";
 export * from "./types/model-provider-config";
+export * from "./types/mime-type";
 export * from "./types/model-type";
 export * from "./types/organization.response";
 export * from "./types/response-headers";

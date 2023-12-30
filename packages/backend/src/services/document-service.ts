@@ -12,12 +12,12 @@ import {
   TxPrismaClient,
   prismaClient,
 } from "@repo/database";
-import { Id, IdType, DocumentIndexingStatus, DataSource } from "@repo/core";
+import { Id, IdType, DocumentIndexingStatus, DataSource, MimeType } from "@repo/core";
 
 export interface DocumentCreateInput {
   id: Id<IdType.Document>;
   name: string;
-  mimeType: string;
+  mimeType: MimeType;
   uri: string;
   externalId: string;
   indexingStatus: DocumentIndexingStatus;

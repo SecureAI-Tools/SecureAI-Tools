@@ -11,6 +11,7 @@ import {
   DocumentIndexingStatus,
   DataSource,
   IdType,
+  MimeType,
 } from "@repo/core";
 import {
   DocumentCollectionService,
@@ -63,7 +64,7 @@ export async function POST(
   if (!file) {
     return NextResponseErrors.badRequest("file is required.");
   }
-  if (file.type !== "application/pdf") {
+  if (file.type !== MimeType.PDF) {
     return NextResponseErrors.badRequest("file.type must be application/pdf");
   }
 

@@ -123,6 +123,7 @@ model DocumentCollection {
 model Document {
   id          String                 @id
   name        String
+  // Enum controlled by MimeType
   mimeType    String
   // Unique resource identifier to deduplicate documents across all data source connections
   // within an org

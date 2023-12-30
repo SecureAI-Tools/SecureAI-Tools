@@ -13,6 +13,7 @@ import {
   DocumentIndexingStatus,
   IdType,
   toDataSource,
+  MimeType,
 } from "@repo/core";
 import {
   DocumentService,
@@ -111,7 +112,7 @@ export async function POST(
   const documentCreateRequest = (await req.json()) as DocumentCreateRequest;
 
   // TODO: Expand this when supporting more document types!
-  if (documentCreateRequest.mimeType !== "application/pdf") {
+  if (documentCreateRequest.mimeType !== MimeType.PDF) {
     return NextResponseErrors.badRequest(`unsupported mimeType ${documentCreateRequest.mimeType}`);
   }
 

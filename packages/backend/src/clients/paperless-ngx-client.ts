@@ -1,6 +1,7 @@
 import {
   DataSourceConnectionDocumentResponse,
   removeTrailingSlash,
+  MimeType,
 } from "@repo/core";
 
 import {
@@ -99,7 +100,7 @@ export function toDataSourceConnectionDocumentResponse(
     externalId: dr.id.toString(),
     name: dr.title,
     createdAt: new Date(dr.created).getTime(),
-    mimeType: "application/pdf",
+    mimeType: MimeType.PDF,
     metadata: {
       ...dr,
     },

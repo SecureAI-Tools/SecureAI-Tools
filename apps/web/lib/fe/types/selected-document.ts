@@ -1,4 +1,4 @@
-import { DataSource, Id, IdType } from "@repo/core";
+import { DataSource, Id, IdType, MimeType } from "@repo/core";
 
 // Selected document could either be a local file,  or a remote-file from a data-source
 export interface SelectedDocument {
@@ -6,7 +6,7 @@ export interface SelectedDocument {
 
   name: string;
 
-  mimeType: string;
+  mimeType: MimeType;
 
   // Present if dataSource is UPLOAD
   file?: File;
