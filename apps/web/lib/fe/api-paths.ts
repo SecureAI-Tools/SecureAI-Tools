@@ -78,11 +78,11 @@ export const getDocumentToCollections = ({
   )}`;
 };
 
-export const documentCollectionDocumentApiPath = (
+export const documentPreviewApiPath = (
   documentCollectionId: Id<IdType.DocumentCollection>,
   documentId: Id<IdType.Document>,
 ): string => {
-  return `/api/document-collections/${documentCollectionId}/documents/${documentId}`;
+  return `/api/document-collections/${documentCollectionId}/documents/${documentId}/preview`;
 };
 
 export const documentCollectionDocumentIndexApiPath = (

@@ -23,7 +23,7 @@ import { RenderCellsFn, Table } from "lib/fe/components/table";
 import useTableState, { PAGE_PARAM } from "lib/fe/hooks/use-table-state";
 import { numberOfPages } from "lib/core/pagination-utils";
 import {
-  documentCollectionDocumentApiPath,
+  documentPreviewApiPath,
   getDocumentCollectionApiPath,
   getDocumentCollectionDocumentsApiPath,
   getDocumentCollectionStatsApiPath,
@@ -261,7 +261,7 @@ const DocumentCollectionDetailsPage = ({
           <div className={tw("flex flex-row")}>
             <div className={tw("text-base font-normal")}>
               <Link
-                href={documentCollectionDocumentApiPath(
+                href={documentPreviewApiPath(
                   documentCollectionId,
                   Id.from(document.id),
                 )}

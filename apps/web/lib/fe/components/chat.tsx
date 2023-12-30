@@ -16,6 +16,7 @@ import {
   documentCollectionDocumentIndexApiPath,
   getChatMessagesApiPath,
   getChatMessageCitationsApiPath,
+  documentPreviewApiPath,
 } from "lib/fe/api-paths";
 import { get, post, postStreaming } from "lib/fe/api";
 import { ChatTitleRequest } from "lib/types/api/chat-title.request";
@@ -47,14 +48,14 @@ export interface DocumentsWithIndexingStatus extends DocumentResponse {
 
 const MessageEntry = ({
   message,
+  collectionId,
   citations,
   documents,
-  onJumpToPage,
 }: {
   message: Message;
+  collectionId?: Id<IdType.DocumentCollection>,
   citations?: CitationResponse[];
   documents?: DocumentResponse[];
-  onJumpToPage?: (docId: string, pageIndex: number) => void;
 }) => {
   const [copiedToClipboard, setCopiedToClipboard] = useState<boolean>(false);
 
@@ -101,23 +102,17 @@ const MessageEntry = ({
                         return (
                           <li key={c.id} className={tw("ml-5 pb-2")}>
                             <Tooltip
-                              content={`Jump to page ${c.pageNumber} of ${
-                                doc?.name ?? ""
-                              }`}
+                              content={`Open ${doc?.name ?? ""} in new tab`}
                               animation="duration-1000"
                             >
                               <Link
-                                href="#"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  onJumpToPage?.(
-                                    c.documentId,
-                                    c.pageNumber - 1,
-                                  );
-                                }}
+                                href={documentPreviewApiPath(
+                                  collectionId!,
+                                  Id.from(doc!.id),
+                                )}
+                                target="_blank"
                               >
-                                Page {c.pageNumber} (lines {c.fromLine}-
-                                {c.toLine}){doc ? `, ${doc.name}` : null}
+                                {doc?.name ?? ""}: page {c.pageNumber} (lines {c.fromLine}-{c.toLine})
                               </Link>
                             </Tooltip>
                           </li>
@@ -162,13 +157,11 @@ export function Chat({
   chatMessages,
   documents,
   citations,
-  onJumpToPage,
 }: {
   chat: ChatResponse;
   chatMessages: ChatMessageResponse[];
   documents?: DocumentsWithIndexingStatus[];
   citations?: CitationResponse[];
-  onJumpToPage?: (docId: string, pageIndex: number) => void;
 }) {
   const chatId = Id.from<IdType.Chat>(chat.id);
 
@@ -372,7 +365,7 @@ export function Chat({
                 message={m}
                 citations={messageCitations.get(m.id)}
                 documents={documents}
-                onJumpToPage={onJumpToPage}
+                collectionId={Id.from(chat.documentCollectionId!)}
               />
             ))
           : null}

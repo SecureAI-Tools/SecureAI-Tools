@@ -232,4 +232,27 @@ export class DocumentService {
     }
     return resp.data!;
   }
+
+  async getPreviewUrl(
+    document: Document,
+    dataSourceConnection: DataSourceConnection,
+  ): Promise<string> {
+    const connection = await this.dataSourceConnectionService.refreshAccessTokenIfExpired(dataSourceConnection);
+    switch (connection.dataSource) {
+      case DataSource.PAPERLESS_NGX:
+        const paperlessNgxClient = new PaperlessNgxClient(
+          connection.baseUrl!,
+          connection.accessToken!,
+        );
+        return await paperlessNgxClient.getPreviewUrl(document.externalId);
+      case DataSource.GOOGLE_DRIVE:
+        const googleDriveClient = new GoogleDriveClient(
+          connection.accessToken!,
+        );
+
+        return await googleDriveClient.getPreviewUrl(document.externalId);
+      default:
+        throw new Error(`${connection.dataSource} not supported`);
+    }
+  }
 }

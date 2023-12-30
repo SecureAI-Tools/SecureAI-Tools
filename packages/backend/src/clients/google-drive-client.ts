@@ -49,6 +49,28 @@ export class GoogleDriveClient {
 
     return await gaxiosResponseToClientResponse(resp);
   }
+
+  async getPreviewUrl(id: string): Promise<string> {
+    const resp = await this.drive.files.get({
+      fileId: id,
+      fields: "webViewLink"
+    });
+
+    if (!isOk(resp)) {
+      throw new Error(`could not get file; Received "${resp.statusText}" (${resp.status})`);
+    }
+
+    return resp.data.webViewLink!;
+  }
+
+  async export(id: string): Promise<ClientResponse<unknown>> {
+    const resp = (await this.drive.files.export({
+      fileId: id,
+      mimeType: "text/plain",
+    }));
+
+    return await gaxiosResponseToClientResponse(resp);
+  }
 }
 
 function gaxiosResponseToClientResponse<T>(
@@ -59,6 +81,10 @@ function gaxiosResponseToClientResponse<T>(
     status: response.status,
     statusText: response.statusText,
     // https://developer.mozilla.org/en-US/docs/Web/API/Response/ok
-    ok: response.status >= 200 && response.status <= 299,
+    ok: isOk(response),
   };
+}
+
+function isOk({ status }: { status: number }): boolean {
+  return status >= 200 && status <= 299;
 }

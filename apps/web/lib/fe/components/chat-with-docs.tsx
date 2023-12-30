@@ -1,20 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Dropdown, Spinner } from "flowbite-react";
+import { Spinner } from "flowbite-react";
 import { tw } from "twind";
 import useSWR from "swr";
-import { HiArrowTopRightOnSquare } from "react-icons/hi2";
-import Link from "next/link";
-import { Viewer, Worker } from "@react-pdf-viewer/core";
-import { pageNavigationPlugin } from "@react-pdf-viewer/page-navigation";
-
-import "@react-pdf-viewer/core/lib/styles/index.css";
-import "@react-pdf-viewer/page-navigation/lib/styles/index.css";
 
 import { ChatResponse } from "lib/types/api/chat.response";
 import {
-  documentCollectionDocumentApiPath,
   getDocumentCollectionDocumentsApiPath,
   getChatMessageCitationsApiPath,
   getDocumentToCollections,
@@ -39,19 +30,6 @@ export function ChatWithDocs({
   chat: ChatResponse;
   chatMessages: ChatMessageResponse[];
 }) {
-  const [previewDocumentId, setPreviewDocumentId] = useState<
-    string | undefined
-  >();
-
-  // A state that doesn't need to re-render component. So it's never set -- only values are modified on
-  // appropriate events.
-  const [documentsCurrentPageIndexMap, _] = useState<Map<string, number>>(
-    new Map(),
-  );
-
-  const pageNavigationPluginInstance = pageNavigationPlugin();
-  const { jumpToPage } = pageNavigationPluginInstance;
-
   const documentCollectionId = Id.from<IdType.DocumentCollection>(
     chat.documentCollectionId!,
   );
@@ -118,17 +96,6 @@ export function ChatWithDocs({
     },
   );
 
-  useEffect(() => {
-    const responses = collectionDocumentsResponse?.response;
-    if (responses && responses?.length > 0) {
-      setPreviewDocumentId(responses[0]!.id);
-    }
-  }, [collectionDocumentsResponse]);
-
-  function changeDocument(docId: string) {
-    setPreviewDocumentId(docId);
-  }
-
   if (
     fetchCollectionDocumentsError ||
     fetchCitationsError ||
@@ -151,15 +118,10 @@ export function ChatWithDocs({
     );
   };
 
-  const previewDocument = previewDocumentId
-    ? map.get(previewDocumentId)
-    : undefined;
-
   const shouldRenderLoadingSpinner =
     !collectionDocumentsResponse ||
     !citationsResponse ||
-    !documentToCollectionsResponse ||
-    !previewDocument;
+    !documentToCollectionsResponse;
 
   const docIdToIndexingStatusMap = new Map(
     documentToCollectionsResponse?.response.map((d2c) => [
@@ -173,110 +135,17 @@ export function ChatWithDocs({
       {shouldRenderLoadingSpinner ? (
         renderLoadingSpinner()
       ) : (
-        <div className={tw("flex")}>
-          <div className={tw("w-1/2 border-r-2")}>
-            <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
-              <div className={tw("flex flex-col h-screen")}>
-                <div
-                  className={tw(
-                    "flex flex-row flex p-4 mt-1 bg-gray-50 top-0 items-center z-50 border-b border-black/10",
-                  )}
-                >
-                  <div className={tw("grow flex flex-row justify-center")}>
-                    <Dropdown
-                      label={
-                        <span className={tw("font-semibold")}>
-                          {previewDocument.name}
-                        </span>
-                      }
-                      className={tw("z-50")}
-                      placement="bottom"
-                      inline
-                    >
-                      {collectionDocumentsResponse.response.map((doc) => (
-                        <Dropdown.Item
-                          onClick={() => {
-                            changeDocument(doc.id);
-                          }}
-                          key={doc.id}
-                        >
-                          <span
-                            className={tw(
-                              doc.id === previewDocumentId ? "font-bold" : "",
-                            )}
-                          >
-                            {doc.name}
-                          </span>
-                        </Dropdown.Item>
-                      ))}
-                    </Dropdown>
-                  </div>
-                  <Link
-                    href={documentCollectionDocumentApiPath(
-                      documentCollectionId,
-                      Id.from(previewDocument.id),
-                    )}
-                    target="_blank"
-                    className={tw("mr-4")}
-                    aria-label="open document in new tab"
-                  >
-                    <HiArrowTopRightOnSquare />
-                  </Link>
-                </div>
-                <div className={tw("grow overflow-scroll")}>
-                  <Viewer
-                    fileUrl={documentCollectionDocumentApiPath(
-                      documentCollectionId,
-                      Id.from(previewDocument.id),
-                    )}
-                    plugins={[pageNavigationPluginInstance]}
-                    onDocumentLoad={(e) => {
-                      // Extract document id
-                      // file.name is the URL path, and last part is document id
-                      const parts = e.file.name.split("/");
-                      const docId = parts[parts.length - 1];
-                      const currentPageIndex = documentsCurrentPageIndexMap.get(
-                        docId!,
-                      );
-                      if (currentPageIndex !== undefined) {
-                        jumpToPage(currentPageIndex);
-                      }
-                    }}
-                    onPageChange={(e) => {
-                      if (previewDocumentId) {
-                        documentsCurrentPageIndexMap.set(
-                          previewDocumentId,
-                          e.currentPage,
-                        );
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            </Worker>
-          </div>
-          <div className={tw("w-1/2")}>
-            <Chat
-              chat={chat}
-              chatMessages={chatMessages}
-              documents={collectionDocumentsResponse.response.map((d) => {
-                return {
-                  ...d,
-                  indexingStatus: docIdToIndexingStatusMap.get(d.id)!,
-                };
-              })}
-              citations={citationsResponse?.response}
-              onJumpToPage={(docId: string, pageIndex: number) => {
-                if (docId === previewDocumentId) {
-                  jumpToPage(pageIndex);
-                } else {
-                  documentsCurrentPageIndexMap.set(docId, pageIndex);
-                  setPreviewDocumentId(docId);
-                }
-              }}
-            />
-          </div>
-        </div>
+        <Chat
+          chat={chat}
+          chatMessages={chatMessages}
+          documents={collectionDocumentsResponse.response.map((d) => {
+            return {
+              ...d,
+              indexingStatus: docIdToIndexingStatusMap.get(d.id)!,
+            };
+          })}
+          citations={citationsResponse?.response}
+        />
       )}
     </div>
   );

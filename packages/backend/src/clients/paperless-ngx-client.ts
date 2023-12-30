@@ -72,6 +72,10 @@ export class PaperlessNgxClient {
 
     return await toClientResponseBlob(resp);
   }
+
+  getPreviewUrl(id: number | string): string {
+    return `${this.baseUrl}/api/documents/${id}/preview/`;
+  }
 }
 
 // TODO: Should these go into own namespace perhaps?

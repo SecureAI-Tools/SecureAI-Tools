@@ -1,9 +1,10 @@
 import { NextRequest } from "next/server";
+import { redirect } from 'next/navigation'
 
 import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
 
-import { Id, IdType } from "@repo/core";
+import { DataSource, Id, IdType } from "@repo/core";
 import {
   DataSourceConnectionService,
   DocumentCollectionService,
@@ -73,13 +74,19 @@ export async function GET(
   }
   const dataSourceConnection = dataSourceConnections[0]!;
 
-  const blob = await documentService.read(document, dataSourceConnection);
+  if (dataSourceConnection.dataSource === DataSource.UPLOAD) {
+    const blob = await documentService.read(document, dataSourceConnection);
 
-  const headers = new Headers();
-  headers.append("Content-Type", document.mimeType);
+    const headers = new Headers();
+    headers.append("Content-Type", document.mimeType);
 
-  // Send read data as document with appropriate mime-type response header!
-  return new Response(blob.stream(), {
-    headers,
-  });
+    // Send read data as document with appropriate mime-type response header!
+    return new Response(blob.stream(), {
+      headers,
+    });
+  }
+
+  // Redirect to data source specific link
+  const url = await documentService.getPreviewUrl(document, dataSourceConnection);
+  redirect(url);
 }
