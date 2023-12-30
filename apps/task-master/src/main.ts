@@ -41,7 +41,7 @@ async function main() {
         }
       } catch (e) {
         logger.error(
-          "something went wrong when indexing. Skipping document...",
+          `something went wrong when indexing. Skipping document: ${e}`,
           {
             error: e,
             data: data,

@@ -114,6 +114,8 @@ export class IndexingService {
       );
     }
 
+    // Index document and yield stream-chunks
+    yield { status: "Splitting documents into chunks" };
     const blob = await this.documentService.read(
       document,
       dataSourceConnection,
@@ -124,9 +126,6 @@ export class IndexingService {
 
     const embeddingModel =
       this.modelProviderService.getEmbeddingModel(documentCollection);
-
-    // Index document and yield stream-chunks
-    yield { status: "Splitting documents into chunks" };
 
     const documentTextChunks: string[] = langchainDocuments.map(
       (document) => document.pageContent,
@@ -145,30 +144,39 @@ export class IndexingService {
       embeddings.push(chunkEmbedding[0]!);
     }
 
-    const vectorDbCollection = await this.chromaClient.getOrCreateCollection({
-      name: documentCollection.internalName,
-    });
-
     const chunkIdsInVectorDb = embeddings.map((_, i) =>
       toDocumentChunkId(document.id, i),
     );
-    const addResponse = await vectorDbCollection.add({
-      ids: chunkIdsInVectorDb,
-      embeddings: embeddings,
-      documents: documentTextChunks,
-      metadatas: langchainDocuments.map((langchainDocument, i) =>
-        toDocumentChunkMetadata(document.id, i, langchainDocument),
-      ),
-    });
 
-    if (!isEmpty(addResponse.error)) {
-      logger.error("could not add document to vector db", {
-        documentId: document.id,
-        documentCollectionId: documentCollection.id,
-        error: addResponse.error,
+    if (documentTextChunks.length > 0) {
+      const vectorDbCollection = await this.chromaClient.getOrCreateCollection({
+        name: documentCollection.internalName,
       });
-      yield { error: "something went wrong when indexing the doc" };
-      return;
+
+      const addResponse = await vectorDbCollection.add({
+        ids: chunkIdsInVectorDb,
+        embeddings: embeddings,
+        documents: documentTextChunks,
+        metadatas: langchainDocuments.map((langchainDocument, i) =>
+          toDocumentChunkMetadata(document.id, i, langchainDocument),
+        ),
+      });
+
+      if (!isEmpty(addResponse.error)) {
+        logger.error("could not add document to vector db", {
+          documentId: document.id,
+          documentCollectionId: documentCollection.id,
+          error: addResponse.error,
+        });
+        yield { error: "something went wrong when indexing the doc" };
+        return;
+      }
+    } else {
+      logger.error("could not get any text chunks from document", {
+        documentId: document.id,
+        documentName: document.name,
+      });
+      yield { status: "could not get any text chunks from document; Skipping document..." };
     }
 
     const documentId = Id.from<IdType.Document>(document.id);
