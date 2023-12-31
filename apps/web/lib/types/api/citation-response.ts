@@ -4,7 +4,7 @@ import { DocumentChunkMetadata } from "@repo/core";
 export class CitationResponse {
   id!: string;
   score!: number;
-  pageNumber!: number;
+  pageNumber?: number;
   fromLine!: number;
   toLine!: number;
   documentId!: string;

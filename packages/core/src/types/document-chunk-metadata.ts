@@ -4,7 +4,7 @@
 export type DocumentChunkMetadata = {
   documentId: string;
   documentChunkId: string;
-  pageNumber: number;
+  pageNumber?: number;
   fromLine: number;
   toLine: number;
 };

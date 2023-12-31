@@ -101,10 +101,6 @@ export class IndexingService {
         : 200,
     });
 
-    if (document.mimeType !== MimeType.PDF) {
-      throw new Error(`MimeType not supported: ${document.mimeType}`);
-    }
-
     const dataSourceConnection = await this.dataSourceConnectionService.get(
       dataSourceConnectionId,
     );
@@ -116,13 +112,27 @@ export class IndexingService {
 
     // Index document and yield stream-chunks
     yield { status: "Splitting documents into chunks" };
-    const blob = await this.documentService.read(
-      document,
-      dataSourceConnection,
-    );
-    const loader = new PDFLoader(blob);
-    const langchainDocuments: LangchainDocument[] =
-      await loader.loadAndSplit(textSplitter);
+
+    let langchainDocuments: LangchainDocument[];
+    switch (document.mimeType) {
+      case MimeType.PDF:
+        const blob = await this.documentService.read(
+          document,
+          dataSourceConnection,
+        );
+        const loader = new PDFLoader(blob);
+        langchainDocuments = await loader.loadAndSplit(textSplitter);
+        break;
+      case MimeType.GOOGLE_DOC:
+        const text = await this.documentService.exportAsText(
+          document,
+          dataSourceConnection,
+        );
+        langchainDocuments = await textSplitter.createDocuments([text]);
+        break;
+      default:
+        throw new Error(`MimeType not supported: ${document.mimeType}`);
+    }
 
     const embeddingModel =
       this.modelProviderService.getEmbeddingModel(documentCollection);
@@ -153,13 +163,15 @@ export class IndexingService {
         name: documentCollection.internalName,
       });
 
+      const metadatas = langchainDocuments.map((langchainDocument, i) =>
+        toDocumentChunkMetadata(document.id, i, langchainDocument),
+      );
+
       const addResponse = await vectorDbCollection.add({
         ids: chunkIdsInVectorDb,
         embeddings: embeddings,
         documents: documentTextChunks,
-        metadatas: langchainDocuments.map((langchainDocument, i) =>
-          toDocumentChunkMetadata(document.id, i, langchainDocument),
-        ),
+        metadatas: metadatas,
       });
 
       if (!isEmpty(addResponse.error)) {

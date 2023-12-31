@@ -29,6 +29,11 @@ const SUPPORTED_DATA_SOURCES = new Set<DataSource>([
   DataSource.GOOGLE_DRIVE,
 ]);
 
+const SUPPORTED_MIME_TYPES = new Set<MimeType>([
+  MimeType.PDF,
+  MimeType.GOOGLE_DOC,
+]);
+
 const permissionService = new PermissionService();
 const documentService = new DocumentService();
 const dataSourceConnectionService = new DataSourceConnectionService();
@@ -111,8 +116,7 @@ export async function POST(
 
   const documentCreateRequest = (await req.json()) as DocumentCreateRequest;
 
-  // TODO: Expand this when supporting more document types!
-  if (documentCreateRequest.mimeType !== MimeType.PDF) {
+  if (!SUPPORTED_MIME_TYPES.has(documentCreateRequest.mimeType)) {
     return NextResponseErrors.badRequest(`unsupported mimeType ${documentCreateRequest.mimeType}`);
   }
 

@@ -137,7 +137,7 @@ async function getDocumentsFromGoogleDrive(
 
   // Reference: https://developers.google.com/drive/api/guides/search-files#examples
   const nameQuery = query ? `name contains '${query}' and` : "";
-  const queryWithMimeFilter = `${nameQuery} mimeType = '${MimeType.PDF}'`;
+  const queryWithMimeFilter = `${nameQuery} (mimeType = '${MimeType.PDF}' or mimeType = '${MimeType.GOOGLE_DOC}')`;
   const documentsSearchResponse = await googleDriveClient.getDocuments({
     query: queryWithMimeFilter,
     pageSize: paginationParams.pageSize,
