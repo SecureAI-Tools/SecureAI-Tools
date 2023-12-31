@@ -2,8 +2,6 @@ import Image from "next/image";
 import { HiOutlineCloudUpload } from "react-icons/hi";
 import { tw } from "twind";
 
-import { getLogoSrc } from "lib/fe/data-source-utils";
-
 import { DataSource, dataSourceToReadableName } from "@repo/core";
 
 export const DataSourceIcon = ({ dataSource }: { dataSource: DataSource }) => {
@@ -20,4 +18,8 @@ export const DataSourceIcon = ({ dataSource }: { dataSource: DataSource }) => {
       height={20}
     />
   );
+};
+
+const getLogoSrc = (dataSource: DataSource): string => {
+  return `/data-source-logos/${dataSource.toLowerCase()}.svg`;
 };

@@ -41,6 +41,7 @@ import useToasts from "lib/fe/hooks/use-toasts";
 import { Toasts } from "lib/fe/components/toasts";
 import { FrontendRoutes } from "lib/fe/routes";
 import DocumentCollectionUpdateModal from "./document-collection-update-modal";
+import { DocumentIcon } from "lib/fe/components/document-icon";
 
 import {
   PAGINATION_DEFAULT_PAGE_SIZE,
@@ -258,8 +259,9 @@ const DocumentCollectionDetailsPage = ({
         )}
       >
         <div>
-          <div className={tw("flex flex-row")}>
-            <div className={tw("text-base font-normal")}>
+          <div className={tw("flex flex-row items-center")}>
+            <DocumentIcon mimeType={document.mimeType} />
+            <div className={tw("text-base font-normal ml-2")}>
               <Link
                 href={documentPreviewApiPath(
                   documentCollectionId,

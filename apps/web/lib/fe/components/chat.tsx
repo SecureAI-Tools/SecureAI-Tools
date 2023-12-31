@@ -31,6 +31,7 @@ import { ChatType } from "lib/types/core/chat-type";
 import { CitationResponse } from "lib/types/api/citation-response";
 import { Link } from "lib/fe/components/link";
 import { ChatMessageRole } from "lib/types/core/chat-message-role";
+import { DocumentIcon } from "lib/fe/components/document-icon";
 
 import {
   DocumentResponse,
@@ -105,15 +106,20 @@ const MessageEntry = ({
                               content={`Open ${doc?.name ?? ""} in new tab`}
                               animation="duration-1000"
                             >
-                              <Link
-                                href={documentPreviewApiPath(
-                                  collectionId!,
-                                  Id.from(doc!.id),
-                                )}
-                                target="_blank"
-                              >
-                                {doc!.name}: {c.pageNumber ? `page ${c.pageNumber}` : ""} (lines {c.fromLine}-{c.toLine})
-                              </Link>
+                              <div className={tw("flex flex-row items-center")}>
+                                <DocumentIcon mimeType={doc!.mimeType} size={12} />
+                                <div className={tw("ml-1")}>
+                                  <Link
+                                    href={documentPreviewApiPath(
+                                      collectionId!,
+                                      Id.from(doc!.id),
+                                    )}
+                                    target="_blank"
+                                  >
+                                    {doc!.name}: {c.pageNumber ? `page ${c.pageNumber}` : ""} (lines {c.fromLine}-{c.toLine})
+                                  </Link>
+                                </div>
+                              </div>
                             </Tooltip>
                           </li>
                         );

@@ -33,10 +33,6 @@ export const createDataSourceConnection = async (
   ).response;
 };
 
-export const getLogoSrc = (dataSource: DataSource): string => {
-  return `/data-source-logos/${dataSource.toLowerCase()}.svg`;
-};
-
 export interface DataSourceRecord {
   dataSource: DataSource;
   connection?: DataSourceConnectionResponse;

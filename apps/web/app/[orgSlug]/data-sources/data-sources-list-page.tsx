@@ -5,7 +5,6 @@ import { tw } from "twind";
 import { useEffect, useState } from "react";
 import { Button } from "flowbite-react";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
 import { HiOutlineCheckCircle } from "react-icons/hi";
 
 import AppsLoggedInLayout from "lib/fe/components/apps-logged-in-layout";
@@ -19,6 +18,7 @@ import { createFetcher } from "lib/fe/api";
 import { renderErrors } from "lib/fe/components/generic-error";
 import { formatDateTime } from "lib/core/date-format";
 import { DataSourcesResponse } from "lib/types/api/data-sources.response";
+import { DataSourceIcon } from "lib/fe/components/data-sources/data-source-icon";
 
 import {
   PAGINATION_STARTING_PAGE_NUMBER,
@@ -30,7 +30,6 @@ import {
 import {
   DataSourceRecord,
   getDataSourceRecords,
-  getLogoSrc,
 } from "lib/fe/data-source-utils";
 
 const DataSourcesListPage = ({ orgSlug }: { orgSlug: string }) => {
@@ -104,12 +103,7 @@ const DataSourcesListPage = ({ orgSlug }: { orgSlug: string }) => {
         <div>
           <div className={tw("flex flex-row items-center")}>
             <div>
-              <Image
-                src={getLogoSrc(item.dataSource)}
-                alt={`${dataSourceToReadableName(item.dataSource)} logo`}
-                width={20}
-                height={20}
-              />
+              <DataSourceIcon dataSource={item.dataSource}/>
             </div>
             <div className={tw("text-base font-normal ml-2")}>
               {dataSourceToReadableName(item.dataSource)}

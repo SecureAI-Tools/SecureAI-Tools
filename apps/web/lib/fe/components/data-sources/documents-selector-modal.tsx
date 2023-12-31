@@ -18,6 +18,7 @@ import { createFetcher } from "lib/fe/api";
 import useDebounce from "lib/fe/hooks/use-debounce";
 import { formatDateTime } from "lib/core/date-format";
 import { SelectedDocument } from "lib/fe/types/selected-document";
+import { DocumentIcon } from "lib/fe/components/document-icon";
 
 import {
   DataSource,
@@ -132,7 +133,14 @@ export const DocumentsSelectorModal = ({
           checked={selectedExternalIds.has(item.externalId)}
         />
       </div>,
-      <div>{item.name}</div>,
+      <div className={tw("flex flex-row items-center")}>
+        <div>
+          <DocumentIcon mimeType={item.mimeType} />
+        </div>
+        <div className={tw("ml-2")}>
+          {item.name}
+        </div>
+      </div>,
       <div>{formatDateTime(item.createdAt)}</div>,
     ];
   };
