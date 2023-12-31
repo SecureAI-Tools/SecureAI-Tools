@@ -1,3 +1,4 @@
+import { MimeType } from "@repo/core";
 import { IndexingMode } from "../core/indexing-mode";
 
 export class DocumentCreateRequest {
@@ -5,5 +6,5 @@ export class DocumentCreateRequest {
   externalId!: string;
   dataSourceConnectionId!: string;
   indexingMode!: IndexingMode;
-  mimeType!: string;
+  mimeType!: MimeType;
 }

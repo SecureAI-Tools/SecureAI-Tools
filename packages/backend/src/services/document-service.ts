@@ -233,6 +233,33 @@ export class DocumentService {
     return resp.data!;
   }
 
+  async exportAsText(
+    document: Document,
+    dataSourceConnection: DataSourceConnection,
+  ): Promise<string> {
+    const connection = await this.dataSourceConnectionService.refreshAccessTokenIfExpired(dataSourceConnection);
+
+    switch (connection.dataSource) {
+      case DataSource.GOOGLE_DRIVE:
+        const googleDriveClient = new GoogleDriveClient(
+          connection.accessToken!,
+        );
+
+        const resp = await googleDriveClient.exportAsText(
+          document.externalId,
+        );
+        if (!resp.ok) {
+          throw new Error(
+            `could not export document ${document.id} from ${connection.dataSource} (${connection.baseUrl}); Received ${resp.statusText} (${resp.status})`,
+          );
+        }
+
+        return resp.data!;
+      default:
+        throw new Error(`Data source ${connection.dataSource} can not be exported as text`);
+    }
+  }
+
   async getPreviewUrl(
     document: Document,
     dataSourceConnection: DataSourceConnection,

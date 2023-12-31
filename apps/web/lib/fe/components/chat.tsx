@@ -112,7 +112,7 @@ const MessageEntry = ({
                                 )}
                                 target="_blank"
                               >
-                                {doc?.name ?? ""}: page {c.pageNumber} (lines {c.fromLine}-{c.toLine})
+                                {doc!.name}: {c.pageNumber ? `page ${c.pageNumber}` : ""} (lines {c.fromLine}-{c.toLine})
                               </Link>
                             </Tooltip>
                           </li>

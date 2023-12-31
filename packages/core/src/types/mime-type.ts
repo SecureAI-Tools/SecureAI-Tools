@@ -1,5 +1,6 @@
 export enum MimeType {
-  PDF = "application/pdf"
+  PDF = "application/pdf",
+  GOOGLE_DOC = "application/vnd.google-apps.document",
 }
 
 const reverseMap = new Map<string, MimeType>();

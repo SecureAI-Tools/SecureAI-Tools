@@ -63,11 +63,11 @@ export class GoogleDriveClient {
     return resp.data.webViewLink!;
   }
 
-  async export(id: string): Promise<ClientResponse<unknown>> {
+  async exportAsText(id: string): Promise<ClientResponse<string>> {
     const resp = (await this.drive.files.export({
       fileId: id,
       mimeType: "text/plain",
-    }));
+    })) as GaxiosResponse<string>;
 
     return await gaxiosResponseToClientResponse(resp);
   }
