@@ -13,6 +13,7 @@ export enum IdType {
   Organization,
   OrgMembership,
   DataSourceConnection,
+  OrgDataSourceOAuthCredential,
 }
 
 export class Id<T extends IdType> {

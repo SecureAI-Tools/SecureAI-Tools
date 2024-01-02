@@ -12,7 +12,7 @@ import { Sidebar } from "lib/fe/components/side-bar";
 import { PageTitle } from "lib/fe/components/page-title";
 import { FrontendRoutes } from "lib/fe/routes";
 import { RenderCellsFn, Table } from "lib/fe/components/table";
-import { getDataSourcesApiPath, getOrganizationsIdOrSlugDataSourceConnectionsApiPath } from "lib/fe/api-paths";
+import { getOrgDataSourcesApiPath, getOrganizationsIdOrSlugDataSourceConnectionsApiPath } from "lib/fe/api-paths";
 import { TokenUser } from "lib/types/core/token-user";
 import { createFetcher } from "lib/fe/api";
 import { renderErrors } from "lib/fe/components/generic-error";
@@ -45,7 +45,7 @@ const DataSourcesListPage = ({ orgSlug }: { orgSlug: string }) => {
     error: dataSourcesFetchError,
   } = useSWR(
     shouldFetchDataSources
-      ? getDataSourcesApiPath()
+      ? getOrgDataSourcesApiPath(orgSlug)
       : null,
     createFetcher<DataSourcesResponse>(),
   );
@@ -121,16 +121,29 @@ const DataSourcesListPage = ({ orgSlug }: { orgSlug: string }) => {
         </div>
       ) : (
         <div className={tw("w-24")}>
-          <Button
-            size="xs"
-            pill
-            href={FrontendRoutes.getConnectDataSourceRoute(
-              orgSlug,
-              item.dataSource,
-            )}
-          >
-            Connect
-          </Button>
+          {item.configured ? (
+            <Button
+              size="xs"
+              pill
+              href={FrontendRoutes.getConnectDataSourceRoute(
+                orgSlug,
+                item.dataSource,
+              )}
+            >
+              Connect
+            </Button>
+          ) : (
+            <Button
+              size="xs"
+              pill
+              href={FrontendRoutes.getConfigureDataSourceRoute(
+                orgSlug,
+                item.dataSource,
+              )}
+            >
+              Configure
+            </Button>
+          )}
         </div>
       ),
     ];

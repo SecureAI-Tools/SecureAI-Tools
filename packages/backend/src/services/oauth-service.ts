@@ -1,9 +1,9 @@
 import { OAuth2Client } from "google-auth-library";
 
-import { DataSource } from "@repo/core";
+import { DataSource, Id, IdType } from "@repo/core";
 
-import { DataSourceOAuthConfig } from "../types/data-source-oauth-config";
 import { getLogger } from "../logger";
+import { OrgDataSourceOAuthCredentialService } from "./org-data-source-oauth-credential-service";
 
 const logger = getLogger("oauth-service");
 
@@ -15,54 +15,83 @@ export interface OAuthTokens {
 }
 
 export class OAuthService {
-  private oauthConfigs: Map<DataSource, DataSourceOAuthConfig>;
+  private orgDataSourceOAuthCredentialService = new OrgDataSourceOAuthCredentialService();
 
-  constructor() {
-    this.oauthConfigs = new Map();
-
-    const configs = this.getConfigs();
-    configs.forEach(c => {
-      this.oauthConfigs.set(c.dataSource, c);
-    });
-  }
-
-  async getAuthorizeUrl(dataSource: DataSource, redirectUri: string, scopes: string[]): Promise<string> {
+  async getAuthorizeUrl({
+    dataSource,
+    redirectUri,
+    scopes,
+    orgId,
+  }: {
+    dataSource: DataSource,
+    redirectUri: string,
+    scopes: string[],
+    orgId: Id<IdType.Organization>,
+  }): Promise<string> {
     switch (dataSource) {
       case DataSource.GOOGLE_DRIVE:
-        return await this.getGoogleAuthorizeUrl(redirectUri, scopes);
+        return await this.getGoogleAuthorizeUrl(redirectUri, scopes, orgId);
       default:
         throw new Error(`unsupported data source ${dataSource}`);
     }
   }
 
   // Exchanges temporary authorizationCode for access token
-  async getAccessToken(dataSource: DataSource, authorizationCode: string, redirectUri: string): Promise<OAuthTokens> {
+  async getAccessToken({
+    dataSource,
+    authorizationCode,
+    redirectUri,
+    orgId,
+  }: {
+    dataSource: DataSource,
+    authorizationCode: string,
+    redirectUri: string,
+    orgId: Id<IdType.Organization>,
+  }): Promise<OAuthTokens> {
     switch (dataSource) {
       case DataSource.GOOGLE_DRIVE:
-        return await this.getGoogleAccessToken(authorizationCode, redirectUri);
+        return await this.getGoogleAccessToken(authorizationCode, redirectUri, orgId);
       default:
         throw new Error(`unsupported data source ${dataSource}`);
     }
   }
 
-  async refreshAccessToken(dataSource: DataSource, refreshToken: string): Promise<OAuthTokens> {
+  async refreshAccessToken({
+    dataSource,
+    refreshToken,
+    orgId,
+  }: {
+    dataSource: DataSource,
+    refreshToken: string,
+    orgId: Id<IdType.Organization>,
+  }): Promise<OAuthTokens> {
     switch (dataSource) {
       case DataSource.GOOGLE_DRIVE:
-        return await this.refreshGoogleAccessToken(refreshToken);
+        return await this.refreshGoogleAccessToken(refreshToken, orgId);
       default:
         throw new Error(`unsupported data source ${dataSource}`);
     }
   }
 
-  private async getGoogleAuthorizeUrl(redirectUri: string, scopes: string[]): Promise<string> {
-    return this.getGoogleOAuthClient(redirectUri).generateAuthUrl({
+  private async getGoogleAuthorizeUrl(
+    redirectUri: string,
+    scopes: string[],
+    orgId: Id<IdType.Organization>,
+  ): Promise<string> {
+    const client = await this.getGoogleOAuthClient(orgId, redirectUri);
+    return await client.generateAuthUrl({
       scope: scopes,
       access_type: "offline",
     });
   }
 
-  private async getGoogleAccessToken(authorizationCode: string, redirectUri: string): Promise<OAuthTokens> {
-    const resp = await this.getGoogleOAuthClient(redirectUri).getToken(authorizationCode);
+  private async getGoogleAccessToken(
+    authorizationCode: string,
+    redirectUri: string,
+    orgId: Id<IdType.Organization>,
+  ): Promise<OAuthTokens> {
+    const client = await this.getGoogleOAuthClient(orgId, redirectUri);
+    const resp = await client.getToken(authorizationCode);
     
     return {
       accessToken: resp.tokens.access_token ?? undefined,
@@ -71,8 +100,11 @@ export class OAuthService {
     }
   }
 
-  async refreshGoogleAccessToken(refreshToken: string): Promise<OAuthTokens> {
-    const client = this.getGoogleOAuthClient();
+  async refreshGoogleAccessToken(
+    refreshToken: string,
+    orgId: Id<IdType.Organization>,
+  ): Promise<OAuthTokens> {
+    const client = await this.getGoogleOAuthClient(orgId);
     client.setCredentials({
       refresh_token: refreshToken, 
     });
@@ -86,33 +118,27 @@ export class OAuthService {
     }
   }
 
-  private getGoogleOAuthClient(redirectUri?: string): OAuth2Client {
-    const googleDriveOAuthConfig = this.oauthConfigs.get(DataSource.GOOGLE_DRIVE);
-    if (!googleDriveOAuthConfig) {
-      throw new Error("OAuth config not found for GOOGLE_DRIVE data source");
+  private async getGoogleOAuthClient(
+    orgId: Id<IdType.Organization>,
+    redirectUri?: string,
+  ): Promise<OAuth2Client> {
+    const oauthCredsList = await this.orgDataSourceOAuthCredentialService.getAll({
+      where: {
+        orgId: orgId.toString(),
+        dataSource: DataSource.GOOGLE_DRIVE,
+      }
+    });
+
+    if (oauthCredsList.length !== 1) {
+      throw new Error(`no Google Drive oauth credentials found for orgId=${orgId}. Make sure oauth credentials are configured for it first`);
     }
+
+    const oauthCreds = oauthCredsList[0]!;
 
     return new OAuth2Client({
-      clientId: googleDriveOAuthConfig.clientId,
-      clientSecret: googleDriveOAuthConfig.clientSecret,
+      clientId: oauthCreds.clientId,
+      clientSecret: oauthCreds.clientSecret,
       redirectUri: redirectUri,
     });
-  }
-
-  getConfigs(): DataSourceOAuthConfig[] {
-    if (!process.env.DATA_SOURCE_OAUTH_CONFIGS) {
-      return [];
-    }
-
-    try {
-      return JSON.parse(
-        process.env.DATA_SOURCE_OAUTH_CONFIGS,
-      ) as DataSourceOAuthConfig[];
-    } catch (e) {
-      logger.error("could not parse DATA_SOURCE_OAUTH_CONFIGS", { error: e });
-      throw new Error(
-        "Invalid DATA_SOURCE_OAUTH_CONFIGS! Make sure to configure valid DATA_SOURCE_OAUTH_CONFIGS",
-      );
-    }
   }
 }

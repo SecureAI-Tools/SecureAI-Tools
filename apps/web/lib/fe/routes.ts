@@ -53,7 +53,15 @@ export namespace FrontendRoutes {
   ): string =>
     `${getOrgHomeRoute(
       orgSlug,
-    )}/data-sources/connect/${dataSource.toLowerCase()}`;
+    )}/data-sources/${dataSource.toLowerCase()}/connect`;
+  
+  export const getConfigureDataSourceRoute = (
+      orgSlug: string,
+      dataSource: DataSource,
+    ): string =>
+      `${getOrgHomeRoute(
+        orgSlug,
+      )}/data-sources/${dataSource.toLowerCase()}/configure`;
 
   export const getOnboardingAIRoute = (orgSlug: string): string =>
     `${getOrgHomeRoute(orgSlug)}/onboarding/ai`;

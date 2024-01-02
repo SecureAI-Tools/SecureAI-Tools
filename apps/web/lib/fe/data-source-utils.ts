@@ -6,7 +6,7 @@ import {
   postDataSourceConnectionsApiPath,
 } from "lib/fe/api-paths";
 import { DataSourceConnectionCreateRequest } from "lib/types/api/data-source-connection-create.request";
-import { DataSource, DataSourceConnectionResponse } from "@repo/core";
+import { DataSource, DataSourceConnectionResponse, toDataSource } from "@repo/core";
 import { DataSourcesResponse } from "lib/types/api/data-sources.response";
 
 export const checkDataSourceConnection = async (
@@ -35,6 +35,7 @@ export const createDataSourceConnection = async (
 
 export interface DataSourceRecord {
   dataSource: DataSource;
+  configured: boolean,
   connection?: DataSourceConnectionResponse;
 }
 
@@ -46,7 +47,8 @@ export const getDataSourceRecords = (
     dataSourceConnections.map((dsc) => [dsc.dataSource, dsc]),
   );
 
-  const dataSources = dataSourcesResponse.enabledDataSources;
+  const dataSources = Object.keys(DataSource).map(s => toDataSource(s));
+  const configuredDataSources = new Set(dataSourcesResponse.configuredDataSources.map(s => toDataSource(s)));
 
   // Sort alphabetically
   dataSources.sort();
@@ -54,6 +56,7 @@ export const getDataSourceRecords = (
   return dataSources.map((ds): DataSourceRecord => {
     return {
       dataSource: ds,
+      configured: configuredDataSources.has(ds),
       connection: dataSourceConnectionsMap.get(ds),
     };
   });

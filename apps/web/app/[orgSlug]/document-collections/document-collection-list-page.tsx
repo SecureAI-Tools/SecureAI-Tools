@@ -112,7 +112,7 @@ const DocumentCollectionListPage = ({ orgSlug }: { orgSlug: string }) => {
   const { data: orgMembershipResponse, error: fetchOrgMembershipError } =
     useSWR(
       shouldFetchOrgMembership
-        ? getOrgMembershipsApiPath(Id.from(organizationResponse.response.id), {
+        ? getOrgMembershipsApiPath(organizationResponse.response.id, {
             userId: (session!.user as TokenUser).id,
           })
         : null,

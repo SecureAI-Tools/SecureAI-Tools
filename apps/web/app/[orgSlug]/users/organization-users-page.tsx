@@ -60,7 +60,7 @@ const getOrgMemberships = async (
 ): Promise<ResponseWithHeaders<OrgMembershipResponse[]>> => {
   // TODO(TECH-DEBT): Use SWR here instead of direct get()
   return await get<OrgMembershipResponse[]>(
-    getOrgMembershipsApiPath(orgId, {
+    getOrgMembershipsApiPath(orgId.toString(), {
       orderingParams: {
         orderBy: "createdAt",
         order: "asc",

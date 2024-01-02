@@ -23,3 +23,11 @@ export const dataSourceToReadableName = (type: DataSource): string => {
       return type;
   }
 };
+
+export const isConfigurableDataSource = (dataSource: DataSource): boolean => {
+  return CONFIGURABLE_DATA_SOURCES.has(dataSource)
+}
+
+const CONFIGURABLE_DATA_SOURCES = new Set<DataSource>([
+  DataSource.GOOGLE_DRIVE,
+]);

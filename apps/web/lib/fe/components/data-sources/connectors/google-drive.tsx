@@ -34,7 +34,7 @@ export const GoogleDriveConnector = ({
     const callbackUri = getCallbackUri(pathname!);
 
     try {
-      const { response } = await get<OAuthAuthorizeUrlResponse>(getDataSourceAuthorizeUrlApiPath(DataSource.GOOGLE_DRIVE, callbackUri, REQUEST_SCOPES))
+      const { response } = await get<OAuthAuthorizeUrlResponse>(getDataSourceAuthorizeUrlApiPath(orgSlug, DataSource.GOOGLE_DRIVE, callbackUri, REQUEST_SCOPES))
       // Redirect to authorize url
       router.push(response.authorizeUrl);
     } catch (e) {

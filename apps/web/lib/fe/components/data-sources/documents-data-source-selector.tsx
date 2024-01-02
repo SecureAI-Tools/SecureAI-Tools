@@ -5,12 +5,13 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { Button, Modal, Spinner } from "flowbite-react";
 import useSWR from "swr";
+import { HiOutlineLink, HiOutlineCog } from "react-icons/hi";
 
 import {
   DataSourceRecord,
   getDataSourceRecords,
 } from "lib/fe/data-source-utils";
-import { getDataSourcesApiPath, getOrganizationsIdOrSlugDataSourceConnectionsApiPath } from "lib/fe/api-paths";
+import { getOrgDataSourcesApiPath, getOrganizationsIdOrSlugDataSourceConnectionsApiPath } from "lib/fe/api-paths";
 import { TokenUser } from "lib/types/core/token-user";
 import { createFetcher } from "lib/fe/api";
 import { DataSourceIcon } from "lib/fe/components/data-sources/data-source-icon";
@@ -53,7 +54,7 @@ export const DocumentsDataSourceSelector = ({
     error: dataSourcesFetchError,
   } = useSWR(
     shouldFetchDataSources
-      ? getDataSourcesApiPath()
+      ? getOrgDataSourcesApiPath(orgSlug)
       : null,
     createFetcher<DataSourcesResponse>(),
   );
@@ -135,7 +136,7 @@ const DataSourceCard = ({
   ) => void;
 }) => {
   const [showModal, setShowModal] = useState(false);
-  const { dataSource, connection } = dataSourceRecord;
+  const { dataSource, configured, connection } = dataSourceRecord;
 
   if (dataSource === DataSource.UPLOAD) {
     return (
@@ -163,7 +164,9 @@ const DataSourceCard = ({
 
   const tooltTipText = connection
     ? `Select documents from ${readableName}`
-    : `Connect to ${readableName} first to select documents`;
+    : configured ? 
+      `Connect to ${readableName} first to select documents`
+      : `Configure ${readableName} first to connect to it`;
 
   return (
     <div>
@@ -200,12 +203,21 @@ const DataSourceCard = ({
             onDocumentsSelected={onDocumentsSelected}
           />
         ) : (
-          <ConnectModal
-            dataSource={dataSource}
-            orgSlug={orgSlug}
-            show={showModal}
-            onClose={() => setShowModal(false)}
-          />
+          configured ? (
+            <ConnectModal
+              dataSource={dataSource}
+              orgSlug={orgSlug}
+              show={showModal}
+              onClose={() => setShowModal(false)}
+            />
+          ) : (
+            <ConfigureModal
+              dataSource={dataSource}
+              orgSlug={orgSlug}
+              show={showModal}
+              onClose={() => setShowModal(false)}
+            />
+          )
         )
       ) : null}
     </div>
@@ -283,7 +295,12 @@ const ConnectModal = ({
       onClose={onClose}
       dismissible
     >
-      <Modal.Header>Connect to {readableName}</Modal.Header>
+      <Modal.Header>
+        <div className={tw("flex flex-row items-center")}>
+          <HiOutlineLink className={tw("mr-2")}/>
+          Connect to {readableName}
+        </div>
+      </Modal.Header>
       <Modal.Body>
         Your account is not connected to {readableName} yet. You first need to
         connect your account to {readableName} to select documents from it. This
@@ -294,6 +311,47 @@ const ConnectModal = ({
           target="_blank"
         >
           Connect to {readableName}
+        </Button>
+      </Modal.Body>
+    </Modal>
+  );
+};
+
+const ConfigureModal = ({
+  dataSource,
+  orgSlug,
+  show,
+  onClose,
+}: {
+  dataSource: DataSource;
+  orgSlug: string;
+  show: boolean;
+  onClose?: () => void;
+}) => {
+  const readableName = dataSourceToReadableName(dataSource);
+
+  return (
+    <Modal
+      size="lg"
+      position="center"
+      show={show}
+      onClose={onClose}
+      dismissible
+    >
+      <Modal.Header>
+        <div className={tw("flex flex-row items-center")}>
+          <HiOutlineCog className={tw("mr-2")}/>
+          Configure {readableName}
+        </div>
+      </Modal.Header>
+      <Modal.Body>
+        {readableName} needs to be configured for your organization first. You will be able to connect your account after it is configured.
+        <Button
+          href={FrontendRoutes.getConfigureDataSourceRoute(orgSlug, dataSource)}
+          className={tw("mt-6")}
+          target="_blank"
+        >
+          Configure {readableName} for your organization
         </Button>
       </Modal.Body>
     </Modal>

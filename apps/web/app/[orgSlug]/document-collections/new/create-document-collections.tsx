@@ -77,6 +77,7 @@ const CreateDocumentCollections = ({ orgSlug }: { orgSlug: string }) => {
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleSubmit();
+                  return false;
                 }}
               >
                 <div>

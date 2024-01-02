@@ -210,6 +210,29 @@ export const checkDataSourceConnectionsApiPath = (
   return `/api/organizations/${orgIdOrSlug}/data-source-connections/check`;
 };
 
+export const getOrgDataSourcesApiPath = (
+  orgIdOrSlug: string
+): string => {
+  return `/api/organizations/${orgIdOrSlug}/data-sources`;
+};
+
+export const getDataSourceAuthorizeUrlApiPath = (
+  orgIdOrSlug: string,
+  dataSource: DataSource,
+  redirectUri: string,
+  scopes: string[],
+): string => {
+  return `/api/organizations/${orgIdOrSlug}/data-sources/${dataSource}/oauth/authorize-url?redirectUri=${encodeURIComponent(redirectUri)}`
+    + scopes.map(s => `&scope=${encodeURIComponent(s)}`).join("");
+};
+
+export const postOrgDataSourceCredentialApiPath = (
+  orgIdOrSlug: string,
+  dataSource: DataSource,
+): string => {
+  return `/api/organizations/${orgIdOrSlug}/data-sources/${dataSource}/oauth/credentials`;
+};
+
 export const postDataSourceConnectionsApiPath = (
   orgIdOrSlug: string,
 ): string => {
@@ -217,7 +240,7 @@ export const postDataSourceConnectionsApiPath = (
 };
 
 export const getOrgMembershipsApiPath = (
-  orgId: Id<IdType.Organization>,
+  orgIdOrSlug: string,
   // filters and ordering
   {
     nameOrEmailLike,
@@ -238,7 +261,7 @@ export const getOrgMembershipsApiPath = (
   },
 ): string => {
   return (
-    `/api/organizations/${orgId}/memberships?orderBy=${orderingParams.orderBy}&order=${orderingParams.order}&page=${paginationParams.page}&pageSize=${paginationParams.pageSize}` +
+    `/api/organizations/${orgIdOrSlug}/memberships?orderBy=${orderingParams.orderBy}&order=${orderingParams.order}&page=${paginationParams.page}&pageSize=${paginationParams.pageSize}` +
     (!isEmpty(nameOrEmailLike)
       ? `&nameOrEmailLike=${encodeURIComponent(nameOrEmailLike!)}`
       : "") +
@@ -288,17 +311,4 @@ export const getDataSourceConnetionDocumentsApiPath = ({
   return `/api/data-source-connections/${connectionId}/documents?query=${encodeURIComponent(
     query,
   )}&page=${pagination.page}&pageSize=${pagination.pageSize}`;
-};
-
-export const getDataSourceAuthorizeUrlApiPath = (
-  dataSource: DataSource,
-  redirectUri: string,
-  scopes: string[],
-): string => {
-  return `/api/data-sources/${dataSource}/oauth/authorize-url?redirectUri=${encodeURIComponent(redirectUri)}`
-    + scopes.map(s => `&scope=${encodeURIComponent(s)}`).join("");
-};
-
-export const getDataSourcesApiPath = (): string => {
-  return `/api/data-sources`;
 };
