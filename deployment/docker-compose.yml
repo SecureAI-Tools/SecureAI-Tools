@@ -10,8 +10,7 @@ version: "3.8"
 
 services:
   web:
-    image: public.ecr.aws/d8f2p0h3/secure-ai-tools:latest
-    platform: linux/amd64
+    image: test-secure-ai-tools
     volumes:
       - ./web:/app/volume
     env_file:
@@ -38,8 +37,7 @@ services:
         restart: false
 
   task-master:
-    image: public.ecr.aws/d8f2p0h3/secure-ai-tools:latest
-    platform: linux/amd64
+    image: test-secure-ai-tools
     volumes:
       - ./web:/app/volume
     env_file:
@@ -65,8 +63,7 @@ services:
 
   # Performs DB schema migrations and seeds db with initial data if needed.
   db-migrate-and-seed:
-    image: public.ecr.aws/d8f2p0h3/secure-ai-tools:latest
-    platform: linux/amd64
+    image: test-secure-ai-tools
     volumes:
       - ./web:/app/volume
     env_file:
