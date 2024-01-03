@@ -11,7 +11,8 @@ If you have a Google Cloud project, then skip this step.
 
 ### 2. Enable Google Drive API
 
-#### 2.1. Navigate to "Enabled APIs & services": `Left side navigation > APIs & Services > Enabled APIs & services`
+#### 2.1. Navigate to "Enabled APIs & services"
+`Left side navigation > APIs & Services > Enabled APIs & services`
 
 <img src="/docs/images/nav-enabled-api-services.png?raw=true" height="250" />
 
