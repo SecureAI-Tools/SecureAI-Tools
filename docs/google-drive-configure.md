@@ -46,6 +46,8 @@ If you have a Google Cloud project, then skip this step.
 
 1. Click "Add or remove scopes"
 
+<img src="/docs/images/click-add-or-remove-scopes.png?raw=true" height="250" />
+
 2. Add the following scopes manually (or search for them and select)
 
     ```
