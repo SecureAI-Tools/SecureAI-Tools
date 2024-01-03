@@ -172,7 +172,17 @@ export class DataSourceConnectionService {
       dataSource: connection.dataSource,
     });
 
-    const tokens = await this.oauthService.refreshAccessToken(toDataSource(connection.dataSource), connection.refreshToken);
+    const membership = await prismaClient.orgMembership.findUniqueOrThrow({
+      where: {
+        id: connection.membershipId,
+      }
+    });
+
+    const tokens = await this.oauthService.refreshAccessToken({
+      dataSource: toDataSource(connection.dataSource),
+      refreshToken: connection.refreshToken,
+      orgId: Id.from(membership.orgId),
+    });
 
     if (isEmpty(tokens.accessToken)) {
       throw new Error("something went wrong during token refresh; Received empty access token during refresh!");

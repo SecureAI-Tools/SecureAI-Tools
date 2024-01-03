@@ -55,7 +55,7 @@ const OrgGeneralSettings = ({ orgSlug }: { orgSlug: string }) => {
     useSWR(
       shouldFetchOrgMembership
         ? getOrgMembershipsApiPath(
-            Id.from(fetchOrganizationResponse.response.id),
+            fetchOrganizationResponse.response.id,
             { userId: (session!.user as TokenUser).id },
           )
         : null,

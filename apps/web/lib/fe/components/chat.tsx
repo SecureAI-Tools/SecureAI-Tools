@@ -3,8 +3,6 @@ import { Message } from "ai";
 import { useChat } from "ai/react";
 import { tw } from "twind";
 import { Button, Progress, Spinner, Tooltip } from "flowbite-react";
-import { HiOutlineClipboard, HiOutlineClipboardCheck } from "react-icons/hi";
-import clipboardCopy from "clipboard-copy";
 import { MdSend } from "react-icons/md";
 
 import ChatInput from "lib/fe/components/chat-input";
@@ -32,6 +30,7 @@ import { CitationResponse } from "lib/types/api/citation-response";
 import { Link } from "lib/fe/components/link";
 import { ChatMessageRole } from "lib/types/core/chat-message-role";
 import { DocumentIcon } from "lib/fe/components/document-icon";
+import { CopyClipboard } from "lib/fe/components/copy-clipboard";
 
 import {
   DocumentResponse,
@@ -58,8 +57,6 @@ const MessageEntry = ({
   citations?: CitationResponse[];
   documents?: DocumentResponse[];
 }) => {
-  const [copiedToClipboard, setCopiedToClipboard] = useState<boolean>(false);
-
   return (
     <div
       key={message.id}
@@ -129,29 +126,17 @@ const MessageEntry = ({
               </div>
             ) : null}
           </div>
-          {copiedToClipboard ? (
-            <HiOutlineClipboardCheck />
-          ) : (
-            <HiOutlineClipboard
-              className={tw("cursor-pointer hover:bg-slate-200 rounded")}
-              onClick={(event) => {
-                clipboardCopy(message.content);
-
-                // Show success icon for a bit and then go back to copy-clipboard icon.
-                setCopiedToClipboard(true);
-                setTimeout(() => {
-                  setCopiedToClipboard(false);
-                }, 2048);
-
-                Analytics.track({
-                  event: Analytics.Event.ChatMessageCopiedToClipboard,
-                  payload: {
-                    messageRole: message.role,
-                  },
-                });
-              }}
-            />
-          )}
+          <CopyClipboard
+            content={message.content}
+            onCopied={() => {
+              Analytics.track({
+                event: Analytics.Event.ChatMessageCopiedToClipboard,
+                payload: {
+                  messageRole: message.role,
+                },
+              });
+            }}
+          />
         </div>
       </div>
     </div>

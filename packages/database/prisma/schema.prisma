@@ -28,17 +28,18 @@ model User {
 }
 
 model Organization {
-  id                  String               @id
+  id                  String                         @id
   name                String
-  slug                String               @unique
+  slug                String                         @unique
   // Default model name
   defaultModel        String
   // Enum controlled by ModelType
   defaultModelType    String?
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  createdAt           DateTime                       @default(now())
+  updatedAt           DateTime                       @updatedAt
   memberships         OrgMembership[]
   documentCollections DocumentCollection[]
+  dataSourceCreds     OrgDataSourceOAuthCredential[]
 
   @@index([id])
 }
@@ -205,10 +206,30 @@ model DocumentToDataSource {
 }
 
 model DocumentChunk {
-  id           String               @id
+  id         String   @id
   // Id from external vector db
-  vectorDbId   String
-  documentId   String
-  document     Document             @relation(fields: [documentId], references: [id])
-  @@index([id])  
+  vectorDbId String
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id])
+
+  @@index([id])
+}
+
+// The oauth credentials at org level for the data sources that need it.
+// For example, GOOGLE_DRIVE needs a data source config at org level, but UPLOAD and 
+// PAPERLESS_NGX don't need it.
+model OrgDataSourceOAuthCredential {
+  id           String       @id
+  // Enum controlled by DataSource in TS
+  dataSource   String
+  orgId        String
+  org          Organization @relation(fields: [orgId], references: [id])
+  clientId     String
+  clientSecret String
+  // Raw credentials JSON
+  raw          Json
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([id])
 }

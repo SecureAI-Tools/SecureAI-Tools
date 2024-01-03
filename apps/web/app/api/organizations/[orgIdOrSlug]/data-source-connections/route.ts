@@ -149,11 +149,12 @@ export async function POST(
     }
 
     // Exchange authorization code for access token!
-    const tokens = await oauthService.getAccessToken(
-      dataSource,
-      authorizationCode!,
-      redirectUri!,
-    );
+    const tokens = await oauthService.getAccessToken({
+      dataSource: dataSource,
+      authorizationCode: authorizationCode!,
+      redirectUri: redirectUri!,
+      orgId: Id.from(org.id),
+    });
 
     input = {
       dataSource: dataSource,
