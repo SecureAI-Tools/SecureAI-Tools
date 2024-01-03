@@ -127,9 +127,8 @@ export const GoogleDriveConfigure = ({
                 <span>
                   Please follow&nbsp;
                   <Link
-                    // DO NOT SUBMIT
-                    // Link to instructions doc!
-                    href="#"
+                    href="https://github.com/SecureAI-Tools/SecureAI-Tools/blob/main/docs/google-drive-configure.md"
+                    target="_blank"
                   >
                     these instructions
                   </Link>
