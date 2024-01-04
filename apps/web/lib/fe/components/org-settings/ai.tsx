@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { tw } from "twind";
 import useSWR from "swr";
-import { Button, Label, Select, TextInput } from "flowbite-react";
+import { Button, Label, Select, Spinner, TextInput } from "flowbite-react";
 import { useEffect, useState } from "react";
 
 import {
@@ -165,6 +165,12 @@ const OrgAISettings = ({
     );
   }
 
+  if (!modelProvidersResponse) {
+    return <Spinner size="lg" />
+  }
+
+  const allowedModels = modelProvidersResponse.response.find(c => modelType && c.type === modelType)?.allowedModels
+
   return (
     <div className={tw("px-4")}>
       <Toasts toasts={toasts} />
@@ -191,7 +197,7 @@ const OrgAISettings = ({
             }}
             value={modelType}
           >
-            {modelProvidersResponse?.response.map((config, i) => {
+            {modelProvidersResponse.response.map((config, i) => {
               return (
                 <option key={config.type} value={config.type}>
                   {modelTypeToReadableName(config.type)}
@@ -207,18 +213,37 @@ const OrgAISettings = ({
               value="Large Language Model (LLM) Name"
             />
           </div>
-          <TextInput
-            id="model-name"
-            placeholder={getModelNamePlaceholder(modelType)}
-            required
-            type="text"
-            value={modelName}
-            onChange={(event) => {
-              setModelName(event.target.value.toLowerCase());
-            }}
-            disabled={!isOrgAdmin}
-            helperText={renderModelNameHelpText(modelType)}
-          />
+          {allowedModels && allowedModels.length > 0 ? (
+            <Select
+              id="model-name"
+              required
+              onChange={(e) => {
+                setModelName(e.target.value);
+              }}
+              value={modelName}
+            >
+              {allowedModels.map((m, i) => {
+                return (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                );
+              })}
+            </Select>
+          ) : (
+            <TextInput
+              id="model-name"
+              placeholder={getModelNamePlaceholder(modelType)}
+              required
+              type="text"
+              value={modelName}
+              onChange={(event) => {
+                setModelName(event.target.value.toLowerCase());
+              }}
+              disabled={!isOrgAdmin}
+              helperText={renderModelNameHelpText(modelType)}
+            />
+          )}
         </div>
         <Button
           type="submit"

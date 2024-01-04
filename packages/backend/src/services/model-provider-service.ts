@@ -11,6 +11,7 @@ import {
   ModelType,
   removeTrailingSlash,
   ModelProviderConfig,
+  isEmpty,
 } from "@repo/core";
 
 const logger = getLogger("model-provider-service");
@@ -115,6 +116,25 @@ export class ModelProviderService {
   }
 
   getConfigs(): ModelProviderConfig[] {
+    const configs = this.parseConfigs();
+
+    // Add OLLAMA if INFERENCE_SERVER env config is provided and OLLAMA is not already specifed in model-configs env vars!
+    if (!isEmpty(process.env.INFERENCE_SERVER) && configs.findIndex((c) => c.type === ModelType.OLLAMA) < 0) {
+      configs.push({
+        type: ModelType.OLLAMA,
+        apiBaseUrl: process.env.INFERENCE_SERVER!,
+      });
+    }
+
+    return configs;
+  }
+
+  getConfig(type: ModelType): ModelProviderConfig | undefined {
+    // TODO: Optimize this if/when needed!
+    return this.getConfigs().find((c) => c.type === type.toString());
+  }
+
+  private parseConfigs(): ModelProviderConfig[] {
     if (!process.env.MODEL_PROVIDER_CONFIGS) {
       logger.warn(
         "No model-provider-configs found. Make sure to configure valid model-provider-configs json in MODEL_PROVIDER_CONFIGS",
@@ -132,22 +152,5 @@ export class ModelProviderService {
         "Invalid model-provider-configs! Make sure to configure valid model-provider-configs json in MODEL_PROVIDER_CONFIGS",
       );
     }
-  }
-
-  getConfig(type: ModelType): ModelProviderConfig | undefined {
-    // TODO: Optimize this if/when needed!
-    const configs = this.getConfigs();
-
-    const config = configs.find((c) => c.type === type.toString());
-
-    // Default for ollama if no config is provided!
-    if (type === ModelType.OLLAMA && !config) {
-      return {
-        type: ModelType.OLLAMA,
-        apiBaseUrl: process.env.INFERENCE_SERVER!,
-      };
-    }
-
-    return config;
   }
 }

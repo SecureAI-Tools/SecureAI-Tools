@@ -5,6 +5,10 @@ export interface ModelProviderConfig {
   apiBaseUrl: string;
   apiKey?: string;
 
+  // If specified => system will restrict users to those model strings
+  // If not specified or empty => system will allow any arbitrary model name
+  allowedModels?: string[];
+
   // Model provider specific options.
   // All fields except for model-name and api-key! Those two fields are overridden based on the model selected in UI and apiBaseUrl above!
   //

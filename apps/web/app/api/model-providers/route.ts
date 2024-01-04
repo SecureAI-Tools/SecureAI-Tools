@@ -4,7 +4,6 @@ import { isAuthenticated } from "lib/api/core/auth";
 import { ModelProviderResponse } from "lib/types/api/mode-provider.response";
 import { getWebLogger } from "lib/api/core/logger";
 
-import { ModelType } from "@repo/core";
 import { ModelProviderService, NextResponseErrors } from "@repo/backend";
 
 const logger = getWebLogger();
@@ -17,21 +16,12 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const modelProviderConfigs = modelProviderService.getConfigs();
+    const configs = modelProviderService.getConfigs();
 
-    const modelTypes = modelProviderConfigs.map((c) => c.type);
-    if (
-      process.env.INFERENCE_SERVER &&
-      modelTypes.findIndex((t) => t === ModelType.OLLAMA) < 0
-    ) {
-      // Add OLLAMA if INFERENCE_SERVER env config if provided and it's not already specifed in model-configs!
-      modelTypes.push(ModelType.OLLAMA);
-    }
-    modelTypes.sort();
-
-    const modelProviders: ModelProviderResponse[] = modelTypes.map((type) => {
+    const modelProviders: ModelProviderResponse[] = configs.map((c) => {
       return {
-        type: type,
+        type: c.type,
+        allowedModels: c.allowedModels,
       };
     });
     return NextResponse.json(modelProviders);
