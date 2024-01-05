@@ -124,6 +124,7 @@ export class IndexingService {
         langchainDocuments = await loader.loadAndSplit(textSplitter);
         break;
       case MimeType.GOOGLE_DOC:
+      case MimeType.NOTION_PAGE:
         const text = await this.documentService.exportAsText(
           document,
           dataSourceConnection,
@@ -133,6 +134,8 @@ export class IndexingService {
       default:
         throw new Error(`MimeType not supported: ${document.mimeType}`);
     }
+
+    logger.debug("langchainDocuments", langchainDocuments);
 
     const embeddingModel =
       this.modelProviderService.getEmbeddingModel(documentCollection);

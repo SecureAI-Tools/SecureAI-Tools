@@ -27,11 +27,13 @@ import {
 const SUPPORTED_DATA_SOURCES = new Set<DataSource>([
   DataSource.PAPERLESS_NGX,
   DataSource.GOOGLE_DRIVE,
+  DataSource.NOTION,
 ]);
 
 const SUPPORTED_MIME_TYPES = new Set<MimeType>([
   MimeType.PDF,
   MimeType.GOOGLE_DOC,
+  MimeType.NOTION_PAGE,
 ]);
 
 const permissionService = new PermissionService();

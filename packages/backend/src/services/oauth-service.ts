@@ -1,9 +1,11 @@
 import { OAuth2Client } from "google-auth-library";
+import { Client as NotionClient } from "@notionhq/client";
 
 import { DataSource, Id, IdType } from "@repo/core";
 
 import { getLogger } from "../logger";
 import { OrgDataSourceOAuthCredentialService } from "./org-data-source-oauth-credential-service";
+import { DataSourceOAuthConfig } from "../types/data-source-oauth-config";
 
 const logger = getLogger("oauth-service");
 
@@ -17,20 +19,35 @@ export interface OAuthTokens {
 export class OAuthService {
   private orgDataSourceOAuthCredentialService = new OrgDataSourceOAuthCredentialService();
 
+  // DataSourceOAuthConfig for system configurable data sources
+  private sysOAuthConfigs: Map<DataSource, DataSourceOAuthConfig>;
+
+  constructor() {
+    this.sysOAuthConfigs = new Map();
+
+    this.getConfigs().forEach(c => {
+      this.sysOAuthConfigs.set(c.dataSource, c);
+    });
+  }
+
   async getAuthorizeUrl({
     dataSource,
     redirectUri,
     scopes,
     orgId,
+    state,
   }: {
     dataSource: DataSource,
     redirectUri: string,
     scopes: string[],
     orgId: Id<IdType.Organization>,
+    state: string,
   }): Promise<string> {
     switch (dataSource) {
       case DataSource.GOOGLE_DRIVE:
-        return await this.getGoogleAuthorizeUrl(redirectUri, scopes, orgId);
+        return await this.getGoogleAuthorizeUrl(redirectUri, scopes, orgId, state);
+      case DataSource.NOTION:
+        return await this.getNotionAuthorizeUrl(redirectUri, state);
       default:
         throw new Error(`unsupported data source ${dataSource}`);
     }
@@ -51,6 +68,8 @@ export class OAuthService {
     switch (dataSource) {
       case DataSource.GOOGLE_DRIVE:
         return await this.getGoogleAccessToken(authorizationCode, redirectUri, orgId);
+      case DataSource.NOTION:
+        return await this.getNotionAccessToken(authorizationCode, redirectUri);
       default:
         throw new Error(`unsupported data source ${dataSource}`);
     }
@@ -77,12 +96,33 @@ export class OAuthService {
     redirectUri: string,
     scopes: string[],
     orgId: Id<IdType.Organization>,
+    state: string,
   ): Promise<string> {
     const client = await this.getGoogleOAuthClient(orgId, redirectUri);
     return await client.generateAuthUrl({
       scope: scopes,
       access_type: "offline",
+      state: state,
     });
+  }
+
+  private async getNotionAuthorizeUrl(
+    redirectUri: string,
+    state: string,
+  ): Promise<string> {
+    const notionOAuthConfig = this.sysOAuthConfigs.get(DataSource.NOTION);
+    if (!notionOAuthConfig) {
+      throw new Error("OAuth config not found for NOTION data source");
+    }
+
+    const url = new URL("https://api.notion.com/v1/oauth/authorize");
+    url.searchParams.set("client_id", notionOAuthConfig.clientId);
+    url.searchParams.set("response_type", "code");
+    url.searchParams.set("owner", "user");
+    url.searchParams.set("redirect_uri", redirectUri);
+    url.searchParams.set("state", state);
+
+    return url.toString();
   }
 
   private async getGoogleAccessToken(
@@ -97,6 +137,29 @@ export class OAuthService {
       accessToken: resp.tokens.access_token ?? undefined,
       accessTokenExpiresAt: resp.tokens.expiry_date ?? undefined,
       refreshToken: resp.tokens.refresh_token ?? undefined,
+    }
+  }
+
+  private async getNotionAccessToken(
+    authorizationCode: string,
+    redirectUri: string,
+  ): Promise<OAuthTokens> {
+    const notionOAuthConfig = this.sysOAuthConfigs.get(DataSource.NOTION);
+    if (!notionOAuthConfig) {
+      throw new Error("OAuth config not found for NOTION data source");
+    }
+
+    const client = new NotionClient();
+    const resp = await client.oauth.token({
+      client_id: notionOAuthConfig.clientId,
+      client_secret: notionOAuthConfig.clientSecret,
+      grant_type: "authorization_code",
+      code: authorizationCode,
+      redirect_uri: redirectUri,
+    });
+    
+    return {
+      accessToken: resp.access_token ?? undefined,
     }
   }
 
@@ -140,5 +203,22 @@ export class OAuthService {
       clientSecret: oauthCreds.clientSecret,
       redirectUri: redirectUri,
     });
+  }
+
+  getConfigs(): DataSourceOAuthConfig[] {
+    if (!process.env.DATA_SOURCE_OAUTH_CONFIGS) {
+      return [];
+    }
+
+    try {
+      return JSON.parse(
+        process.env.DATA_SOURCE_OAUTH_CONFIGS,
+      ) as DataSourceOAuthConfig[];
+    } catch (e) {
+      logger.error("could not parse DATA_SOURCE_OAUTH_CONFIGS", { error: e });
+      throw new Error(
+        "Invalid DATA_SOURCE_OAUTH_CONFIGS! Make sure to configure valid DATA_SOURCE_OAUTH_CONFIGS",
+      );
+    }
   }
 }

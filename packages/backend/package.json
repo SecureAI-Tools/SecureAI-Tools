@@ -13,12 +13,14 @@
   },
   "dependencies": {
     "@googleapis/drive": "^8.4.0",
+    "@notionhq/client": "^2.2.14",
     "@repo/core": "*",
     "@repo/database": "*",
     "amqplib": "^0.10.3",
     "gaxios": "^6.1.1",
     "google-auth-library": "^9.4.1",
     "langchain": "^0.0.200",
+    "notion-to-md": "^3.1.1",
     "winston": "^3.10.0",
     "winston-daily-rotate-file": "^4.7.1"
   },

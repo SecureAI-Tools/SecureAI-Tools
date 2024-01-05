@@ -15,6 +15,7 @@ import { createFetcher } from "lib/fe/api";
 import { renderErrors } from "lib/fe/components/generic-error";
 import { formatDateTime } from "lib/core/date-format";
 import { GoogleDriveConnector } from "lib/fe/components/data-sources/connectors/google-drive";
+import { NotionConnector } from "lib/fe/components/data-sources/connectors/notion";
 
 import {
   DataSource,
@@ -93,6 +94,8 @@ const ConnectDataSource = ({
         return <PaperlessNgxConnector orgSlug={orgSlug} userId={userId} />;
       case DataSource.GOOGLE_DRIVE:
         return <GoogleDriveConnector orgSlug={orgSlug} userId={userId} />;
+      case DataSource.NOTION:
+        return <NotionConnector orgSlug={orgSlug} userId={userId} />;
       default:
         return <div>Unsupported data source "{dataSourceReadableName}"</div>;
     }

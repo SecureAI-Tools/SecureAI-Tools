@@ -4,7 +4,6 @@ import { isAuthenticated } from "lib/api/core/auth";
 import { OrgMembershipService } from "lib/api/services/org-membership-service";
 import { OrganizationService } from "lib/api/services/organization-service";
 import { DataSourceConnectionCreateRequest } from "lib/types/api/data-source-connection-create.request";
-import { isOAuthDataSource } from "lib/api/core/data-source.utils";
 
 import {
   NextResponseErrors,
@@ -18,6 +17,7 @@ import {
   Id,
   OrgMembershipStatus,
   isEmpty,
+  isOAuthDataSource,
 } from "@repo/core";
 
 const orgMembershipService = new OrgMembershipService();

@@ -68,4 +68,7 @@ export namespace FrontendRoutes {
 
   export const getLogInWithEmailRoute = (email: string): string =>
     `${LOG_IN}&email=${encodeURIComponent(email)}`;
+
+  export const getDataSourcesOAuthCallbackRoute = (dataSource: DataSource): string =>
+    `/data-sources/${dataSource.toLowerCase()}/oauth-callback`;
 }

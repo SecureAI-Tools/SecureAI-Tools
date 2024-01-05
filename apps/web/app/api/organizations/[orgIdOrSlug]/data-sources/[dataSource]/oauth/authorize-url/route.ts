@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { isEmpty, toDataSource, OAuthAuthorizeUrlResponse, Id } from "@repo/core";
+import { isEmpty, toDataSource, OAuthAuthorizeUrlResponse, Id, DataSource, isOAuthDataSource,  } from "@repo/core";
 import { NextResponseErrors, OAuthService } from "@repo/backend";
 
 import { isAuthenticated } from "lib/api/core/auth";
-import { isOAuthDataSource } from "lib/api/core/data-source.utils";
 import { OrganizationService } from "lib/api/services/organization-service";
 
 const oauthService = new OAuthService();
@@ -33,8 +32,11 @@ export async function GET(
   const { searchParams } = new URL(req.url);
   const redirectUri = searchParams.get("redirectUri");
   const scopes = searchParams.getAll("scope").filter(s => !isEmpty(s));
-  if (isEmpty(redirectUri) || scopes.length < 1) {
-    return NextResponseErrors.badRequest("redirectUri and scope are required");
+  if (isEmpty(redirectUri)) {
+    return NextResponseErrors.badRequest("redirectUri is required");
+  }
+  if (dataSource === DataSource.GOOGLE_DRIVE && scopes.length < 1) {
+    return NextResponseErrors.badRequest("scope is required");
   }
 
   const resp: OAuthAuthorizeUrlResponse = {
@@ -43,6 +45,7 @@ export async function GET(
       redirectUri: redirectUri!,
       scopes: scopes,
       orgId: Id.from(org.id),
+      state: params.orgIdOrSlug,
     }),
   }
   return NextResponse.json(resp);
