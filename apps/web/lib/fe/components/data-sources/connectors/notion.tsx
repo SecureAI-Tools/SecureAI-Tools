@@ -12,13 +12,7 @@ import { getDataSourceAuthorizeUrlApiPath } from "lib/fe/api-paths";
 import { get } from "lib/fe/api";
 import { createDataSourceConnection } from "lib/fe/data-source-utils";
 
-// https://developers.google.com/identity/protocols/oauth2/scopes#drive
-const REQUEST_SCOPES = [
-  'https://www.googleapis.com/auth/drive.readonly',
-  'https://www.googleapis.com/auth/drive.metadata.readonly',
-];
-
-export const GoogleDriveConnector = ({
+export const NotionConnector = ({
   orgSlug,
   userId,
 }: {
@@ -31,14 +25,14 @@ export const GoogleDriveConnector = ({
   const searchParams = useSearchParams();
 
   const startOAuthFlow = async () => {
-    const callbackUri = getCallbackUri(pathname!);
+    const callbackUri = getCallbackUri();
 
     try {
       const { response } = await get<OAuthAuthorizeUrlResponse>(getDataSourceAuthorizeUrlApiPath({
         orgIdOrSlug: orgSlug,
-        dataSource: DataSource.GOOGLE_DRIVE,
+        dataSource: DataSource.NOTION,
         redirectUri: callbackUri,
-        scopes: REQUEST_SCOPES,
+        scopes: [],
       }));
       // Redirect to authorize url
       router.push(response.authorizeUrl);
@@ -54,27 +48,19 @@ export const GoogleDriveConnector = ({
       return;
     }
 
-    if (isRedirectBackFromGoogle(searchParams)) {
+    if (isRedirectBackFromProvider(searchParams)) {
       const errorCode = getErrorParam(searchParams);
       const authorizationCode = getAuthorizationCodeParam(searchParams);
-      const scopeParam = getScopeParam(searchParams);
 
       if (!isEmpty(errorCode)) {
         setCurrentState('error');
       } else {
-        const scopes = scopeParam?.split(" ") ?? [];
-        const receivedAllRequestedScope = scopes.every(s => REQUEST_SCOPES.includes(s));
-        if (!receivedAllRequestedScope || isEmpty(authorizationCode)) {
-          setCurrentState("error");
-          return;
-        }
-
         // Create data source connection based on authorizationCode
         createDataSourceConnection(orgSlug, {
-          dataSource: DataSource.GOOGLE_DRIVE,
-          baseUrl: "https://drive.google.com/",
+          dataSource: DataSource.NOTION,
+          baseUrl: "https://notion.so/",
           authorizationCode: authorizationCode!,
-          redirectUri: getCallbackUri(pathname!),
+          redirectUri: getCallbackUri(),
         }).then((resp) => {
           setCurrentState("success")
         }).catch((e) => {
@@ -92,7 +78,7 @@ export const GoogleDriveConnector = ({
       return (
         <>
           <Spinner size="xl" />
-          <div className={tw("mt-4")}>Redirecting to Google...</div>
+          <div className={tw("mt-4")}>Redirecting to Notion...</div>
         </>
       );
     }
@@ -102,7 +88,7 @@ export const GoogleDriveConnector = ({
         <>
           <Alert color="failure" icon={HiOutlineExclamation}>
             <div className={tw("font-medium")}>Something went wrong!</div>
-            <div className={tw("mt-2")}>Something went wrong when trying to connect to Google Drive. Please try again.</div>
+            <div className={tw("mt-2")}>Something went wrong when trying to connect to Notion. Please try again.</div>
             <Button
               onClick={() => {
                 startOAuthFlow();
@@ -127,8 +113,8 @@ export const GoogleDriveConnector = ({
         dismissible={false}
         msg={
           <p>
-            Successfully connected to Google Drive. Now you can select files
-            from Google Drive when needed
+            Successfully connected to Notion. Now you can select files
+            from Notion when needed
           </p>
         }
         onButtonClick={() => {
@@ -139,8 +125,8 @@ export const GoogleDriveConnector = ({
   );
 };
 
-function isRedirectBackFromGoogle(searchParams: ReadonlyURLSearchParams): boolean {
-  return !isEmpty(getErrorParam(searchParams)) || !isEmpty(getAuthorizationCodeParam(searchParams)) || !isEmpty(getScopeParam(searchParams));
+function isRedirectBackFromProvider(searchParams: ReadonlyURLSearchParams): boolean {
+  return !isEmpty(getErrorParam(searchParams)) || !isEmpty(getAuthorizationCodeParam(searchParams));
 }
 
 function getErrorParam(searchParams: ReadonlyURLSearchParams): string | null {
@@ -151,10 +137,6 @@ function getAuthorizationCodeParam(searchParams: ReadonlyURLSearchParams): strin
   return searchParams.get("code");
 }
 
-function getScopeParam(searchParams: ReadonlyURLSearchParams): string | null {
-  return searchParams.get("scope");
-}
-
-function getCallbackUri(pathname: string): string {
-  return `${window.location.protocol}//${window.location.host}${FrontendRoutes.getDataSourcesOAuthCallbackRoute(DataSource.GOOGLE_DRIVE)}`
+function getCallbackUri(): string {
+  return `${window.location.protocol}//${window.location.host}${FrontendRoutes.getDataSourcesOAuthCallbackRoute(DataSource.NOTION)}`
 }

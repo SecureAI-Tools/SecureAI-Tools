@@ -9,7 +9,7 @@ import { OrgDataSourceOAuthCredentialResponse } from "lib/types/api/org-data-sou
 import {
   Id,
   toDataSource,
-  isConfigurableDataSource,
+  isOrgAdminConfigurableDataSource,
 } from "@repo/core";
 import {
   NextResponseErrors,
@@ -35,7 +35,7 @@ export async function POST(
 
   const dataSource = toDataSource(params.dataSource.toUpperCase());
 
-  if (!isConfigurableDataSource(dataSource)) {
+  if (!isOrgAdminConfigurableDataSource(dataSource)) {
     return NextResponseErrors.badRequest(`${dataSource} can not be configured`);
   }
 

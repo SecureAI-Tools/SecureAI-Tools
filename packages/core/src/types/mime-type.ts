@@ -1,6 +1,10 @@
 export enum MimeType {
+  // Standard types
   PDF = "application/pdf",
   GOOGLE_DOC = "application/vnd.google-apps.document",
+
+  // Non-standard types!
+  NOTION_PAGE = "notion/page",
 }
 
 const reverseMap = new Map<string, MimeType>();

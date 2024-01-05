@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Client as NotionClient } from "@notionhq/client";
+import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 
 import { isAuthenticated } from "lib/api/core/auth";
 import { PermissionService } from "lib/api/services/permission-service";
@@ -84,6 +86,8 @@ async function getDocuments(
       return await getDocumentsFromPaperlessNgx(dataSourceConnection, searchParams);
     case DataSource.GOOGLE_DRIVE:
       return await getDocumentsFromGoogleDrive(dataSourceConnection, searchParams);
+    case DataSource.NOTION:
+      return await getDocumentsFromNotion(dataSourceConnection, searchParams);
     default:
       return NextResponseErrors.badRequest(
         `${dataSourceConnection.dataSource} data source is not supported`,
@@ -159,6 +163,55 @@ async function getDocumentsFromGoogleDrive(
         mimeType: toMimeType(f.mimeType!),
         metadata: {
           ...f,
+        }
+      }
+    })
+  );
+}
+
+async function getDocumentsFromNotion(
+  dataSourceConnection: DataSourceConnection,
+  searchParams: URLSearchParams,
+): Promise<Response> {
+  const query = searchParams.get(QUERY_PARAM);
+  const paginationParams = API.PaginationParams.from(searchParams);
+  const notionClient = new NotionClient({
+    auth: dataSourceConnection.accessToken!,
+  })
+
+  const resp = await notionClient.search({
+    query: query ?? undefined,
+    page_size: paginationParams.pageSize,
+    filter: {
+      property: "object",
+      value: "page",
+    }
+  });
+
+  // TODO: Make sure this doesn't miss any non-database children pages 
+  // Filter out all pages without a title!
+  const results = resp.results.filter((x) => {
+    const r = x as PageObjectResponse;
+
+    const titleObject = r.properties.title as any;
+    const title = titleObject?.title[0]?.plain_text;
+
+    return title !== undefined;
+  });
+
+  return NextResponse.json(
+    results.map((x): DataSourceConnectionDocumentResponse => {
+      const r = x as PageObjectResponse;
+
+      const title = r.properties.title as any;
+
+      return {
+        externalId: r.id!,
+        name: title?.title[0]?.plain_text ?? "",
+        createdAt: Date.parse(r.created_time!),
+        mimeType: MimeType.NOTION_PAGE,
+        metadata: {
+          ...r,
         }
       }
     })

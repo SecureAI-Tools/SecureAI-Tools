@@ -216,12 +216,17 @@ export const getOrgDataSourcesApiPath = (
   return `/api/organizations/${orgIdOrSlug}/data-sources`;
 };
 
-export const getDataSourceAuthorizeUrlApiPath = (
+export const getDataSourceAuthorizeUrlApiPath = ({
+  orgIdOrSlug,
+  dataSource,
+  redirectUri,
+  scopes,
+}: {
   orgIdOrSlug: string,
   dataSource: DataSource,
   redirectUri: string,
   scopes: string[],
-): string => {
+}): string => {
   return `/api/organizations/${orgIdOrSlug}/data-sources/${dataSource}/oauth/authorize-url?redirectUri=${encodeURIComponent(redirectUri)}`
     + scopes.map(s => `&scope=${encodeURIComponent(s)}`).join("");
 };

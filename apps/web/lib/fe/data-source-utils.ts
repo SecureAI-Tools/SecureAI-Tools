@@ -6,7 +6,7 @@ import {
   postDataSourceConnectionsApiPath,
 } from "lib/fe/api-paths";
 import { DataSourceConnectionCreateRequest } from "lib/types/api/data-source-connection-create.request";
-import { DataSource, DataSourceConnectionResponse, toDataSource } from "@repo/core";
+import { DataSource, DataSourceConnectionResponse, isOrgAdminConfigurableDataSource, toDataSource } from "@repo/core";
 import { DataSourcesResponse } from "lib/types/api/data-sources.response";
 
 export const checkDataSourceConnection = async (
@@ -59,5 +59,8 @@ export const getDataSourceRecords = (
       configured: configuredDataSources.has(ds),
       connection: dataSourceConnectionsMap.get(ds),
     };
+  }).filter(d => {
+    // Show all data sources that are either already configured, or aren't configured but are org configurable!
+    return d.configured || isOrgAdminConfigurableDataSource(d.dataSource)
   });
 };

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { NextResponseErrors, OrgDataSourceOAuthCredentialService } from "@repo/backend";
+import { NextResponseErrors, OAuthService, OrgDataSourceOAuthCredentialService } from "@repo/backend";
 import { DataSource, toDataSource } from "@repo/core";
 
 import { isAuthenticated } from "lib/api/core/auth";
@@ -9,6 +9,7 @@ import { OrgMembershipService } from "lib/api/services/org-membership-service";
 
 const orgMembershipService = new OrgMembershipService();
 const orgDataSourceOAuthCredentialService = new OrgDataSourceOAuthCredentialService();
+const oauthService = new OAuthService();
 
 // Data sources that don't need any configs at instance or org level.
 const PRE_CONFIGURED_DATA_SOURCES = [
@@ -44,12 +45,16 @@ export async function GET(
       }
     }
   });
-  const configuredDataSources = Array.from(new Set(creds.map(c => toDataSource(c.dataSource))));
+  const orgAdminConfiguredDataSources = Array.from(new Set(creds.map(c => toDataSource(c.dataSource))));
+
+  // Data sources configured at system level
+  const sysAdminConfiguredDataSources = oauthService.getConfigs().map(c => c.dataSource);
 
   const response: DataSourcesResponse = {
     configuredDataSources: [
       ...PRE_CONFIGURED_DATA_SOURCES,
-      ...configuredDataSources,
+      ...orgAdminConfiguredDataSources,
+      ...sysAdminConfiguredDataSources,
     ]
   }
 

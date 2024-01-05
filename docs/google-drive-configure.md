@@ -86,9 +86,9 @@ If you have a Google Cloud project, then skip this step.
 
 #### 4.6 Configure "Authorized redirect URIs"
 
-* For self-hosted instances, configure this to be `http://<ip-address-or-domain-name>:<port>/<org-slug>/data-sources/google_drive/connect` with appropriate values for your instance and organization.
+* For self-hosted instances, configure this to be `http://<ip-address-or-domain-name>:<port>/data-sources/google_drive/oauth-callback` with appropriate values for your instance.
 
-* For managed instances, put `https://platform.secureai.tools/<your-org-slug>/data-sources/google_drive/connect` with appropriate values for `<your-org-slug>`.
+* For managed instances, put `https://platform.secureai.tools/data-sources/google_drive/oauth-callback`.
 
 <img src="/docs/images/oauth-creds-authorized-redirects.png" height="250" />
 

@@ -1,3 +1,7 @@
+import { Client as NotionClient } from "@notionhq/client";
+import { NotionToMarkdown } from "notion-to-md";
+import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
+
 import { API } from "../utils/api.utils";
 import { LocalObjectStorageService } from "./local-object-storage-service";
 import { PaperlessNgxClient } from "../clients/paperless-ngx-client";
@@ -255,6 +259,27 @@ export class DocumentService {
         }
 
         return resp.data!;
+      case DataSource.NOTION:
+        // Convert to markdown!
+        const notionClient = new NotionClient({
+          auth: connection.accessToken!,
+        });
+        
+        const n2m = new NotionToMarkdown({
+          notionClient: notionClient,
+          config: {
+            convertImagesToBase64: false,
+            parseChildPages: false,
+          },
+        });
+        const mdblocks = await n2m.pageToMarkdown(document.externalId);
+        const mdString = n2m.toMarkdownString(mdblocks);
+
+        if (!mdString["parent"]) {
+          throw new Error("invalid markdown text!")
+        }
+
+        return mdString["parent"];
       default:
         throw new Error(`Data source ${connection.dataSource} can not be exported as text`);
     }
@@ -278,6 +303,15 @@ export class DocumentService {
         );
 
         return await googleDriveClient.getPreviewUrl(document.externalId);
+      case DataSource.NOTION:
+        const notionClient = new NotionClient({
+          auth: connection.accessToken!,
+        });
+
+        const resp = await notionClient.pages.retrieve({
+          page_id: document.externalId,
+        });
+        return (resp as PageObjectResponse).url;
       default:
         throw new Error(`${connection.dataSource} not supported`);
     }

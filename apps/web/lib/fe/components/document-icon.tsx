@@ -5,6 +5,7 @@ import { MimeType } from "@repo/core";
 const ICON_NAME_MAP = new Map<MimeType, string>([
   [MimeType.PDF, "pdf.svg"],
   [MimeType.GOOGLE_DOC, "google_docs.svg"],
+  [MimeType.NOTION_PAGE, "notion.svg"],
 ]);
 
 export const DocumentIcon = ({

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import ConfigureDataSource from "./configure-data-source";
 
-import { DataSource, isConfigurableDataSource, toDataSource } from "@repo/core";
+import { DataSource, isOrgAdminConfigurableDataSource, toDataSource } from "@repo/core";
 
 export const metadata: Metadata = {
   title: "Configure data source",
@@ -15,7 +15,7 @@ const Page = ({
   params: { orgSlug: string; dataSource: string };
 }) => {
   // Return 404 if dataSource is not a valid data source!
-  if (!isConfigurableDataSource(toDataSource(params.dataSource.toUpperCase()))) {
+  if (!isOrgAdminConfigurableDataSource(toDataSource(params.dataSource.toUpperCase()))) {
     return notFound();
   }
 
