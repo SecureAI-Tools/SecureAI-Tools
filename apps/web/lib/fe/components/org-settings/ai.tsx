@@ -43,7 +43,7 @@ const OrgAISettings = ({
   onSuccess?: () => void;
 }) => {
   const { data: session } = useSession();
-  const [modelName, setModelName] = useState<string>("");
+  const [modelName, setModelName] = useState<string | undefined>(undefined);
   const [modelType, setModelType] = useState<ModelType | undefined>(undefined);
   const [isOrgAdmin, setIsOrgAdmin] = useState<boolean>(false);
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
@@ -194,6 +194,7 @@ const OrgAISettings = ({
             required
             onChange={(e) => {
               setModelType(toModelType(e.target.value));
+              setModelName(undefined);
             }}
             value={modelType}
           >
@@ -222,6 +223,9 @@ const OrgAISettings = ({
               }}
               value={modelName}
             >
+              <option value={undefined}>
+                Select model
+              </option>
               {allowedModels.map((m, i) => {
                 return (
                   <option key={m} value={m}>
@@ -247,7 +251,7 @@ const OrgAISettings = ({
         </div>
         <Button
           type="submit"
-          disabled={!isOrgAdmin}
+          disabled={!isOrgAdmin || modelName === undefined}
           isProcessing={isFormSubmitting}
         >
           {buttonLabel}
