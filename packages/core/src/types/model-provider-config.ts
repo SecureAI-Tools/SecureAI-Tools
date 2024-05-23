@@ -4,6 +4,7 @@ export interface ModelProviderConfig {
   type: ModelType;
   apiBaseUrl: string;
   apiKey?: string;
+  embeddingsModel?: string;
 
   // If specified => system will restrict users to those model strings
   // If not specified or empty => system will allow any arbitrary model name
