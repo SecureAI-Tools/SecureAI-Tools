@@ -119,13 +119,13 @@ SecureAI Tools can be used with OpenAI APIs and any other provider that provides
 
    ```.env
    # For OpenAI
-   MODEL_PROVIDER_CONFIGS='[{"type":"OPENAI","apiBaseUrl":"https://api.openai.com/v1","apiKey":"sk-..."}]'
+   MODEL_PROVIDER_CONFIGS='[{"type":"OPENAI","apiBaseUrl":"https://api.openai.com/v1","apiKey":"sk-...","embeddingsModel":"text-embedding-3-large"}]'
 
    # For OpenAI-compatible other provider
-   MODEL_PROVIDER_CONFIGS='[{"type":"OPENAI","apiBaseUrl":"...URL of API provider here ...","apiKey":"sk-..."}]'
+   MODEL_PROVIDER_CONFIGS='[{"type":"OPENAI","apiBaseUrl":"...URL of API provider here ...","apiKey":"sk-...","embeddingsModel":"text-embedding-3-large"}]'
    ```
 
-2. Go to the organization settings page, select OpenAI model type, and provide the appropriate model name like `gpt3.5-turbo`
+2. Go to the organization settings page, select OpenAI model type, and provide the appropriate model name like `gpt-4o`
 
 ### Customize LLM provider-specific options
 

@@ -94,9 +94,7 @@ export class ModelProviderService {
           // Unlike Ollama, OpenAI has different model names for embedding v/s completion.
           // It does not allow completion models for embedding APIs.
           // https://platform.openai.com/docs/guides/embeddings/what-are-embeddings
-          //
-          // TODO: Make this part of MODEL_PROVIDER_CONFIGS if/when needed!
-          modelName: "text-embedding-ada-002",
+          modelName: config.embeddingsModel || "text-embedding-ada-002",
           configuration: {
             baseURL: config.apiBaseUrl,
           },
