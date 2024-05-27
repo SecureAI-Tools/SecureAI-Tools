@@ -4,6 +4,7 @@ export interface ModelProviderConfig {
   type: ModelType;
   apiBaseUrl: string;
   apiKey?: string;
+  // Model to compute the embeddings. Supported for OpenAI only for now
   embeddingsModel?: string;
 
   // If specified => system will restrict users to those model strings
