@@ -104,7 +104,7 @@ services:
   message-broker:
     image: rabbitmq:management
     volumes:
-      - ./message-broker:/var/lib/rabbitmq
+      - ./message-broker:/var/lib/rabbitmq/mnesia
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
