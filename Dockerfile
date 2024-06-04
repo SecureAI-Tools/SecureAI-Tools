@@ -4,7 +4,7 @@
 # https://github.com/vercel/turbo/blob/main/examples/with-docker/apps/web/Dockerfile
 # https://turbo.build/repo/docs/handbook/deploying-with-docker
 
-FROM --platform=linux/amd64 node:18-alpine AS base
+FROM node:18-alpine AS base
 
 # Rebuild the source code only when needed
 FROM base AS builder
